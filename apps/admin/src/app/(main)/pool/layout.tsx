@@ -8,7 +8,7 @@ const Layout = ({ children }: PropsWithChildren) => {
   return (
     <AppContextProvider value={{ activeNav: active, setActiveNav: setActive }}>
       <div className="relative flex flex-col">
-        <main className="bg-background mx-auto min-h-screen w-full grow text-clip">{children}</main>
+        <main className="mx-auto min-h-screen w-full grow text-clip">{children}</main>
       </div>
     </AppContextProvider>
   );
