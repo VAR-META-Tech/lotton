@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "builder": "swc",
+    "typeCheck": true
+  },
+  "projects": {
+    "app": {
+      "root": "src",
+      "entryFile": "main"
+    },
+    "worker": {
+      "root": "src",
+      "entryFile": "worker"
+    }
+  }
+}
