@@ -351,6 +351,9 @@ importers:
       web3:
         specifier: ^4.6.0
         version: 4.11.1(typescript@5.4.5)(zod@3.23.8)
+      web3-providers-ws:
+        specifier: ^4.0.8
+        version: 4.0.8
       web3-validator:
         specifier: ^2.0.6
         version: 2.0.6
