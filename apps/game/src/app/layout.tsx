@@ -9,6 +9,8 @@ import { fontSans } from '@/config/fonts';
 import { APP_URL, siteConfig } from '@/config/site';
 
 import { Providers } from './providers';
+import { VStack } from '@/components/ui/Utilities';
+import MainLayout from '@/components/layouts/MainLayout';
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
@@ -64,7 +66,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <Toaster />
 
-          {children}
+          <VStack justify={'center'} align={'center'} className="min-h-screen hidden md:flex">
+            <span className="text-3xl text-white">Only support for mobile</span>
+          </VStack>
+
+          <MainLayout>{children}</MainLayout>
         </Providers>
       </body>
     </html>

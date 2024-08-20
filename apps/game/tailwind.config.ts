@@ -105,6 +105,8 @@ const config: Config = {
           light: 'hsl(var(--info-light))',
         },
         divider: 'hsl(var(--divider))',
+        "navigate-tab": "hsl(var(--navigate-tab))",
+        "gray-color": "hsl(var(--gray-color))",
         neutral: {
           '0': '#FFFFFF',
           '10': '#DADADA',
