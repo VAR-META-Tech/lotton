@@ -10,6 +10,8 @@ import type { MainConfig } from './main.config';
 import main from './main.config';
 import type { RedisConfig } from './redis.config';
 import redis from './redis.config';
+import type { TelegramConfig } from './telegram.config';
+import telegram from './telegram.config';
 import type { UserAuthConfig } from './user_auth.config';
 import userAuth from './user_auth.config';
 
@@ -20,6 +22,7 @@ export const load: ConfigFactory[] = [
   file,
   adminAuth,
   userAuth,
+  telegram,
 ];
 
 export type StellaConfig = {
@@ -29,4 +32,5 @@ export type StellaConfig = {
   file: FileConfig;
   adminAuth: AdminAuthConfig;
   userAuth: UserAuthConfig;
+  telegram: TelegramConfig;
 };

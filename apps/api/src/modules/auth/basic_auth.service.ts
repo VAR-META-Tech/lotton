@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -56,7 +56,7 @@ export class BasicAuthService implements IBasicAuth {
   async validateUser(
     dto: ValidateUserByPasswordDto,
   ): Promise<{ user: User; tokens: TokensType }> {
-    const { wallet, password } = dto;
+    const { wallet } = dto;
 
     const user = await this.userRepository.findOne({
       where: {
@@ -68,14 +68,7 @@ export class BasicAuthService implements IBasicAuth {
       throw Causes.NOT_FOUND('User');
     }
 
-    const isMatch = await this.hashService.compare(password, user.password);
-    if (!isMatch) {
-      throw new BadRequestException('Password incorrect');
-    }
-
     const tokens = await this.authHelperService.createTokensAsUser(user);
-
-    delete user.password;
 
     return {
       user,

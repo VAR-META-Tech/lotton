@@ -8,16 +8,7 @@ export class User extends BaseTime {
   id: number;
 
   @Column({ unique: true, length: 100, nullable: true })
-  username: string;
-
-  @Column({ unique: true, length: 100, nullable: true })
   wallet: string;
-
-  @Column({ length: 100, nullable: true })
-  fullName: string;
-
-  @Column({ type: 'text', nullable: true })
-  password: string;
 
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
