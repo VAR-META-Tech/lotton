@@ -3,12 +3,12 @@ import { Toaster } from 'sonner';
 import '@/styles/globals.css';
 
 import { type Metadata, type Viewport } from 'next';
-import clsx from 'clsx';
 
 import { fontSans } from '@/config/fonts';
 import { APP_URL, siteConfig } from '@/config/site';
 
 import { Providers } from './providers';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
@@ -59,7 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head />
       <body
         suppressHydrationWarning
-        className={clsx('bg-background min-h-screen font-sans antialiased', fontSans.variable)}
+        className={cn('bg-[#d5d5d7] min-h-screen font-sans antialiased', fontSans.variable)}
       >
         <Providers>
           <Toaster />

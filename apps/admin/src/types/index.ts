@@ -1,4 +1,5 @@
-import { FC, PropsWithChildren, type SVGProps } from 'react';
+import { NextPage } from 'next';
+import { FC, PropsWithChildren, ReactElement, ReactNode, type SVGProps } from 'react';
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
   size?: number;
@@ -24,3 +25,12 @@ export type TResponse<T> = {
 };
 
 export type FCC<P = {}> = FC<PropsWithChildren<P>>;
+
+type Layout = {
+  children: React.ReactNode;
+  params: {
+    locale: string;
+  };
+};
+
+export type CP<P = {}> = Layout & P;
