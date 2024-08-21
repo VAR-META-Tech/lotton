@@ -3,12 +3,13 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { ConnectWallet } from '@/modules/PoolManagement/components/ConnectWallet';
+
 import { HStack } from '../ui/Utilities';
 import { menuConfigs } from '@/lib/menu';
 import { usePathname } from 'next/navigation';
 import { useAppStore } from '@/stores/AppStore';
 import { CircleX, Menu } from 'lucide-react';
+import { ConnectWallet } from '../ConnectWallet';
 
 const Header = () => {
   const open = useAppStore.use.openSideBar();
