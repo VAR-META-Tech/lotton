@@ -1,4 +1,5 @@
 import { type ForwardRefExoticComponent, type RefAttributes, type SVGProps } from 'react';
+import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react';
 
 import document from './svg/document.svg';
 import home from './svg/home.svg';
@@ -14,6 +15,9 @@ const IconList = {
   home,
   ticketStar,
   wallet,
+  arrowLeft: ArrowLeft,
+  arrowRight: ArrowRight,
+  chevronDown: ChevronDown,
 };
 
 type SVGAttributes = Partial<SVGProps<SVGSVGElement>>;

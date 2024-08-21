@@ -21,7 +21,7 @@
     "noUnusedParameters": false,
     "allowUnreachableCode": false,
     "noFallthroughCasesInSwitch": true,
-    "target": "es5",
+    "target": "es6",
     "outDir": "out",
     "declaration": false,
     "sourceMap": true,
