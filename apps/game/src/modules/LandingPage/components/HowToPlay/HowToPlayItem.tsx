@@ -1,4 +1,4 @@
-import React, { FC, HTMLAttributes, ReactNode } from 'react';
+import React, { FC, HTMLAttributes, memo, ReactNode, useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 import { HStack, VStack } from '@/components/ui/Utilities';
@@ -10,12 +10,12 @@ interface Props extends HTMLAttributes<HTMLDivElement> {
 }
 
 const HowToPlayItem: FC<Props> = ({ icon, title, description, className, ...props }) => {
-  const descriptionText =
-    typeof description === 'string' ? (
-      <p className="text-gray-color text-xs text-justify">{description}</p>
-    ) : (
-      description
-    );
+  const descriptionText = useMemo(() => {
+    if (typeof description === 'string') {
+      return <p className="text-gray-color text-xs text-justify">{description}</p>;
+    }
+    return description;
+  }, []);
 
   return (
     <HStack align={'start'} spacing={12} {...props} className={cn('w-full', className)}>
@@ -30,4 +30,4 @@ const HowToPlayItem: FC<Props> = ({ icon, title, description, className, ...prop
   );
 };
 
-export default HowToPlayItem;
+export default memo(HowToPlayItem);
