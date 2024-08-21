@@ -1,8 +1,10 @@
 import React from 'react';
+import dynamic from 'next/dynamic';
 
 import { Carousel } from '@/components/ui/carousel';
 
-import PoolList from './components/PoolList';
+const HowToPlay = dynamic(() => import('./components/HowToPlay'));
+const PoolList = dynamic(() => import('./components/PoolList'));
 
 const LandingPage = () => {
   return (
@@ -12,6 +14,8 @@ const LandingPage = () => {
       <Carousel>
         <PoolList />
       </Carousel>
+
+      <HowToPlay />
     </div>
   );
 };

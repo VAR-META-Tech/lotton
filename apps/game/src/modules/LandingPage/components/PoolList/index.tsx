@@ -14,7 +14,7 @@ const PoolList = () => {
   const { carouselRef, selectedIndex, scrollSnaps, onDotButtonClick } = useCommonCarousel();
 
   return (
-    <div>
+    <div className="space-y-4">
       <CarouselContent className="-ml-[3rem] py-3" ref={carouselRef}>
         <CarouselItem className="pl-[3rem] basis-[100%]">
           <PoolCard isShow={isShow} setIsShow={setIsShow} />
@@ -27,7 +27,7 @@ const PoolList = () => {
         </CarouselItem>
       </CarouselContent>
 
-      <div className="mt-9 flex justify-center gap-2 md:mt-12">
+      <div className="flex justify-center gap-2">
         {scrollSnaps.map((_, index) => (
           <DotButton
             key={index}

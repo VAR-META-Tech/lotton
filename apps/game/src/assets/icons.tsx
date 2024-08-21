@@ -7,6 +7,8 @@ import telegram from './svg/telegram.svg';
 import ticketStar from './svg/ticket-star.svg';
 import twitter from './svg/twitter.svg';
 import wallet from './svg/wallet.svg';
+import calendar from './svg/calendar.svg';
+import ticket from './svg/ticket.svg';
 
 const IconList = {
   twitter,
@@ -18,6 +20,8 @@ const IconList = {
   arrowLeft: ArrowLeft,
   arrowRight: ArrowRight,
   chevronDown: ChevronDown,
+  calendar,
+  ticket,
 };
 
 type SVGAttributes = Partial<SVGProps<SVGSVGElement>>;
