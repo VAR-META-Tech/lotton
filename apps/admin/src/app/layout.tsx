@@ -59,10 +59,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head />
       <body
         suppressHydrationWarning
-        className={cn('bg-[#d5d5d7] min-h-screen font-sans antialiased', fontSans.variable)}
+        className={cn('bg-[#f5f5f5] min-h-screen font-sans antialiased', fontSans.variable)}
       >
         <Providers>
-          <Toaster />
+          <Toaster position="top-right" />
 
           {children}
         </Providers>

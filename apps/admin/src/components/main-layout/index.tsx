@@ -11,7 +11,7 @@ const MainLayout = ({ children }: CP) => {
 
       <div>
         <Header />
-        <main className='ml-[1rem] md:ml-[19rem] mt-[6rem] md:mt-[5rem]'>{children}</main>
+        <main className='ml-[1rem] md:ml-[16.25rem] mt-[6rem] md:mt-[5rem]'>{children}</main>
       </div>
     </div>
   );

@@ -7,6 +7,8 @@ import type { FCC } from '@/types';
 import { usePathname } from 'next/navigation';
 import { menuConfigs } from '@/lib/menu';
 import { useAppStore } from '@/stores/AppStore';
+import { LogOut } from 'lucide-react';
+import { Button } from '../ui/button';
 
 interface Props {
   active?: boolean;
@@ -59,6 +61,19 @@ const Sidebar = () => {
               {menu.name}
             </MenuLink>
           ))}
+        </VStack>
+
+        <VStack spacing={4} className={cn(
+          'max-w-[16.20rem] fixed left-0 w-full bottom-0',
+          {
+            '-left-[16.25rem] md:left-0': !open,
+          }
+        )}>
+          <div className='delay-500 md:delay-0 bg-[#8B8B94] w-full h-[.0313rem]'/>
+
+          <Button className='bg-transparent h-[3.375rem] gap-2 rounded-none'>
+            <LogOut /> LOG OUT
+          </Button>
         </VStack>
       </div>
     </>
