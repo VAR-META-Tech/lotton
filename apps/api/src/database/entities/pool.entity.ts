@@ -5,6 +5,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { Token } from '.';
 import { BaseTime } from './base/time.entity';
 import { PoolPrize } from './pool_prize.entity';
@@ -15,7 +16,7 @@ export class Pool extends BaseTime {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, length: 100, nullable: true })
+  @Column({ length: 100, nullable: true })
   name: string;
 
   @ManyToOne(() => Token)

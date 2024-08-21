@@ -27,7 +27,7 @@ export async function paginateEntities<T>(
   pagination: QueryPaginationDto,
   fetchType: FetchType,
 ): Promise<FetchResult<T>> {
-  const { page, limit } = pagination;
+  const { page, pageSizes: limit } = pagination;
 
   const take = limit > 50 || !limit ? 50 : limit;
   const skip = (page - 1) * take || 0;
