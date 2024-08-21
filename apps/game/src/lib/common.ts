@@ -1,6 +1,6 @@
 import { BigNumber } from 'bignumber.js';
-import { formatUnits, getAddress, isAddress } from 'viem';
 import bigDecimal from 'js-big-decimal';
+import { formatUnits, getAddress, isAddress } from 'viem';
 
 import { REGEX_EMOJI, REGEX_NO_SPECIAL_CHARACTERS } from './regex';
 
@@ -167,7 +167,6 @@ const convertTextToAmount = (text: string) => {
     currency,
   };
 };
-
 
 export const prettyNumber = (number: number | string, digits = 3, separator = ',') =>
   bigDecimal.getPrettyValue(number, digits, separator);

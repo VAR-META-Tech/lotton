@@ -1,21 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { FC, HTMLAttributes, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { Icons } from '@/assets/icons';
 
 import { prettyNumber } from '@/lib/common';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { HStack, VStack } from '@/components/ui/Utilities';
 
-import PoolCountDown from './PoolCountDown';
 import PoolInfo from './PoolInfo';
 
-const PoolCard = () => {
-  const [isShow, setIsShow] = useState(false);
+const PoolCountDown = dynamic(() => import('./PoolCountDown'), { ssr: false });
 
+interface Props extends HTMLAttributes<HTMLDivElement> {
+  isShow: boolean;
+  setIsShow: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const PoolCard: FC<Props> = ({ isShow, setIsShow, className, ...props }) => {
   return (
-    <div className="w-full rounded-xl overflow-hidden">
+    <div {...props} className={cn('w-full rounded-xl overflow-hidden', className)}>
       <div className="bg-navigate-tab py-1.5">
         <div className="text-primary text-2xl font-semibold text-center">TON Pool</div>
 

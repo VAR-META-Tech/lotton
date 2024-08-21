@@ -7,10 +7,10 @@ import clsx from 'clsx';
 
 import { fontSans } from '@/config/fonts';
 import { APP_URL, siteConfig } from '@/config/site';
-
-import { Providers } from './providers';
 import { VStack } from '@/components/ui/Utilities';
 import MainLayout from '@/components/layouts/MainLayout';
+
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
