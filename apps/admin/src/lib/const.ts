@@ -16,3 +16,14 @@ export const env = {
 export const isServer = typeof window === 'undefined';
 export const isUseTestnet = env.USE_TESTNET === 'true';
 export const network = isUseTestnet ? 'testnet' : ('mainnet' as Network);
+
+export const GOOGLE_CLIENT_ID = process.env.GOOGLE_ID ?? '146918779218-chupnj1tmp12vmhe0qfq273aaq93khd6.apps.googleusercontent.com';
+
+export const USER_COOKIES = {
+  user: 'user_ton',
+  token: 'token_ton',
+  isLoggedIn: 'account_status_ton',
+  refreshToken: 'refresh_token_ton',
+};
+
+export const LOGGED_IN_KEY = 'active';

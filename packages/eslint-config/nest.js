@@ -1,7 +1,7 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    tsconfigRootDir: __dirname,
+    // tsconfigRootDir: __dirname,
     sourceType: 'module',
   },
   plugins: ['@typescript-eslint/eslint-plugin'],
@@ -24,7 +24,7 @@ module.exports = {
       parser: '@typescript-eslint/parser',
       plugins: ['@typescript-eslint', 'unused-imports', 'simple-import-sort'],
       parserOptions: {
-        tsconfigRootDir: __dirname,
+        // tsconfigRootDir: __dirname,
         sourceType: 'module',
       },
       rules: {

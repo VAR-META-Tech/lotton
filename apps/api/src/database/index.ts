@@ -4,11 +4,15 @@ import {
   LatestBlock,
   Network,
   NetworkToken,
+  Pool,
+  PoolPrize,
+  PoolRound,
   Token,
   TokenPrice,
   Transaction,
   User,
   UserSession,
+  UserTicket,
 } from './entities';
 
 const entities = [
@@ -22,6 +26,10 @@ const entities = [
   UserSession,
   User,
   TokenPrice,
+  Pool,
+  PoolPrize,
+  PoolRound,
+  UserTicket,
 ];
 
 export default entities;

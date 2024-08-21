@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Token } from '.';
 import { BaseTime } from './base/time.entity';
+import { Token } from './token.entity';
 
 @Entity()
 export class Transaction extends BaseTime {

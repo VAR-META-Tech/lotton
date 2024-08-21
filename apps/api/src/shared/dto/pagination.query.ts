@@ -6,12 +6,12 @@ export class QueryPaginationDto {
   @ApiProperty({
     required: false,
     type: Number,
-    description: 'Limit for pagination',
+    description: 'Page size for pagination',
   })
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => Number(value))
-  limit?: number;
+  pageSizes?: number;
 
   @ApiProperty({
     required: false,

@@ -3,6 +3,13 @@ export enum SortEnum {
   DESC = 'DESC',
 }
 
+export enum PoolStatusEnum {
+  UPCOMING = 'upcoming',
+  ONGOING = 'ongoing',
+  CLOSED = 'closed',
+  DELETE = 'deleted',
+}
+
 export enum RoleEnum {
   SUPER_ADMIN = 'super_admin',
   ADMIN = 'admin',
