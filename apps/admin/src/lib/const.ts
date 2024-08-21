@@ -27,3 +27,11 @@ export const USER_COOKIES = {
 };
 
 export const LOGGED_IN_KEY = 'active';
+
+export const POOL_STATUS = {
+  UP_COMING: 'up_coming',
+  ON_GOING: 'on_going',
+  CLOSED: 'closed',
+} as const;
+
+export const BIG_NUMBER = 1000000;
