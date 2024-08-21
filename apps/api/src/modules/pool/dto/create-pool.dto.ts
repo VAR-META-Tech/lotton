@@ -65,14 +65,6 @@ export class CreatePoolDto {
   @IsNotEmpty()
   startTime: Date;
 
-  @ApiProperty({
-    required: true,
-    description: 'end time',
-    example: new Date(),
-  })
-  @IsDate()
-  endTime: Date;
-
   @ApiProperty({ required: true, description: 'sequency days', example: 30 })
   @IsNumber()
   @IsNotEmpty()
@@ -85,7 +77,7 @@ export class CreatePoolDto {
   @Type(() => Number)
   totalRounds: number;
 
-  @ApiProperty({ required: true, description: 'sequency days', example: 30 })
+  @ApiProperty({ required: true, description: 'ticket price', example: 30 })
   @IsNumber()
   @IsNotEmpty()
   @Type(() => Number)

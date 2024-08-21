@@ -40,6 +40,14 @@ export class AdminSeedService {
         role: RoleEnum.SUPER_ADMIN,
         isActive: true,
       },
+      {
+        id: 2,
+        email: 'hoaile@var-meta.com',
+        fullName: 'Lê Phước Hoài',
+        socialType: SocialAuthEnum.GOOGLE,
+        role: RoleEnum.SUPER_ADMIN,
+        isActive: true,
+      },
     ];
 
     const values = admins
