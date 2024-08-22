@@ -39,9 +39,8 @@ export class UserJwtStrategy extends PassportStrategy(Strategy, 'user-jwt') {
         .andWhere('user.isActive = :isActive', { isActive: true })
         .select([
           'user.id',
-          'user.email',
-          'user.fullName',
           'user.isActive',
+          'user.wallet',
           'user.createdAt',
           'userSession.id',
           'userSession.expiresAt',
