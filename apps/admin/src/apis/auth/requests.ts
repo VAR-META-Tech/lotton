@@ -7,7 +7,7 @@ import { request } from '../axios';
 import type { IGetMeResponse, IGoogleSignInRequest, ILoginResponse, ISignInRequest, ISignInResponse } from './types';
 
 export const refreshTokenRequest = async (refreshToken: string): Promise<TResponse<Omit<ILoginResponse, 'user'>>> => {
-  const { data } = await axios.get(`${env.API_URL}/api/auth/refresh-token`, {
+  const { data } = await axios.get(`${env.API_URL}/api/auth/admin/refresh-token`, {
     headers: {
       Authorization: `Bearer ${refreshToken}`,
     },
