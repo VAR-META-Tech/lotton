@@ -47,9 +47,9 @@ const Sidebar = () => {
   const setUser = useUserStore.use.setUser();
 
   const handleLogout = () => {
+    router.replace(ROUTES.LOGIN);
     setAccessToken('');
     setUser({} as IUser);
-    router.replace(ROUTES.LOGIN);
     toast.success('Logout successfully!');
   };
 
