@@ -17,6 +17,7 @@ export class PoolPrize extends BaseTime {
 
   @ManyToOne(() => Pool, (pool) => pool.poolPrizes, {
     onDelete: 'CASCADE',
+    cascade: true,
   })
   pool: Pool;
 
