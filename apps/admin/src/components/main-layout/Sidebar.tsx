@@ -9,6 +9,11 @@ import { menuConfigs } from '@/lib/menu';
 import { useAppStore } from '@/stores/AppStore';
 import { LogOut } from 'lucide-react';
 import { Button } from '../ui/button';
+import { toast } from 'sonner';
+import { useUserStore } from '@/stores';
+import { IUser } from '@/apis/auth';
+import { useRouter } from 'next/navigation';
+import { ROUTES } from '@/lib/routes';
 
 interface Props {
   active?: boolean;
@@ -37,6 +42,16 @@ const MenuLink: FCC<Props> = ({ active, icon, children, href }) => {
 const Sidebar = () => {
   const open = useAppStore.use.openSideBar();
   const pathname = usePathname();
+  const router = useRouter();
+  const setAccessToken = useUserStore.use.setAccessToken();
+  const setUser = useUserStore.use.setUser();
+
+  const handleLogout = () => {
+    setAccessToken('');
+    setUser({} as IUser);
+    router.replace(ROUTES.LOGIN);
+    toast.success('Logout successfully!');
+  };
 
   return (
     <>
@@ -71,7 +86,7 @@ const Sidebar = () => {
         )}>
           <div className='delay-500 md:delay-0 bg-[#8B8B94] w-full h-[.0313rem]'/>
 
-          <Button className='bg-transparent h-[3.375rem] gap-2 rounded-none'>
+          <Button className='bg-transparent h-[3.375rem] gap-2 rounded-none' onClick={handleLogout}>
             <LogOut /> LOG OUT
           </Button>
         </VStack>

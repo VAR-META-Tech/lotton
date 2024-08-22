@@ -2,12 +2,12 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { PoolPrize, PoolRound } from '@/database/entities';
 import type { QueryPaginationDto } from '@/shared/dto/pagination.query';
 import { PoolRoundStatusEnum } from '@/shared/enums';
 import { FetchType, paginateEntities } from '@/utils/paginate';
 
-import { PoolPrize, PoolRound } from '@/database/entities';
-import { RoundQueryDto } from './dto/round.query.dto';
+import type { RoundQueryDto } from './dto/round.query.dto';
 
 @Injectable()
 export class RoundService {

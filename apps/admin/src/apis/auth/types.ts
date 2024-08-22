@@ -24,6 +24,7 @@ export interface IUser {
 export interface ISignInResponseData {
   user: IUser;
   tokens: IToken;
+  accessToken: string;
 }
 
 export interface ISignInRequest {
@@ -32,8 +33,7 @@ export interface ISignInRequest {
 }
 
 export interface IGoogleSignInRequest {
-  code: string;
-  provider: string;
+  accessToken: string;
 }
 
 export interface ISignInResponse extends TResponse<ISignInResponseData> {}
