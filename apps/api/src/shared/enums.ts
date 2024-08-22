@@ -3,7 +3,7 @@ export enum SortEnum {
   DESC = 'DESC',
 }
 
-export enum PoolStatusEnum {
+export enum PoolRoundStatusEnum {
   UPCOMING = 'upcoming',
   ONGOING = 'ongoing',
   CLOSED = 'closed',

@@ -132,7 +132,7 @@ export class CrawlTokenService {
     );
   }
 
-  private async getLatestBlock(): Promise<number> {
+  async getLatestBlock(): Promise<number> {
     return this.dataSource.transaction(async (manager) => {
       const latestBlockKey =
         'crawl_transfer_' +
@@ -187,8 +187,7 @@ export class CrawlTokenService {
    * Description: Crawl data and save it to the database
    */
   private async handleTransferEvent(event: any): Promise<void> {
-    const { blockNumber, blockHash, returnValues, transactionHash, address } =
-      event;
+    const { blockNumber, returnValues, transactionHash, address } = event;
     const { from, to, value } = returnValues;
 
     const block = await this._web3.eth.getBlock(blockNumber);

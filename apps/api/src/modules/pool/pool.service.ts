@@ -3,16 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import { Repository } from 'typeorm';
 
+import { Causes } from '@/common/exceptions/causes';
 import { Pool, PoolPrize, PoolRound, Token } from '@/database/entities';
 import type { QueryPaginationDto } from '@/shared/dto/pagination.query';
-import { PoolStatusEnum } from '@/shared/enums';
+import { PoolRoundStatusEnum } from '@/shared/enums';
 import { FetchType, paginateEntities } from '@/utils/paginate';
 
+import { PoolRoundService } from '../poolRound/poolRound.service';
 import type { CreatePoolDto, PoolPrizes } from './dto/create-pool.dto';
 import type { PoolQueryDto } from './dto/get-pool.query';
-import { Causes } from '@/common/exceptions/causes';
-import { PoolRoundService } from '../poolRound/poolRound.service';
-import { UpdatePoolDto } from './dto/update-pool.dto';
+import type { UpdatePoolDto } from './dto/update-pool.dto';
 
 export class PoolService {
   constructor(
@@ -203,18 +203,18 @@ export class PoolService {
           search: `%${search}%`,
         });
       }
-      if (status && status == PoolStatusEnum.UPCOMING) {
+      if (status && status == PoolRoundStatusEnum.UPCOMING) {
         queryBuilder.andWhere('pool.startTime > NOW()');
       }
-      if (status && status == PoolStatusEnum.ONGOING) {
+      if (status && status == PoolRoundStatusEnum.ONGOING) {
         queryBuilder.andWhere(
           'pool.startTime < NOW() AND pool.endTime > NOW()',
         );
       }
-      if (status && status == PoolStatusEnum.CLOSED) {
+      if (status && status == PoolRoundStatusEnum.CLOSED) {
         queryBuilder.andWhere('pool.endTime < NOW()');
       }
-      if (status && status == PoolStatusEnum.DELETE) {
+      if (status && status == PoolRoundStatusEnum.DELETE) {
         queryBuilder.andWhere('pool.deletedAt IS NOT NULL').withDeleted();
       }
 
