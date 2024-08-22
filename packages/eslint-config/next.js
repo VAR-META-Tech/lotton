@@ -5,6 +5,8 @@ const project = resolve(process.cwd(), "tsconfig.json");
 /** @type {import("eslint").Linter.Config} */
 module.exports = {
   extends: [
+    "plugin:react-hooks/recommended",
+    "plugin:prettier/recommended",
     "eslint:recommended",
     "prettier",
     require.resolve("@vercel/style-guide/eslint/next"),
@@ -19,6 +21,9 @@ module.exports = {
     browser: true,
   },
   plugins: ["only-warn"],
+  "rules": {
+    "react-hooks/exhaustive-deps": "warn"
+  },
   settings: {
     "import/resolver": {
       typescript: {
