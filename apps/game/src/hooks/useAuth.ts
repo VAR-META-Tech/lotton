@@ -16,6 +16,7 @@ export const useAuth = () => {
   const setAccessToken = useUserStore.use.setAccessToken();
   const setRefreshToken = useUserStore.use.setRefreshToken();
   const setUser = useUserStore.use.setUser();
+  const logout = useUserStore.use.logout();
 
   const setUserData = (data: ISetUserData) => {
     setAccessToken(data.accessToken);
@@ -30,5 +31,6 @@ export const useAuth = () => {
     user,
     status,
     setUserData,
+    logout,
   };
 };
