@@ -10,6 +10,11 @@ export enum PoolRoundStatusEnum {
   DELETE = 'deleted',
 }
 
+export enum AdminStatusEnum {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
+
 export enum RoleEnum {
   SUPER_ADMIN = 'super_admin',
   ADMIN = 'admin',
