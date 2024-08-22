@@ -14,8 +14,9 @@ const HowToPlayItem: FC<Props> = ({ icon, title, description, className, ...prop
     if (typeof description === 'string') {
       return <p className="text-gray-color text-xs text-justify">{description}</p>;
     }
+
     return description;
-  }, []);
+  }, [description]);
 
   return (
     <HStack align={'start'} spacing={12} {...props} className={cn('w-full', className)}>

@@ -1,3 +1,4 @@
+/* eslint-disable turbo/no-undeclared-env-vars */
 import { Network } from '@orbs-network/ton-access';
 
 const isProduction = process.env.NODE_ENV === 'production';

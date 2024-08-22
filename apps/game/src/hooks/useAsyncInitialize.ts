@@ -6,6 +6,7 @@ export function useAsyncInitialize<T>(func: () => Promise<T>, deps: any[] = []) 
     (async () => {
       setState(await func());
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
   return state;

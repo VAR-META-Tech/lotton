@@ -15,6 +15,7 @@ type TTargetInView =
 
 export type IModalStore = {
   targetInView: TTargetInView;
+  // eslint-disable-next-line no-unused-vars
   setTargetInView: (target: TTargetInView) => void;
 };
 

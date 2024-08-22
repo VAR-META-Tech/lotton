@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 type EventHandler<Event> = ((event?: Event) => void) | undefined;
 
 /**

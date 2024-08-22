@@ -1,15 +1,16 @@
-import type { ILoginResponse, IUser } from '@/apis/auth';
+/* eslint-disable no-unused-vars */
+import type { ILoginByWalletResponse, ILoginByWalletUser } from '@/apis/auth';
 import { createSelectorFunctions } from 'auto-zustand-selectors-hook';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 export interface IMeQueryStore {
   status: 'waiting' | 'ready';
-  user: IUser;
+  user: ILoginByWalletUser;
   accessToken: string;
   refreshToken: string;
-  setStore: (data: ILoginResponse) => void;
-  setUser: (data: IUser) => void;
+  setStore: (data: ILoginByWalletResponse) => void;
+  setUser: (data: ILoginByWalletUser) => void;
   setAccessToken: (data: string) => void;
   setRefreshToken: (data: string) => void;
   logout: () => void;
@@ -21,8 +22,8 @@ const useBaseUserStore = create<IMeQueryStore>()(
       status: 'waiting',
       accessToken: '',
       refreshToken: '',
-      user: {} as IUser,
-      setStore: (data) => set((_) => data),
+      user: {} as ILoginByWalletUser,
+      setStore: (data) => set((state) => ({ ...state, ...data })),
       setUser: (data) => set((state) => ({ ...state, user: data })),
       setAccessToken: (data) => set((state) => ({ ...state, accessToken: data })),
       setRefreshToken: (data) => set((state) => ({ ...state, refreshToken: data })),
@@ -30,7 +31,7 @@ const useBaseUserStore = create<IMeQueryStore>()(
         set(() => ({
           accessToken: '',
           refreshToken: '',
-          user: {} as IUser,
+          user: {} as ILoginByWalletUser,
         })),
     }),
     {

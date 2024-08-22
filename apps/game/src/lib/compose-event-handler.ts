@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 function composeEventHandlers<E>(
   originalEventHandler?: (event: E) => void,
   ourEventHandler?: (event: E) => void,
