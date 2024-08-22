@@ -19,10 +19,9 @@ services:
     image: redis:latest
     container_name: gameonton-redis
     environment:
-      - REDIS_PORT=${REDIS_PORT}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - REDIS_NAME=${REDIS_NAME}
     ports:
-      - '${REDIS_PORT}:${REDIS_PORT}'
+      - '${REDIS_PORT}:6379'
 volumes:
   mysql:
