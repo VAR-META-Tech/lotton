@@ -1,14 +1,42 @@
-import React from 'react';
-import dynamic from 'next/dynamic';
+'use client';
 
+import React, { useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import { useLoginByWalletMutation } from '@/apis/auth';
+import { useTonWallet } from '@tonconnect/ui-react';
+
+import { onMutateError } from '@/lib/common';
+import { useAuth } from '@/hooks/useAuth';
 import { Carousel } from '@/components/ui/carousel';
-import HowToWin from './components/HowToWin';
-import PrizePool from './components/PrizePool';
 
 const HowToPlay = dynamic(() => import('./components/HowToPlay'));
 const PoolList = dynamic(() => import('./components/PoolList'));
+const HowToWin = dynamic(() => import('./components/HowToWin'));
+const PrizePool = dynamic(() => import('./components/PrizePool'));
 
 const LandingPage = () => {
+  const wallet = useTonWallet();
+  const { setUserData, status } = useAuth();
+
+  const { mutate: loginByWallet } = useLoginByWalletMutation({
+    onSuccess: (data) => {
+      setUserData({
+        accessToken: data?.data?.tokens?.accessToken,
+        refreshToken: data?.data?.tokens?.refreshToken,
+        user: data?.data?.user,
+      });
+    },
+    onError: onMutateError,
+  });
+
+  useEffect(() => {
+    if (!wallet || status === 'waiting') return;
+
+    loginByWallet({
+      wallet: wallet?.account?.address,
+    });
+  }, [loginByWallet, status, wallet]);
+
   return (
     <div className="container py-10 pb-24 space-y-8">
       <div className="text-white text-center w-full text-2xl">Get your tickets now!</div>

@@ -55,6 +55,7 @@ export const sleep = async (time: number) => {
   );
 };
 
+// eslint-disable-next-line no-unused-vars
 export const debounce = <F extends (...args: any) => any>(func: F, waitFor: number) => {
   const timeout = 0;
 
@@ -63,6 +64,7 @@ export const debounce = <F extends (...args: any) => any>(func: F, waitFor: numb
     setTimeout(() => func(...args), waitFor);
   };
 
+  // eslint-disable-next-line no-unused-vars
   return debounced as (...args: Parameters<F>) => ReturnType<F>;
 };
 

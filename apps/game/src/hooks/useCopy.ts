@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+// eslint-disable-next-line no-unused-vars
 type CopyFn = (text?: string) => void; // Return success
 
 export function useCopy(): [boolean, CopyFn] {

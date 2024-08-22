@@ -1,6 +1,5 @@
 import React, { forwardRef, HTMLAttributes, memo } from 'react';
 
-import { prettyNumber } from '@/lib/common';
 import { cn } from '@/lib/utils';
 import { VStack } from '@/components/ui/Utilities';
 

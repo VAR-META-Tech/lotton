@@ -1,41 +1,30 @@
-import { type IMeta, type TResponse } from '@/types';
+import { IMeta } from '@/types';
 
-export interface ILoginResponse {
-  user: IUser;
-  accessToken: string;
-  refreshToken: string;
+export interface ILoginByWalletRequest {
+  wallet: string;
 }
 
-export interface IToken {
-  accessToken: string;
-  refreshToken: string;
-  tokenExpired: number;
+export interface ILoginByWalletResponse {
+  meta: IMeta;
+  data: ILoginByWalletData;
 }
 
-export interface IUser {
-  id: number;
-  username: string | null;
-  email: string;
-  avatarUrl: string | null;
+export interface ILoginByWalletData {
+  user: ILoginByWalletUser;
+  tokens: ILoginByWalletTokens;
+}
+
+export interface ILoginByWalletUser {
   createdAt: string;
-  wallets: string[];
+  updatedAt: string;
+  deletedAt: any;
+  id: number;
+  wallet: string;
+  isActive: boolean;
 }
 
-export interface ISignInResponseData {
-  user: IUser;
-  tokens: IToken;
+export interface ILoginByWalletTokens {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
 }
-
-export interface ISignInRequest {
-  email: string;
-  password: string;
-}
-
-export interface IGoogleSignInRequest {
-  code: string;
-  provider: string;
-}
-
-export interface ISignInResponse extends TResponse<ISignInResponseData> {}
-
-export interface IGetMeResponse extends TResponse<IUser> {}

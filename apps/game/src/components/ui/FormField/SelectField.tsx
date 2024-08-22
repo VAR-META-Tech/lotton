@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import React from 'react';
+import Image from 'next/image';
 import { type LucideIcon } from 'lucide-react';
 import type { Control, FieldPath, FieldPathValue, FieldValues } from 'react-hook-form';
 
@@ -42,8 +43,6 @@ const SelectField = <T extends FieldValues>({
   className,
   labelClassName,
   placeholder = 'Please select',
-  iconClassName,
-  arrowIcon,
   requiredClassName,
   ...props
 }: Props<T>) => {
@@ -75,7 +74,7 @@ const SelectField = <T extends FieldValues>({
                     <SelectItem key={x.value} value={x.value}>
                       {x.image ? (
                         <div className="flex items-center space-x-2">
-                          {x.image && <img src={x.image!} alt="" className="h-6 w-6" />}
+                          {x.image && <Image src={x.image!} alt="" width={24} height={24} />}
                           <p>{x.label}</p>
                         </div>
                       ) : (

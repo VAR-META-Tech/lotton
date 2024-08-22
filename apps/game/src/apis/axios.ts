@@ -5,8 +5,6 @@ import axios from 'axios';
 
 import { env } from '@/lib/const';
 
-import { refreshTokenRequest } from './auth';
-
 export const request = axios.create({
   baseURL: env.API_URL,
 });
@@ -17,14 +15,16 @@ const onRefreshToken = async () => {
 
   if (refreshToken) {
     try {
-      const {
-        data: { accessToken, refreshToken: newRefreshToken },
-      } = await refreshTokenRequest(refreshToken);
+      // TODO: REFRESH TOKEN
+      // const {
+      //   data: { accessToken, refreshToken: newRefreshToken },
+      // } = await refreshTokenRequest(refreshToken);
 
-      store?.setAccessToken(accessToken);
-      store?.setRefreshToken(newRefreshToken);
+      // store?.setAccessToken(accessToken);
+      // store?.setRefreshToken(newRefreshToken);
 
-      return accessToken;
+      return '';
+      // eslint-disable-next-line no-unreachable
     } catch (e) {
       Router.replace('/');
       store?.logout();
