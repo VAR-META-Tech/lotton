@@ -29,8 +29,8 @@ export const USER_COOKIES = {
 export const LOGGED_IN_KEY = 'active';
 
 export const POOL_STATUS = {
-  UP_COMING: 'up_coming',
-  ON_GOING: 'on_going',
+  UP_COMING: 'upcoming',
+  ON_GOING: 'ongoing',
   CLOSED: 'closed',
 } as const;
 
