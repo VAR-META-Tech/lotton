@@ -34,7 +34,7 @@ const useBaseUserStore = create<IMeQueryStore>()(
         })),
     }),
     {
-      name: 'user-store',
+      name: 'admin-store',
       storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state) => {
         if (!state) return;
