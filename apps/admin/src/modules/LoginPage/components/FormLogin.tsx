@@ -8,17 +8,33 @@ import { HStack, VStack } from '@/components/ui/Utilities';
 import { ROUTES } from '@/lib/routes';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { toast } from 'sonner';
+import { useSignInWithGoogleMutation } from '@/apis/auth';
+import { useUserStore } from '@/stores';
 
 const FormLogin = () => {
   const router = useRouter();
+  const setAccessToken = useUserStore.use.setAccessToken();
+
+  const { mutate: loginCredential, isPending } = useSignInWithGoogleMutation({
+    onSuccess: ({ data: { tokens } }) => {
+      setAccessToken(tokens.accessToken);
+      router.replace(ROUTES.POOL);
+      toast.success('Login successfully!');
+    },
+    onError: (error: any) => {
+      if (error.code === 403 || error.code === 401) {
+        toast.error('Your email address is not authorized to access this site.');
+        return;
+      }
+      toast.error(`Login fail with error: ${error.message}`);
+    },
+  })
 
   const loginGoogle = useGoogleLogin({
     onSuccess: ({ access_token }) => {
-      router.replace(ROUTES.POOL);
+      loginCredential({ accessToken: access_token });
     },
-    onError: () => {
-      router.push(ROUTES.LOGIN);
-    }
   });
 
   return (
@@ -35,8 +51,12 @@ const FormLogin = () => {
               <p className='text-base font-light'>Welcome to TON game</p>
             </VStack>
 
-
-            <Button className='px-5 py-[.625rem] w-[20.8125rem]' variant="secondary" onClick={() => loginGoogle()}>
+            <Button
+              className='px-5 py-[.625rem] w-[20.8125rem]'
+              loading={isPending}
+              variant="secondary"
+              onClick={() => loginGoogle()}
+            >
               Login with Google
             </Button>
           </VStack>

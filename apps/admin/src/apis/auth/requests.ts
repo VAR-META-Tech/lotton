@@ -18,7 +18,7 @@ export const refreshTokenRequest = async (refreshToken: string): Promise<TRespon
 
 export const getUserProfile = async (): Promise<IGetMeResponse> => {
   const { data } = await request({
-    url: '/api/user/me',
+    url: '/api/admin/me',
     method: 'GET',
   });
   return data;
@@ -36,7 +36,7 @@ export const emailSignInRequest = async (payload: ISignInRequest): Promise<ISign
 
 export const googleSignInRequest = async (payload: IGoogleSignInRequest): Promise<ISignInResponse> => {
   const { data } = await request({
-    url: '/api/auth/login-with-google',
+    url: '/api/auth/admin/login-with-google',
     method: 'POST',
     data: payload,
   });

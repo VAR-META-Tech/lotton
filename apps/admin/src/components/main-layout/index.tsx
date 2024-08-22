@@ -1,8 +1,10 @@
+'use client';
+
 import { CP } from '@/types';
 import React from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
-
+import withAuth from '@/lib/withAuth';
 
 const MainLayout = ({ children }: CP) => {
   return (
@@ -17,4 +19,4 @@ const MainLayout = ({ children }: CP) => {
   );
 };
 
-export default MainLayout;
+export default withAuth(MainLayout);
