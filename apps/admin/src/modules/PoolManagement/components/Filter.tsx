@@ -24,7 +24,7 @@ const PoolFilter: FC<Props> = ({ onSearchChange, loading, onClearValue }) => {
   const methods = useForm<PoolSchema>({
     resolver: zodResolver(poolSchema),
     defaultValues: {
-      name: 'all',
+      // name: 'all',
       status: 'all',
       search: ''
     }
@@ -39,8 +39,8 @@ const PoolFilter: FC<Props> = ({ onSearchChange, loading, onClearValue }) => {
 
   const handleSearch: SubmitHandler<PoolSchema> = (values) => {
     onSearchChange({
-      name: values.name,
-      status: values.status,
+      // name: values.name,
+      status: values.status === 'all' ? undefined : values.status,
       search: values.search,
     });
   };
@@ -48,7 +48,7 @@ const PoolFilter: FC<Props> = ({ onSearchChange, loading, onClearValue }) => {
   const handleClearFilter = () => {
     methods.reset({
       status: 'all',
-      name: 'all',
+      // name: 'all',
       search: '',
     });
 
@@ -71,7 +71,7 @@ const PoolFilter: FC<Props> = ({ onSearchChange, loading, onClearValue }) => {
               />
             </div>
 
-            <div>
+            {/* <div>
               <SelectField
                 data={StatusOptions}
                 control={methods.control}
@@ -80,7 +80,7 @@ const PoolFilter: FC<Props> = ({ onSearchChange, loading, onClearValue }) => {
                 label="Pool Name"
                 className="border border-[#8B8B94] h-[3rem] rounded-sm"
               />
-            </div>
+            </div> */}
 
             <div>
               <TextField
