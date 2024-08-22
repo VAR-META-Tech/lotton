@@ -2,6 +2,7 @@ import React, { FC, useMemo } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { VStack } from '@/components/ui/Utilities';
 
 import { ConnectWallet } from '../../ConnectWallet';
@@ -15,7 +16,7 @@ const PoolAction: FC<Props> = ({ ticketCount }) => {
   const { isLoggedIn, status } = useAuth();
 
   const renderComponent = useMemo(() => {
-    if (status === 'waiting') return null;
+    if (status === 'waiting') return <Spinner className="w-8 h-8 text-white" />;
 
     if (isLoggedIn) {
       return (

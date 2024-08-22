@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Icons } from '@/assets/icons';
 
 import { HStack } from '@/components/ui/Utilities';
@@ -29,4 +29,4 @@ const PoolRound = () => {
   );
 };
 
-export default PoolRound;
+export default memo(PoolRound);

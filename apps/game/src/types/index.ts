@@ -25,3 +25,8 @@ export type TResponse<T> = {
 };
 
 export type FCC<P = {}> = FC<PropsWithChildren<P>>;
+
+export interface IOption<T> {
+  label: string;
+  value: T;
+}

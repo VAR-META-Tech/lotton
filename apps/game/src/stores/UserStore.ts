@@ -6,7 +6,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 export interface IMeQueryStore {
   status: 'waiting' | 'ready';
-  user: ILoginByWalletUser;
+  user: ILoginByWalletUser | undefined;
   accessToken: string;
   refreshToken: string;
   setStore: (data: ILoginByWalletResponse) => void;
@@ -31,7 +31,7 @@ const useBaseUserStore = create<IMeQueryStore>()(
         set(() => ({
           accessToken: '',
           refreshToken: '',
-          user: {} as ILoginByWalletUser,
+          user: undefined,
         })),
     }),
     {
