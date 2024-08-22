@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -10,9 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
-import { Roles } from '@/common/decorators/admin_roles.decorator';
 import { QueryPaginationDto } from '@/shared/dto/pagination.query';
-import { RoleEnum } from '@/shared/enums';
 
 import { AdminJwtGuard } from '../auth/guards/admin_jwt.guard';
 import { CreatePoolDto } from './dto/create-pool.dto';
@@ -28,14 +27,12 @@ export class PoolController {
 
   @Post()
   @UseGuards(AdminJwtGuard)
-  @Roles(RoleEnum.SUPER_ADMIN)
   async create(@Body() createPoolDto: CreatePoolDto) {
     return await this.poolService.create(createPoolDto);
   }
 
   @Put(':id')
   @UseGuards(AdminJwtGuard)
-  @Roles(RoleEnum.SUPER_ADMIN)
   async update(@Param('id') id: number, @Body() updatePoolDto: UpdatePoolDto) {
     return await this.poolService.update(id, updatePoolDto);
   }
@@ -51,5 +48,11 @@ export class PoolController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.poolService.findOne(+id);
+  }
+
+  @Delete(':id')
+  @UseGuards(AdminJwtGuard)
+  delete(@Param('id') id: string) {
+    return this.poolService.deleteOne(+id);
   }
 }

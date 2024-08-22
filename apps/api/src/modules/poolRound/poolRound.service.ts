@@ -51,4 +51,17 @@ export class PoolRoundService {
       throw error;
     }
   }
+
+  async softDelete(poolId: number) {
+    try {
+      await this.roundRepository
+        .createQueryBuilder()
+        .softDelete()
+        .from(PoolRound)
+        .where('poolId = :poolId', { poolId })
+        .execute();
+    } catch (error) {
+      throw error;
+    }
+  }
 }

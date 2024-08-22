@@ -166,8 +166,6 @@ export class PoolService {
       }
 
       if (updatePoolDto.totalRounds < poolExist.totalRounds) {
-        console.log(countRoundOnGoing, updatePoolDto.totalRounds);
-
         // Remove some
         if (countRoundOnGoing <= updatePoolDto.totalRounds) {
           await this.poolRoundService.deleteRoundGreaterRoundNumber(
@@ -241,6 +239,27 @@ export class PoolService {
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  async deleteOne(poolId: number) {
+    const poolExist = await this.findOne(poolId);
+    if (!poolExist) throw Causes.NOT_FOUND('Pool');
+
+    if (dayjs(poolExist?.startTime) > dayjs()) {
+      await this.poolRepository.softRemove(poolExist);
+      await this.poolPrizesRepository
+        .createQueryBuilder()
+        .softDelete()
+        .from(PoolPrize)
+        .where('poolId = :poolId', { poolId })
+        .execute();
+      await this.poolRoundService.softDelete(poolId);
+      return true;
+    }
+
+    throw new BadRequestException(
+      'Cannot delete this pool that has already started.',
+    );
   }
 
   checkPoolPrizes(prizesDB: PoolPrize[], prizesUpdate: PoolPrizes[]) {
