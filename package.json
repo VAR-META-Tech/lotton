@@ -3,7 +3,13 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
+    "build:game": "turbo --filter=lottery build",
+    "build:admin": "turbo --filter=admin-lottery build",
+    "build:api": "turbo --filter=lottery-be build",
     "dev": "turbo dev",
+    "dev:game": "turbo --filter=lottery dev",
+    "dev:admin": "turbo --filter=admin-lottery dev",
+    "dev:api": "turbo --filter=lottery-be dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },

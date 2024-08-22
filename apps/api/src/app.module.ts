@@ -12,6 +12,7 @@ import { HealthController } from './modules/default/health.controller';
 import { NetworkModule } from './modules/network/network.module';
 import { PoolModule } from './modules/pool/pool.module';
 import { QuantTradingModule } from './modules/quant_trading/quant_trading.module';
+import { RoundModule } from './modules/round/round.module';
 import { ServicesModule } from './modules/services/services.module';
 import { SessionModule } from './modules/session/session.module';
 import { TokenModule } from './modules/token/token.module';
@@ -37,6 +38,7 @@ import { OrmModule } from './orm.module';
     QuantTradingModule,
     ServicesModule,
     PoolModule,
+    RoundModule,
   ],
   controllers: [HealthController],
   providers: [

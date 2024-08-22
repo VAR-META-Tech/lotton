@@ -23,6 +23,12 @@ export class UserTicket extends BaseTime {
   @Column()
   code: string;
 
+  @Column({ nullable: true })
+  winningCode: string;
+
+  @Column({ nullable: true, zerofill: true })
+  winningMatch: number;
+
   @ManyToOne(() => Transaction, (round) => round.id, {
     onDelete: 'CASCADE',
   })
