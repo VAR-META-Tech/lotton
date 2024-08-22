@@ -16,6 +16,7 @@ type CarouselProps = {
   opts?: CarouselOptions;
   plugins?: CarouselPlugin;
   orientation?: 'horizontal' | 'vertical';
+  // eslint-disable-next-line no-unused-vars
   setApi?: (api: CarouselApi) => void;
 };
 
@@ -52,7 +53,6 @@ const Carousel = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEl
     const [canScrollPrev, setCanScrollPrev] = React.useState(false);
     const [canScrollNext, setCanScrollNext] = React.useState(false);
 
-    // eslint-disable-next-line @typescript-eslint/no-shadow
     const onSelect = React.useCallback((api: CarouselApi) => {
       if (!api) {
         return;

@@ -1,0 +1,11 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "root": true,
+  "extends": [
+    // "@hoangdevnull/eslint-config-next",
+    "@repo/eslint-config/next.js"
+  ]
+}

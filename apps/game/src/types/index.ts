@@ -5,6 +5,7 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
 };
 
 declare global {
+  // eslint-disable-next-line no-unused-vars
   interface Window {}
 }
 

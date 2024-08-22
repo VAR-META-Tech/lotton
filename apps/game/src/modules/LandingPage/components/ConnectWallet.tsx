@@ -1,14 +1,16 @@
 'use client';
 
 import React from 'react';
-import { TonConnectButton } from '@tonconnect/ui-react';
+import { useTonConnectModal } from '@tonconnect/ui-react';
 
-type Props = {};
+import { Button } from '@/components/ui/button';
 
-export const ConnectWallet = (props: Props) => {
+export const ConnectWallet = () => {
+  const { open } = useTonConnectModal();
+
   return (
-    <div>
-      <TonConnectButton />
-    </div>
+    <Button onClick={() => open()} className="rounded-lg">
+      Connect Wallet
+    </Button>
   );
 };

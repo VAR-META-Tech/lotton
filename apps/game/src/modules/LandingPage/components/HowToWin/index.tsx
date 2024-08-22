@@ -6,7 +6,7 @@ import { Icons } from '@/assets/icons';
 
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { HStack, VStack } from '@/components/ui/Utilities';
+import { HStack } from '@/components/ui/Utilities';
 
 import { ACCORDION_VALUE } from '../../utils/const';
 
