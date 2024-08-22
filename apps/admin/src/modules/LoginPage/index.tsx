@@ -8,11 +8,6 @@ import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/lib/routes';
 
 const LoginPage = () => {
-  const accessToken = useUserStore.use.accessToken();
-  const route = useRouter()
-
-  if (accessToken) route.push(ROUTES.POOL);
-
   return (
     <FormLogin />
   );
