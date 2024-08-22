@@ -66,7 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <Toaster />
 
-          <VStack justify={'center'} align={'center'} className="min-h-screen hidden md:flex">
+          <VStack justify={'center'} align={'center'} className="min-h-screen hidden lg:flex">
             <span className="text-3xl text-white">Only support for mobile</span>
           </VStack>
 

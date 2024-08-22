@@ -124,7 +124,7 @@ export function isJSON(str: string) {
   }
 }
 
-export function shortenAddress(address?: string | null, length = 4): string | undefined | null {
+export function shortenAddress(address?: string, length = 4) {
   if (!address) return address;
 
   const isRightAddress = isAddress(address);
