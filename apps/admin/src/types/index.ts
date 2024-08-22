@@ -28,9 +28,6 @@ export type FCC<P = {}> = FC<PropsWithChildren<P>>;
 
 type Layout = {
   children: React.ReactNode;
-  params: {
-    locale: string;
-  };
 };
 
 export type CP<P = {}> = Layout & P;
