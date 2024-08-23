@@ -1,4 +1,5 @@
 import React, { FC, memo } from 'react';
+import { IGetPoolDetailPoolPrize } from '@/apis/pools';
 import { Icons } from '@/assets/icons';
 import { motion } from 'framer-motion';
 
@@ -11,9 +12,10 @@ import MatchItem from './MatchItem';
 interface Props {
   isShow: boolean;
   setIsShow: React.Dispatch<React.SetStateAction<boolean>>;
+  poolPrizes: IGetPoolDetailPoolPrize[];
 }
 
-const PoolInfo: FC<Props> = ({ isShow, setIsShow }) => {
+const PoolInfo: FC<Props> = ({ isShow, setIsShow, poolPrizes }) => {
   const toggleShow = () => {
     setIsShow(!isShow);
   };
@@ -33,26 +35,17 @@ const PoolInfo: FC<Props> = ({ isShow, setIsShow }) => {
             </span>
 
             <div className="grid grid-cols-2 gap-3">
-              <MatchItem
-                title={'Match first 1'}
-                value={`${prettyNumber(1000)} TON`}
-                subValue={`~ ${prettyNumber(10000)} USD`}
-              />
-              <MatchItem
-                title={'Match first 2'}
-                value={`${prettyNumber(1000)} TON`}
-                subValue={`~ ${prettyNumber(10000)} USD`}
-              />
-              <MatchItem
-                title={'Match first 3'}
-                value={`${prettyNumber(1000)} TON`}
-                subValue={`~ ${prettyNumber(10000)} USD`}
-              />
-              <MatchItem
-                title={'Match first 4'}
-                value={`${prettyNumber(1000)} TON`}
-                subValue={`~ ${prettyNumber(10000)} USD`}
-              />
+              {poolPrizes?.map((item, index) => {
+                const allocationRate = Number(item?.allocation) / 100;
+                return (
+                  <MatchItem
+                    key={`${item?.id}-${index}`}
+                    title={`Match first ${item?.matchNumber}`}
+                    value={`${prettyNumber(Number(2500 * allocationRate).toFixed(2))} TON`}
+                    subValue={`~ ${prettyNumber(Number(10000 * allocationRate).toFixed(2))} USD`}
+                  />
+                );
+              })}
             </div>
           </VStack>
         </div>

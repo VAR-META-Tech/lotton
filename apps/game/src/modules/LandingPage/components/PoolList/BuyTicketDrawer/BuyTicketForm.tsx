@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
+import React, { FC, HTMLAttributes, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { Icons } from '@/assets/icons';
 import { MAX_TICKET, MIN_TICKET } from '@/modules/LandingPage/utils/const';
+import { FCC } from '@/types';
 
 import { prettyNumber } from '@/lib/common';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { HStack, VStack } from '@/components/ui/Utilities';
 
-const BuyTicketForm = () => {
+interface Props {
+  ticketPrice: number;
+}
+
+const BuyTicketForm: FC<Props> = ({ ticketPrice }) => {
   const [amount, setAmount] = useState(0);
 
   const isMax = amount === MAX_TICKET;
@@ -25,6 +30,12 @@ const BuyTicketForm = () => {
     setAmount((prev) => prev - 1);
   };
 
+  const totalAmount = useMemo(() => {
+    if (!amount || !ticketPrice) return 0;
+
+    return Number(amount) * Number(ticketPrice);
+  }, [amount, ticketPrice]);
+
   return (
     <VStack spacing={24}>
       <VStack spacing={20} className="text-white border-b-[1px] border-b-gray-color pb-6">
@@ -34,7 +45,7 @@ const BuyTicketForm = () => {
           <HStack spacing={8}>
             <Image src={'/images/tokens/ton_symbol.webp'} width={24} height={24} alt="ton" />
 
-            <span className="text-2xl">{`10 TON`}</span>
+            <span className="text-2xl">{`${prettyNumber(ticketPrice)} TON`}</span>
           </HStack>
         </HStack>
 
@@ -42,41 +53,23 @@ const BuyTicketForm = () => {
           <span className="text-base font-medium">Amount</span>
 
           <HStack spacing={8}>
-            <button
-              onClick={() => onAmountChange('minus')}
-              disabled={isMin}
-              className={cn(
-                'bg-white border border-primary rounded-[0.3125rem] w-[2.1875rem] h-[1.6875rem] flex justify-center items-center',
-                {
-                  'border-gray-color': isMin,
-                }
-              )}
-            >
+            <ChangeAmountButton isDisabled={isMin} onClick={() => onAmountChange('minus')}>
               <Icons.minus
                 className={cn('text-primary', {
                   'text-gray-color': isMin,
                 })}
               />
-            </button>
+            </ChangeAmountButton>
 
             <span className="text-2xl font-semibold w-8 text-center">{amount}</span>
 
-            <button
-              onClick={() => onAmountChange('plus')}
-              disabled={isMax}
-              className={cn(
-                'bg-white border border-primary rounded-[0.3125rem] w-[2.1875rem] h-[1.6875rem] flex justify-center items-center',
-                {
-                  'border-gray-color': isMax,
-                }
-              )}
-            >
+            <ChangeAmountButton isDisabled={isMax} onClick={() => onAmountChange('plus')}>
               <Icons.plus
                 className={cn('text-primary', {
                   'text-gray-color': isMax,
                 })}
               />
-            </button>
+            </ChangeAmountButton>
           </HStack>
         </HStack>
       </VStack>
@@ -88,13 +81,13 @@ const BuyTicketForm = () => {
           <HStack spacing={8}>
             <Image src={'/images/tokens/ton_symbol.webp'} width={24} height={24} alt="ton" />
 
-            <span className="text-2xl">{`10 TON`}</span>
+            <span className="text-2xl">{`${prettyNumber(totalAmount)} TON`}</span>
           </HStack>
         </HStack>
         <HStack pos={'apart'}>
           <span className="text-xs text-white">{`TON balance: ${prettyNumber(10000)} TON`}</span>
 
-          <span className="text-base text-gray-color">{`~ ${prettyNumber(0)} TON`}</span>
+          <span className="text-base text-gray-color">{`~ ${prettyNumber(0)} USD`}</span>
         </HStack>
       </VStack>
 
@@ -106,3 +99,24 @@ const BuyTicketForm = () => {
 };
 
 export default BuyTicketForm;
+
+interface IChangeAmountButtonProps extends HTMLAttributes<HTMLButtonElement> {
+  isDisabled: boolean;
+}
+
+const ChangeAmountButton: FCC<IChangeAmountButtonProps> = ({ isDisabled, children, ...props }) => {
+  return (
+    <button
+      disabled={isDisabled}
+      className={cn(
+        'bg-white border border-primary rounded-[0.3125rem] w-[2.1875rem] h-[1.6875rem] flex justify-center items-center',
+        {
+          'border-gray-color': isDisabled,
+        }
+      )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};

@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { FC } from 'react';
 import Image from 'next/image';
 
 import { prettyNumber } from '@/lib/common';
@@ -6,7 +6,11 @@ import { HStack, VStack } from '@/components/ui/Utilities';
 
 import PoolAction from './PoolAction';
 
-const PoolPrizePot = () => {
+interface Props {
+  ticketPrice: number;
+}
+
+const PoolPrizePot: FC<Props> = ({ ticketPrice }) => {
   return (
     <div className="p-5 border border-navigate-tab">
       <VStack align={'center'}>
@@ -21,10 +25,10 @@ const PoolPrizePot = () => {
           <div className="text-xs text-gray-color text-center">{`~ ${prettyNumber(10000)} USD`}</div>
         </div>
 
-        <PoolAction ticketCount={0} />
+        <PoolAction holdingTicket={0} ticketPrice={ticketPrice} />
       </VStack>
     </div>
   );
 };
 
-export default memo(PoolPrizePot);
+export default PoolPrizePot;

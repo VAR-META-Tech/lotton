@@ -7,7 +7,11 @@ import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTr
 import BuyTicketForm from './BuyTicketForm';
 import BuyTicketNote from './BuyTicketNote';
 
-const BuyTicketDrawer: FCC = ({ children }) => {
+interface Props {
+  ticketPrice: number;
+}
+
+const BuyTicketDrawer: FCC<Props> = ({ children, ticketPrice }) => {
   return (
     <Drawer>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
@@ -29,7 +33,7 @@ const BuyTicketDrawer: FCC = ({ children }) => {
               </div>
 
               <div className="space-y-10">
-                <BuyTicketForm />
+                <BuyTicketForm ticketPrice={ticketPrice} />
 
                 <BuyTicketNote />
               </div>
