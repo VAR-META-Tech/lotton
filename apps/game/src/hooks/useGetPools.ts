@@ -5,8 +5,8 @@ export const useGetPools = (query?: IGetPoolsParams) => {
 
   return {
     data,
-    pools: data?.data?.items || [],
-    pagination: data?.data?.meta || {},
+    pools: data?.items || [],
+    pagination: data?.meta || {},
     ...rest,
   };
 };

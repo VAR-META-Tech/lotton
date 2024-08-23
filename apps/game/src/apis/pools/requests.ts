@@ -1,7 +1,7 @@
 import { request } from '../axios';
-import type { IGetPoolDetailParams, IGetPoolDetailResponse, IGetPoolsParams, IGetPoolsResponse } from './types';
+import type { IGetPoolDetailData, IGetPoolDetailParams, IGetPoolsData, IGetPoolsParams } from './types';
 
-export const getAllPoolsRequest = async (params: IGetPoolsParams): Promise<IGetPoolsResponse> => {
+export const getAllPoolsRequest = async (params: IGetPoolsParams): Promise<IGetPoolsData> => {
   const { data } = await request({
     url: '/api/pools',
     method: 'GET',
@@ -11,7 +11,7 @@ export const getAllPoolsRequest = async (params: IGetPoolsParams): Promise<IGetP
   return data;
 };
 
-export const getPoolDetailRequest = async (params: IGetPoolDetailParams): Promise<IGetPoolDetailResponse> => {
+export const getPoolDetailRequest = async (params: IGetPoolDetailParams): Promise<IGetPoolDetailData> => {
   const { data } = await request({
     url: `/api/pools/${params.id}`,
     method: 'GET',

@@ -8,10 +8,16 @@ export const SkeletonPool = () => {
       </div>
 
       <div className="col-span-4 p-4 flex flex-col gap-4">
-        <div className="inline-flex items-center gap-4">
-          <span className="h-4 w-[3.25rem] bg-slate-200 rounded-md" />
+        <div className="flex justify-between">
+          <div className="inline-flex items-center gap-4">
+            <span className="h-4 w-[3.25rem] bg-slate-200 rounded-md" />
 
-          <span className="w-[2.9375rem] h-[1.75rem] bg-slate-200 rounded-md" />
+            <span className="w-[2.9375rem] h-[1.75rem] bg-slate-200 rounded-md" />
+          </div>
+          <div className="inline-flex items-center gap-4">
+            <span className="w-6 aspect-square bg-slate-200 rounded-md" />
+            <span className="w-6 aspect-square bg-slate-200 rounded-md" />
+          </div>
         </div>
 
         <div className="w-full max-w-md h-[.875rem] bg-slate-200 rounded-md" />

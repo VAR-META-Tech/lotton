@@ -6,7 +6,9 @@ export const CheckPage = () => {
     <div className="container py-10 pb-24 space-y-16">
       <CheckWinner />
 
-      <PoolList />
+      <div>
+        <PoolList />
+      </div>
     </div>
   );
 };

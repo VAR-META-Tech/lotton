@@ -33,13 +33,15 @@ const PoolRound: FC<Props> = ({ minRound, maxRound, currentRound, setCurrentRoun
     [currentRound, maxRound, minRound, setCurrentRound]
   );
 
+  const roundShow = currentRound >= 10 ? currentRound : `0${currentRound}`;
+
   return (
     <div className="border-x-navigate-tab border-x text-white px-5 py-4">
       <HStack pos={'apart'} spacing={12}>
         <div className="space-y-2">
           <div>
             <span className="font-medium">Round</span>{' '}
-            <span className="bg-navigate-tab px-3 py-1 rounded-lg">{`${currentRound >= 10 ? currentRound : `0${currentRound}`}`}</span>
+            <span className="bg-navigate-tab px-3 py-1 rounded-lg">{roundShow}</span>
           </div>
 
           <div className="text-xs">{!!date && `Draw ${format(new Date(date), 'MMM dd, yyyy, HH:mm a')}`}</div>
