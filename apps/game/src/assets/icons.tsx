@@ -4,11 +4,13 @@ import { ArrowLeft, ArrowRight, Check, ChevronDown, Copy, Loader2, Minus, Plus, 
 import ball from './svg/ball.svg';
 import calendar from './svg/calendar.svg';
 import document from './svg/document.svg';
+import download from './svg/download.svg';
 import home from './svg/home.svg';
 import telegram from './svg/telegram.svg';
 import ticketStar from './svg/ticket-star.svg';
 import ticket from './svg/ticket.svg';
 import twitter from './svg/twitter.svg';
+import upload from './svg/upload.svg';
 import wallet from './svg/wallet.svg';
 
 const IconList = {
@@ -31,6 +33,8 @@ const IconList = {
   copy: Copy,
   check: Check,
   search: Search,
+  download,
+  upload,
 };
 
 type SVGAttributes = Partial<SVGProps<SVGSVGElement>>;
