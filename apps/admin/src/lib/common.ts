@@ -2,6 +2,7 @@ import { BigNumber } from 'bignumber.js';
 import { formatUnits, getAddress, isAddress } from 'viem';
 
 import { REGEX_EMOJI, REGEX_NO_SPECIAL_CHARACTERS } from './regex';
+import { differenceInCalendarDays } from 'date-fns';
 
 export function capitalizeFirstLetter(str = '') {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -166,3 +167,7 @@ const convertTextToAmount = (text: string) => {
     currency,
   };
 };
+
+export function isPastDate(date: Date) {
+  return differenceInCalendarDays(date, new Date()) < 0;
+}
