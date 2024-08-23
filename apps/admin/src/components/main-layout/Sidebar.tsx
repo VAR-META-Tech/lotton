@@ -71,7 +71,7 @@ const Sidebar = () => {
               key={index}
               href={menu.link}
               icon={<span className="h-4 w-4">{menu.icon}</span>}
-              active={pathname === menu.link}
+              active={pathname.includes(menu.link)}
             >
               {menu.name}
             </MenuLink>

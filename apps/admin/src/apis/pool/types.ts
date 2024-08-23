@@ -34,4 +34,58 @@ export interface IGetPoolsResponse {
   meta: IMeta;
 }
 
-export interface IGetMeResponse extends TResponse<IGetPoolsResponse> {}
+export interface IGetPoolsListResponse extends TResponse<IGetPoolsResponse> { }
+
+export interface Currency {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  id: number;
+  name: string;
+  icon: string | null;
+  decimals: number;
+  symbol: string;
+  contractAddress: string;
+  abi: string;
+  beginningBlock: string;
+  isActive: boolean;
+};
+
+export interface Round {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  id: number;
+  roundNumber: number;
+  startTime: string;
+  endTime: string;
+  winningHash: string | null;
+};
+
+export interface PoolPrize {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  id: number;
+  matchNumber: number;
+  allocation: number;
+};
+
+export interface IGetPoolDetail {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  id: number;
+  name: string;
+  startTime: string;
+  endTime: string;
+  sequency: number;
+  totalRounds: number;
+  ticketPrice: string;
+  currency: Currency;
+  rounds: Round[];
+  poolPrizes: PoolPrize[];
+};
+
+export interface IGetPoolDetailResponse extends TResponse<IGetPoolDetail> { }
+

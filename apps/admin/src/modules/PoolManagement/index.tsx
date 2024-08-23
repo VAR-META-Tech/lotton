@@ -13,6 +13,8 @@ import PaginationCus from '@/components/ui/PaginationCus';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SkeletonWrapper } from '@/components/ui/skeleton-wrapper';
 import { PoolStatus } from './components/getPoolStatus';
+import Link from 'next/link';
+import { ROUTES } from '@/lib/routes';
 
 const DEFAULT_QUERY = {
   page: 1,
@@ -24,6 +26,7 @@ export const PoolManagement = () => {
   const {
     data: pools,
     isFetching,
+    isLoading,
   } = useGetPools(paramsQuery);
 
   const columns = useMemo(
@@ -66,7 +69,7 @@ export const PoolManagement = () => {
       <PoolFilter
         onSearchChange={handleSearchChange}
         onClearValue={handleClearValue}
-        loading={isFetching}
+        loading={isLoading}
       />
 
       <div className="min-h-[200px] mt-6 p-6 pb-28 space-y-8 bg-white rounded-sm">
@@ -100,9 +103,11 @@ export const PoolManagement = () => {
                   </TableCell>
                   
                   <TableCell className="text-center border border-[#D4D4D4]">
-                    <Button className='min-w-20 min-h-4 rounded-sm bg-[#1D4ED8]'>
-                      View
-                    </Button>
+                    <Link href={`${ROUTES.POOL}/${pool.id}`}>
+                      <Button className='min-w-20 min-h-4 rounded-sm bg-[#1D4ED8]'>
+                        View
+                      </Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}

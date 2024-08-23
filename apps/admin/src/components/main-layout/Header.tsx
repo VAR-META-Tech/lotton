@@ -1,20 +1,22 @@
-'use client';
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-import { HStack } from '../ui/Utilities';
+import { HStack, Show } from '../ui/Utilities';
 import { menuConfigs } from '@/lib/menu';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAppStore } from '@/stores/AppStore';
-import { CircleX, Menu } from 'lucide-react';
+import { ChevronLeft, CircleX, Menu } from 'lucide-react';
 import { ConnectWallet } from '../ConnectWallet';
+import { useParams } from 'next/navigation';
 
 const Header = () => {
   const open = useAppStore.use.openSideBar();
   const toggle = useAppStore.use.toggleSidebar();
   const pathname = usePathname();
+  const route = useRouter();
+  const params = useParams();
+  const id = params?.id;
 
   return (
     <div
@@ -27,11 +29,19 @@ const Header = () => {
           {open ? <CircleX /> : <Menu />}
         </Button>
 
-        {menuConfigs.map((menu, index) => (
-          <p key={index} className='capitalize text-2xl text-[#000000] hidden md:block'>
-            {pathname === menu.link ? menu.name : ''}
-          </p>
-        ))}
+        <HStack spacing={4}>
+          <Show when={!!id}>
+            <Button size={'sm'} className='' variant="ghost" onClick={() => route.back()}>
+              <ChevronLeft />
+            </Button>
+          </Show>
+
+          {menuConfigs.map((menu, index) => (
+            <p key={index} className='capitalize text-2xl text-[#000000] hidden md:block'>
+              {pathname.includes(menu.link) ? !!id ? `${menu.name.split(' ')[0]} detail` : menu.name : ''}
+            </p>
+          ))}
+        </HStack>
 
         <ConnectWallet />
       </HStack>
