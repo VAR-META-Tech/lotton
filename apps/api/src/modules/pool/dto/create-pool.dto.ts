@@ -13,6 +13,7 @@ import {
 
 import { IsDate } from '@/common/decorators/is_date.decorator';
 import { IsFeatured } from '@/common/decorators/is_featured.decorator';
+import { IsGreaterThan } from '@/common/decorators/is_greater_than.decorator';
 import { SumValueArray } from '@/common/decorators/sum_value.decorator';
 
 export class PoolPrizes {
@@ -55,6 +56,7 @@ export class CreatePoolDto {
   @IsNumber()
   @IsNotEmpty()
   @Type(() => Number)
+  @Min(1)
   currency: number;
 
   @ApiProperty({
@@ -71,17 +73,20 @@ export class CreatePoolDto {
   @IsNumber()
   @IsNotEmpty()
   @Type(() => Number)
+  @Min(1)
   sequency: number;
 
   @ApiProperty({ required: true, description: 'total round', example: 10 })
   @IsNumber()
   @IsNotEmpty()
+  @Min(1)
   @Type(() => Number)
   totalRounds: number;
 
   @ApiProperty({ required: true, description: 'ticket price', example: 30 })
   @IsNumber()
   @IsNotEmpty()
+  @IsGreaterThan(0)
   @Type(() => Number)
   ticketPrice: number;
 
