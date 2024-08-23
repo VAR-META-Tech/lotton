@@ -30,3 +30,11 @@ export interface IOption<T> {
   label: string;
   value: T;
 }
+
+export interface IPagination {
+  itemCount: number;
+  totalItems: number;
+  itemsPerPage: number;
+  totalPages: number;
+  currentPage: number;
+}
