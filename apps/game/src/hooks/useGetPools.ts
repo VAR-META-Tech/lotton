@@ -1,7 +1,7 @@
-import { useGetAllPoolsQuery } from '@/apis/pools';
+import { IGetPoolsParams, useGetAllPoolsQuery } from '@/apis/pools';
 
-export const useGetPools = () => {
-  const { data, ...rest } = useGetAllPoolsQuery();
+export const useGetPools = (query?: IGetPoolsParams) => {
+  const { data, ...rest } = useGetAllPoolsQuery({ variables: query });
 
   return {
     data,

@@ -5,6 +5,7 @@
 @layer base {
   :root {
     --background: 240, 21%, 11%;
+    --background2: 240, 20%, 19%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -37,13 +38,13 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    /* --background: 222.2 84% 4.9%; */
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
+    /* --primary: 210 40% 98%; */
     --primary-foreground: 222.2 47.4% 11.2%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -74,6 +75,10 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background min-h-screen text-foreground font-sans antialiased;
+  }
+
+  *::-webkit-scrollbar {
+    @apply hidden;
   }
 }

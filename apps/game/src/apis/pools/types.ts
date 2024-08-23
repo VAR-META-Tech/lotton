@@ -1,10 +1,10 @@
 import { IPagination, TResponse } from '@/types';
 
 export interface IGetPoolsParams {
-  status: string;
-  search: string;
-  pageSizes: number;
-  page: number;
+  status?: 'ongoing' | 'upcoming' | 'closed';
+  search?: string;
+  pageSizes?: number;
+  page?: number;
 }
 
 export interface IGetPoolsResponse extends TResponse<IGetPoolsData> {}

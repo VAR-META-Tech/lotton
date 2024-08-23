@@ -65,7 +65,7 @@ interface IRoundButtonProps extends HTMLAttributes<HTMLButtonElement> {
   isDisabled?: boolean;
 }
 
-const RoundButton: FCC<IRoundButtonProps> = ({ children, isDisabled, ...props }) => {
+export const RoundButton: FCC<IRoundButtonProps> = ({ children, isDisabled, ...props }) => {
   return (
     <button
       disabled={isDisabled}

@@ -57,12 +57,9 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="dark">
       <head />
-      <body
-        suppressHydrationWarning
-        className={clsx('bg-background min-h-screen font-sans antialiased', fontSans.variable)}
-      >
+      <body suppressHydrationWarning className={clsx(fontSans.variable)}>
         <Providers>
           <Toaster />
 
