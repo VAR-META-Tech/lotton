@@ -3,9 +3,7 @@ import { TResponse } from '@/types';
 export interface ILoginByWalletRequest {
   wallet: string;
 }
-
 export interface ILoginByWalletResponse extends TResponse<ILoginByWalletData> {}
-
 export interface ILoginByWalletData {
   user: ILoginByWalletUser;
   tokens: ILoginByWalletTokens;
