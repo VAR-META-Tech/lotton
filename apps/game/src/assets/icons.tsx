@@ -1,5 +1,5 @@
 import { type ForwardRefExoticComponent, type RefAttributes, type SVGProps } from 'react';
-import { ArrowLeft, ArrowRight, Check, ChevronDown, Copy, Loader2, Minus, Plus, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, ChevronDown, Copy, Loader2, Minus, Plus, Search, X } from 'lucide-react';
 
 import ball from './svg/ball.svg';
 import calendar from './svg/calendar.svg';
@@ -30,6 +30,7 @@ const IconList = {
   spinner: Loader2,
   copy: Copy,
   check: Check,
+  search: Search,
 };
 
 type SVGAttributes = Partial<SVGProps<SVGSVGElement>>;
