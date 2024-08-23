@@ -1,4 +1,4 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -9,36 +9,41 @@ import { ConnectWallet } from '../../ConnectWallet';
 import BuyTicketDrawer from '../BuyTicketDrawer';
 
 interface Props {
-  ticketCount: number;
+  holdingTicket: number;
+  ticketPrice: number;
 }
 
-const PoolAction: FC<Props> = ({ ticketCount }) => {
+const PoolAction: FC<Props> = ({ holdingTicket, ticketPrice }) => {
   const { isLoggedIn, status } = useAuth();
+
+  const renderBuyTicketsButton = useCallback(() => {
+    return (
+      <BuyTicketDrawer ticketPrice={ticketPrice}>
+        <VStack align={'center'}>
+          <span className="text-center text-white text-xs">
+            You have{' '}
+            <span className="underline">
+              <span className="text-sm font-bold">{holdingTicket}</span>{' '}
+              <span className="text-xs">{holdingTicket > 1 ? 'tickets' : 'ticket'}</span>
+            </span>{' '}
+            this round
+          </span>
+
+          <Button className="bg-gradient-to-r from-primary to-[#ED9BD6]">Buy Tickets</Button>
+        </VStack>
+      </BuyTicketDrawer>
+    );
+  }, [holdingTicket, ticketPrice]);
 
   const renderComponent = useMemo(() => {
     if (status === 'waiting') return <Spinner className="w-8 h-8 text-white" />;
 
     if (isLoggedIn) {
-      return (
-        <BuyTicketDrawer>
-          <VStack align={'center'}>
-            <span className="text-center text-white text-xs">
-              You have{' '}
-              <span className="underline">
-                <span className="text-sm font-bold">{ticketCount}</span>{' '}
-                <span className="text-xs">{ticketCount > 1 ? 'tickets' : 'ticket'}</span>
-              </span>{' '}
-              this round
-            </span>
-
-            <Button className="bg-gradient-to-r from-primary to-[#ED9BD6]">Buy Tickets</Button>
-          </VStack>
-        </BuyTicketDrawer>
-      );
+      return renderBuyTicketsButton();
     }
 
     return <ConnectWallet />;
-  }, [isLoggedIn, status, ticketCount]);
+  }, [isLoggedIn, renderBuyTicketsButton, status]);
 
   return <div>{renderComponent}</div>;
 };

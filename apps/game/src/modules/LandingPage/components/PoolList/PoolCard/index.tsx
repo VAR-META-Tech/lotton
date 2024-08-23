@@ -23,7 +23,7 @@ interface Props extends HTMLAttributes<HTMLDivElement> {
 const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, ...props }) => {
   const [currentRound, setCurrentRound] = useState<number>(MIN_ROUND);
 
-  const { pool, rounds } = useGetPoolDetail({ poolId, isActive });
+  const { pool, rounds, poolPrizes } = useGetPoolDetail({ poolId, isActive });
 
   const roundActive = useMemo(() => rounds?.find((item) => item.roundNumber === currentRound), [currentRound, rounds]);
 
@@ -44,9 +44,9 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
         date={roundActive?.endTime}
       />
 
-      <PoolPrizePot />
+      <PoolPrizePot ticketPrice={Number(pool?.ticketPrice || 0)} />
 
-      <PoolInfo isShow={isShow} setIsShow={setIsShow} />
+      <PoolInfo isShow={isShow} setIsShow={setIsShow} poolPrizes={poolPrizes} />
     </div>
   );
 };

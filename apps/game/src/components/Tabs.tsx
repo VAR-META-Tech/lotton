@@ -2,8 +2,6 @@ import React from 'react';
 import { IOption } from '@/types';
 import { motion } from 'framer-motion';
 
-import { cn } from '@/lib/utils';
-
 interface TabsProps<T extends string | number> extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
   layoutId: string;
   data: IOption<T>[];
