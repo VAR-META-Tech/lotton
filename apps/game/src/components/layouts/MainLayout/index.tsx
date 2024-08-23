@@ -13,26 +13,26 @@ import NavigateTab from './components/NavigateTab';
 
 const MainLayout: FCC = ({ children }) => {
   const wallet = useTonWallet();
-  const { setUserData, status } = useAuth();
+  const { setUserData, status, isLoggedIn } = useAuth();
 
   const { mutate: loginByWallet } = useLoginByWalletMutation({
     onSuccess: (data) => {
       setUserData({
-        accessToken: data?.data?.tokens?.accessToken,
-        refreshToken: data?.data?.tokens?.refreshToken,
-        user: data?.data?.user,
+        accessToken: data?.tokens?.accessToken,
+        refreshToken: data?.tokens?.refreshToken,
+        user: data?.user,
       });
     },
     onError: onMutateError,
   });
 
   useEffect(() => {
-    if (!wallet || status === 'waiting') return;
+    if (!wallet || status === 'waiting' || !!isLoggedIn) return;
 
     loginByWallet({
       wallet: wallet?.account?.address,
     });
-  }, [loginByWallet, status, wallet]);
+  }, [isLoggedIn, loginByWallet, status, wallet]);
 
   return (
     <VStack className="relative flex flex-col lg:hidden">

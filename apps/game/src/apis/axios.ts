@@ -39,6 +39,7 @@ const onRefreshToken = async () => {
 const handleSuccess = (res: AxiosResponse) => {
   res.meta = res?.data?.meta;
   res.data = res?.data?.data;
+
   return res;
 };
 

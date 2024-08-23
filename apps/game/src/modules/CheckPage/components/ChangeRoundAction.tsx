@@ -4,6 +4,7 @@ import { RoundButton } from '@/modules/LandingPage/components/PoolList/PoolCard/
 import { HStack } from '@/components/ui/Utilities';
 
 type Props = {
+  // eslint-disable-next-line no-unused-vars
   onClick: (isUp: boolean) => void;
 };
 export const ChangeRoundAction = ({ onClick }: Props) => (
