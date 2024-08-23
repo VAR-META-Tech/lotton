@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'lottery-ton-api',
-      script: 'pnpm start',
+      script: 'pnpm start:prod',
     },
   ],
 };

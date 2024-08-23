@@ -58,7 +58,10 @@ const config: Config = {
         },
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
+        background: {
+          DEFAULT: 'hsl(var(--background))',
+          2: 'hsl(var(--background2))',
+        },
         foreground: 'hsl(var(--foreground))',
         primary: {
           DEFAULT: 'hsl(var(--primary))',
@@ -105,8 +108,8 @@ const config: Config = {
           light: 'hsl(var(--info-light))',
         },
         divider: 'hsl(var(--divider))',
-        "navigate-tab": "hsl(var(--navigate-tab))",
-        "gray-color": "hsl(var(--gray-color))",
+        'navigate-tab': 'hsl(var(--navigate-tab))',
+        'gray-color': 'hsl(var(--gray-color))',
         neutral: {
           '0': '#FFFFFF',
           '10': '#DADADA',

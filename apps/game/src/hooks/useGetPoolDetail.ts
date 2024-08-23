@@ -10,10 +10,10 @@ export const useGetPoolDetail = ({ poolId, isActive }: { poolId: number; isActiv
 
   return {
     data,
-    pool: data?.data,
-    currency: data?.data?.currency,
-    rounds: data?.data?.rounds || [],
-    poolPrizes: data?.data?.poolPrizes || [],
+    pool: data,
+    currency: data?.currency,
+    rounds: data?.rounds || [],
+    poolPrizes: data?.poolPrizes || [],
     ...rest,
   };
 };
