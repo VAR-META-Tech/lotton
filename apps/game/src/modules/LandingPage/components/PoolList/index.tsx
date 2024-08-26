@@ -8,15 +8,27 @@ import { useGetPools } from '@/hooks/useGetPools';
 import { CarouselContent, CarouselItem } from '@/components/ui/carousel';
 
 import PoolCard from './PoolCard';
+import PoolCardSkeleton from './PoolCardSkeleton';
+import PaginationSkeleton from './PoolCardSkeleton/PaginationSkeleton';
 
 const PoolList = () => {
   const [isShow, setIsShow] = useState(false);
-  const { pools } = useGetPools();
+  const { pools, isLoading } = useGetPools();
   const { carouselRef, selectedIndex, scrollSnaps, onDotButtonClick } = useCommonCarousel();
 
   const renderPools = React.useCallback(() => {
+    if (isLoading) {
+      return (
+        <div className="space-y-4">
+          <PoolCardSkeleton />
+
+          <PaginationSkeleton />
+        </div>
+      );
+    }
+
     return (
-      <CarouselContent className="-ml-[3rem] py-3" ref={carouselRef}>
+      <CarouselContent className="-ml-[3rem]" ref={carouselRef}>
         {pools?.map((pool, index) => (
           <CarouselItem key={`${pool?.id}-${index}`} className="pl-[3rem] basis-[100%]">
             <PoolCard isActive={index === selectedIndex} poolId={pool?.id} isShow={isShow} setIsShow={setIsShow} />
@@ -24,9 +36,11 @@ const PoolList = () => {
         ))}
       </CarouselContent>
     );
-  }, [carouselRef, isShow, pools, selectedIndex]);
+  }, [carouselRef, isLoading, isShow, pools, selectedIndex]);
 
   const renderDots = React.useCallback(() => {
+    if (isLoading) return null;
+
     return (
       <div className="flex justify-center gap-2">
         {scrollSnaps.map((_, index) => (
@@ -42,7 +56,7 @@ const PoolList = () => {
         ))}
       </div>
     );
-  }, [onDotButtonClick, scrollSnaps, selectedIndex]);
+  }, [isLoading, onDotButtonClick, scrollSnaps, selectedIndex]);
 
   return (
     <div className="space-y-4">
