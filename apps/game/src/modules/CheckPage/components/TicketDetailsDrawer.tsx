@@ -133,7 +133,7 @@ const TicketMatch = ({ code, ticketNumber, matched = 0 }: { code: string; ticket
 
   const getMatchedTitle = () => {
     if (matched === 0) return '';
-    if (matched === code.length) return 'Matched full';
+    if (matched === code.length) return 'Matched all';
     return 'Matched first ' + matched;
   };
 
