@@ -1,7 +1,7 @@
 import { Icons } from '@/assets/icons';
-import { RoundButton } from '@/modules/LandingPage/components/PoolList/PoolCard/PoolRound';
 
 import { HStack } from '@/components/ui/Utilities';
+import { RoundButton } from '@/modules/LandingPage/components/PoolList/PoolCard/RoundAction';
 
 type Props = {
   // eslint-disable-next-line no-unused-vars

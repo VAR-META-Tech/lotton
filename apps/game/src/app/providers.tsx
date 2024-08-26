@@ -8,11 +8,11 @@ import { QueryClientProviderWrapper } from '@/lib/query-provider';
 const manifestUrl =
   'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json';
 
-const config = {
-  url: '',
-  name: 'Lottery On Ton',
-  iconUrl: '',
-};
+// const config = {
+//   url: '',
+//   name: 'Lottery On Ton',
+//   iconUrl: '',
+// };
 
 export function Providers({ children }: React.PropsWithChildren) {
   return (
