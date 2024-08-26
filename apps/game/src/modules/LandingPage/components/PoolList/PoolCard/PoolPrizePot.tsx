@@ -12,7 +12,7 @@ interface Props {
 
 const PoolPrizePot: FC<Props> = ({ ticketPrice }) => {
   return (
-    <div className="p-5 border border-navigate-tab">
+    <div className="p-5 border border-navigate-tab min-h-[12.875rem]">
       <VStack align={'center'}>
         <div className="text-white">
           <div className="text-center">Prize Pot</div>
