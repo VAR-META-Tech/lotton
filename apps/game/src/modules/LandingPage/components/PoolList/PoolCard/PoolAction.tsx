@@ -7,6 +7,8 @@ import { VStack } from '@/components/ui/Utilities';
 
 import { ConnectWallet } from '../../ConnectWallet';
 import BuyTicketDrawer from '../BuyTicketDrawer';
+import Link from 'next/link';
+import { ROUTES } from '@/lib/routes';
 
 interface Props {
   holdingTicket: number;
@@ -22,10 +24,10 @@ const PoolAction: FC<Props> = ({ holdingTicket, ticketPrice }) => {
         <VStack align={'center'}>
           <span className="text-center text-white text-xs">
             You have{' '}
-            <span className="underline">
+            <Link href={ROUTES.CHECK} className="underline">
               <span className="text-sm font-bold">{holdingTicket}</span>{' '}
               <span className="text-xs">{holdingTicket > 1 ? 'tickets' : 'ticket'}</span>
-            </span>{' '}
+            </Link>{' '}
             this round
           </span>
 

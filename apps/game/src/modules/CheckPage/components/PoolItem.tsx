@@ -7,6 +7,7 @@ import { HStack } from '@/components/ui/Utilities';
 
 import { ChangeRoundAction } from './ChangeRoundAction';
 import { DrawTime } from './DrawTime';
+import { TicketDetailDrawer } from './TicketDetailDrawer';
 
 type Props = {
   poolName: string;
@@ -15,16 +16,15 @@ type Props = {
 
 export const PoolItem = ({ poolName, poolId }: Props) => {
   const [activeRound, setActiveRound] = useState(0);
-  const { pool } = useGetPoolDetail({ poolId, isActive: true });
-  const poolRounds = pool?.rounds ?? [];
-  const roundActive = poolRounds[activeRound];
+  const { rounds } = useGetPoolDetail({ poolId, isActive: true });
+  const roundActive = rounds[activeRound];
   const roundActiveNumber = roundActive
     ? `${roundActive.roundNumber < 10 ? `0${roundActive.roundNumber}` : roundActive.roundNumber}`
     : '00';
 
   const handleChangeRoundActive = (upRound: boolean) => {
     if (upRound) {
-      if (activeRound + 1 >= poolRounds.length) return;
+      if (activeRound + 1 >= rounds.length) return;
       setActiveRound(activeRound + 1);
     } else {
       if (activeRound - 1 < 0) return;
@@ -33,7 +33,7 @@ export const PoolItem = ({ poolName, poolId }: Props) => {
   };
 
   return (
-    <div className="shadow-lg border w-full max-w-lg grid grid-cols-6 h-[8.125rem]">
+    <div className="shadow-lg border w-full max-w-lg grid grid-cols-6">
       <div className="bg-background-2 col-span-2 border flex items-center justify-center p-4">
         <div className="font-semibold text-primary text-[1.625rem] text-center">{poolName}</div>
       </div>
@@ -42,12 +42,14 @@ export const PoolItem = ({ poolName, poolId }: Props) => {
         <HStack pos={'apart'} spacing={16}>
           <RoundNumber roundNumber={roundActiveNumber} />
 
-          <ChangeRoundAction onClick={handleChangeRoundActive} />
+          <ChangeRoundAction activeRound={activeRound} onClick={handleChangeRoundActive} poolId={poolId} />
         </HStack>
 
         <DrawTime endTime={roundActive?.endTime} />
 
-        <Button className="mx-auto rounded-lg text-white">View your tickets</Button>
+        <TicketDetailDrawer name={poolName} activeRound={activeRound + 1}>
+          <Button className="mx-auto rounded-lg text-white">View your tickets</Button>
+        </TicketDetailDrawer>
       </div>
     </div>
   );
