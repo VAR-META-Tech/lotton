@@ -120,6 +120,7 @@ export const PoolDetail = () => {
                   control={methods.control}
                   fullWidth
                   name="startTime"
+                  label="Start Time"
                   placeholder="DD/MM/YYYY HH:mm:ss"
                   className='max-h-[2.125rem] bg-[#ECEEF1] border-[#8B8B94]'
                 />
@@ -132,6 +133,7 @@ export const PoolDetail = () => {
                   control={methods.control}
                   fullWidth
                   name="endTime"
+                  label="End Time"
                   placeholder="DD/MM/YYYY HH:mm:ss"
                   className='max-h-[2.125rem] bg-[#ECEEF1] border-[#8B8B94]'
                 />
