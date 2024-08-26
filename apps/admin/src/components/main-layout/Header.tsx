@@ -30,7 +30,7 @@ const Header = () => {
         </Button>
 
         <HStack spacing={4}>
-          <Show when={!!id}>
+          <Show when={!!id || pathname.includes('create')}>
             <Button size={'sm'} className='' variant="ghost" onClick={() => route.back()}>
               <ChevronLeft />
             </Button>
@@ -38,7 +38,13 @@ const Header = () => {
 
           {menuConfigs.map((menu, index) => (
             <p key={index} className='capitalize text-2xl text-[#000000] hidden md:block'>
-              {pathname.includes(menu.link) ? !!id ? `${menu.name.split(' ')[0]} detail` : menu.name : ''}
+              {pathname.includes(menu.link) && !!id ? (
+                `${menu.name.split(' ')[0]} detail`
+              ) : pathname.includes(menu.link) && pathname.includes('create') ? (
+                `Create ${menu.name.split(' ')[0]}`
+              ) : pathname.includes(menu.link) ? (
+                menu.name
+              ) : ''}
             </p>
           ))}
         </HStack>
