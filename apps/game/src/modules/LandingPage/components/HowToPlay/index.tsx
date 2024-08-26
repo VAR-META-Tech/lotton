@@ -12,7 +12,7 @@ import HowToPlayItem from './HowToPlayItem';
 
 const HOW_TO_PLAY_ITEMS = [
   {
-    icon: <Icons.ticket className="stroke-primary" />,
+    icon: <Icons.ticket className="text-primary w-[1.375rem] h-[1.125rem]" />,
     title: 'Get your Tickets',
     description: 'Price and limit (per transaction) are set each round. Ticket sales close an hour before draw.',
   },
