@@ -1,67 +1,75 @@
 'use client';
 
-import { format } from 'date-fns';
-import { Show, VStack } from "@/components/ui/Utilities";
+import { VStack } from "@/components/ui/Utilities";
 import PoolFilter from "./components/Filter";
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
-import { useCallback, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useCallback, useState } from "react";
 import { IGetAllPoolParams, PoolSchema } from "./components/types";
-import { useGetPools } from "@/apis/pool";
-import { convertToTimestamp } from '@/lib/utils';
-import PaginationCus from '@/components/ui/PaginationCus';
-import { Skeleton } from '@/components/ui/skeleton';
-import { SkeletonWrapper } from '@/components/ui/skeleton-wrapper';
-import { PoolStatus } from './components/getPoolStatus';
-import Link from 'next/link';
-import { ROUTES } from '@/lib/routes';
+import { IGetPoolsListResponse, IGetRoundsListResponse, useGetPools, useGetRounds } from "@/apis/pool";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import PoolList from './components/PoolList';
+import RoundList from './components/RoundList';
 
 const DEFAULT_QUERY = {
   page: 1,
-  limit: 10,
+  pageSizes: 10,
 };
 
 export const PoolManagement = () => {
   const [paramsQuery, setParamsQuery] = useState<IGetAllPoolParams>(DEFAULT_QUERY);
+  const [paramsRoundQuery, setParamsRoundQuery] = useState<IGetAllPoolParams>(DEFAULT_QUERY);
+  const [activeTab, setActiveTab] = useState('pools');
+
   const {
     data: pools,
     isFetching,
     isLoading,
   } = useGetPools(paramsQuery);
 
-  const columns = useMemo(
-    () => [
-      { title: 'Pool Name', key: 'pool_name' },
-      { title: 'Round', key: 'round' },
-      { title: 'Start Time', key: 'start_time' },
-      { title: 'End Time', key: 'end_time' },
-      { title: 'Status', key: 'status' },
-      { title: 'Action', key: '' },
-    ],
-    []
-  );
+  const {
+    data: rounds,
+    isFetching: isFetchingRounds,
+    isLoading: isLoadingRounds,
+  } = useGetRounds(paramsRoundQuery);
 
   const handleSearchChange = useCallback(
     (values: PoolSchema) => {
       (Object.keys(values) as (keyof typeof values)[]).forEach((key) => {
-        setParamsQuery({
-          ...paramsQuery,
-          page: 1,
-          name: values?.name,
-          search: values?.search,
-          status: values?.status,
-        })
+        if (activeTab === 'pools') {
+          setParamsQuery({
+            ...paramsQuery,
+            page: 1,
+            name: values?.name,
+            search: values?.search,
+            status: values?.status,
+          })
+        } else {
+          setParamsRoundQuery({
+            ...paramsRoundQuery,
+            page: 1,
+            name: values?.name,
+            search: values?.search,
+            status: values?.status,
+          })
+        }
       });
     },
-    [paramsQuery]
+    [paramsQuery, paramsRoundQuery]
   );
 
   const handleClearValue = () => {
-    setParamsQuery(DEFAULT_QUERY);
+    if (activeTab === 'pools') {
+      setParamsQuery(DEFAULT_QUERY);
+    } else {
+      setParamsRoundQuery(DEFAULT_QUERY);
+    }
   }
 
   const handlePageChange = (pageNumber: number) => {
-    setParamsQuery({ ...paramsQuery, page: pageNumber });
+    if (activeTab === 'pools') {
+      setParamsQuery({ ...paramsQuery, page: pageNumber });
+    } else {
+      setParamsRoundQuery({ ...paramsRoundQuery, page: pageNumber });
+    }
   };
 
   return (
@@ -69,70 +77,38 @@ export const PoolManagement = () => {
       <PoolFilter
         onSearchChange={handleSearchChange}
         onClearValue={handleClearValue}
-        loading={isLoading}
+        loading={isLoading || isLoadingRounds}
       />
 
       <div className="min-h-[200px] mt-6 p-6 pb-28 space-y-8 bg-white rounded-sm">
-        <Table>
-          <TableHeader className="!rounded-xl bg-[#D4D4D4] text-[#262626] font-bold">
-            <TableRow className="hover:bg-inherit">
-              {columns.map((column) => (
-                <TableCell className="border border-[#e2e1e1] text-center" key={column.key}>
-                  {column.title}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHeader>
+        <Tabs
+          defaultValue="pools"
+          className="w-full flex justify-center items-center flex-col mx-auto gap-8"
+          onValueChange={(value) => setActiveTab(value)}
+        >
+          <TabsList className="w-fit flex justify-center items-center">
+            <TabsTrigger value="pools" className='w-32 text-[#18191F] data-[state=active]:bg-[#18191F] data-[state=active]:text-white'>Pools</TabsTrigger>
+            <TabsTrigger value="rounds" className='w-32 text-[#18191F] data-[state=active]:bg-[#18191F] data-[state=active]:text-white'>Rounds</TabsTrigger>
+          </TabsList>
 
-          <TableBody>
-            <Show when={!isFetching && !!pools?.data?.items}>
-              {pools?.data?.items?.map((pool, index) => (
-                <TableRow key={pool?.id} className="bg-white">
-                  <TableCell className="text-center border border-[#D4D4D4]">{pool?.name}</TableCell>
-                  <TableCell className="text-center border border-[#D4D4D4]">{pool?.totalRounds}</TableCell>
+          <TabsContent value="pools" className='w-full'>
+            <PoolList
+              pools={pools as IGetPoolsListResponse}
+              handlePageChange={handlePageChange}
+              isFetching={isFetching}
+              paramsQuery={paramsQuery}
+            />
+          </TabsContent>
 
-                  <TableCell className="text-center border border-[#D4D4D4]">
-                    {pool?.startTime ? format(convertToTimestamp(pool?.startTime), 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
-                  </TableCell>
-                  <TableCell className="text-center border border-[#D4D4D4]">
-                    {pool?.endTime ? format(convertToTimestamp(pool?.endTime), 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
-                  </TableCell>
-
-                  <TableCell className="text-center border border-[#D4D4D4]">
-                    <PoolStatus endTime={pool?.endTime} startTime={pool?.startTime} />
-                  </TableCell>
-                  
-                  <TableCell className="text-center border border-[#D4D4D4]">
-                    <Link href={`${ROUTES.POOL}/${pool.id}`}>
-                      <Button className='min-w-20 min-h-4 rounded-sm bg-[#1D4ED8]'>
-                        View
-                      </Button>
-                    </Link>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </Show>
-          </TableBody>
-        </Table>
-
-        {!isFetching && (!pools?.data?.items || pools?.data?.items.length === 0) && (
-          <div className="mt-6 text-center">0 record on the system!!</div>
-        )}
-
-        <VStack spacing={4} className='!my-1'>
-          {Array.from({ length: 4 }, (_, index) => (
-            <SkeletonWrapper loading={isFetching} className="h-16 w-full" key={index}>
-              <Skeleton />
-            </SkeletonWrapper>
-          ))}
-        </VStack>
-
-        <PaginationCus
-          onPageChange={handlePageChange}
-          totalCount={pools?.data?.meta.totalItems || 0}
-          currentPage={pools?.data?.meta.currentPage || 0}
-          pageSize={paramsQuery?.limit || 10}
-        />
+          <TabsContent value="rounds" className='w-full'>
+            <RoundList
+              rounds={rounds as IGetRoundsListResponse}
+              handlePageChange={handlePageChange}
+              isFetching={isFetchingRounds}
+              paramsQuery={paramsRoundQuery}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </VStack>
   );

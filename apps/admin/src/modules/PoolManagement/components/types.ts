@@ -13,6 +13,6 @@ export interface IGetAllPoolParams {
   status?: string;
   name?: string;
   page?: number;
-  limit?: number;
+  pageSizes?: number;
   sort?: string;
 }

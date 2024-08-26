@@ -12,7 +12,6 @@ export interface IGetPoolsParams {
   search?: string;
   page?: number;
   pageSizes?: number;
-  limit?: number;
   status?: string;
 }
 
@@ -89,3 +88,31 @@ export interface IGetPoolDetail {
 
 export interface IGetPoolDetailResponse extends TResponse<IGetPoolDetail> { }
 
+export interface IGetRoundsParams {
+  search?: string;
+  page?: number;
+  pageSizes?: number;
+  status?: string;
+}
+
+export interface IRoundItem {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  id: number;
+  roundNumber: number;
+  startTime: string;
+  endTime: string;
+  winningHash: string | null;
+  prizePool: number,
+  symbol: string,
+  poolName: string,
+}
+
+export interface IGetRoundsResponse {
+  items: IRoundItem[];
+  meta: IMeta;
+}
+
+
+export interface IGetRoundsListResponse extends TResponse<IGetRoundsResponse> { }

@@ -1,5 +1,5 @@
-import { getPoolDetail, getPools } from './requests';
-import type { IGetPoolsParams, IGetPoolsListResponse, IGetPoolDetailResponse } from './types';
+import { getPoolDetail, getPools, getRounds } from './requests';
+import type { IGetPoolsParams, IGetPoolsListResponse, IGetPoolDetailResponse, IGetRoundsParams, IGetRoundsListResponse } from './types';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import type { UseQueryOptions } from '@tanstack/react-query';
@@ -22,6 +22,17 @@ export const useGetPoolDetail = (
   return useQuery({
     queryKey: ['/pool/detail', id],
     queryFn: () => getPoolDetail(id),
+    ...options,
+  });
+};
+
+export const useGetRounds = (
+  params: IGetRoundsParams,
+  options?: UseQueryOptions<IGetRoundsListResponse, AxiosError, IGetRoundsListResponse, any>
+) => {
+  return useQuery({
+    queryKey: ['/rounds', params],
+    queryFn: () => getRounds(params),
     ...options,
   });
 };
