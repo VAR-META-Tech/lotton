@@ -24,7 +24,7 @@ const SEQUENCY_OPTIONS = [
   { label: '1 month', value: '30' },
   { label: '2 months', value: '60' },
   { label: '3 months', value: '90' },
-  { label: '6 months', value: '120' },
+  { label: '6 months', value: '180' },
 ];
 
 export const CreatePool = () => {
@@ -89,11 +89,24 @@ export const CreatePool = () => {
   };
 
   const startTime = methods.watch('startTime');
+  const sequency = methods.watch('sequency');
+  const totalRound = methods.watch('totalRounds');
 
   useEffect(() => {
-    methods.setValue('endTime', methods.getValues('startTime'));
-  }, [startTime]);
+    if (!startTime || !sequency || !totalRound) return;
 
+    const sequencyNum = Number(sequency);
+    const totalRoundNum = Number(totalRound);
+  
+    if (isNaN(sequencyNum) || isNaN(totalRoundNum)) return;
+
+    const startDate = new Date(startTime);
+
+    startDate.setDate(startDate.getDate() + (sequencyNum * Number(totalRoundNum)));
+  
+    methods.setValue('endTime', startDate);
+  }, [startTime, sequency, totalRound]);
+  
   return (
     <VStack className="mx-10 mb-24 bg-white rounded-sm min-h-[12.5rem] px-24 py-12">
       <div>

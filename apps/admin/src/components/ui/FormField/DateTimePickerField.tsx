@@ -42,6 +42,7 @@ const DateTimePickerField = <T extends FieldValues>({
               <DateTimePicker
                 displayFormat={{ hour24: 'dd/MM/yyyy HH:mm:ss' }}
                 className={className}
+                disablePast={disablePast}
                 {...props}
                 {...field}
               />

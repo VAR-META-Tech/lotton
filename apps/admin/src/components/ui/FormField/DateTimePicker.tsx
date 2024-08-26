@@ -641,6 +641,7 @@ type DateTimePickerProps = {
    **/
   granularity?: Granularity;
   className?: string;
+  disablePast?: boolean;
 } & Pick<CalendarProps, 'locale' | 'weekStartsOn' | 'showWeekNumber' | 'showOutsideDays'>;
 
 type DateTimePickerRef = {
@@ -660,6 +661,7 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
       granularity = 'second',
       placeholder = 'Pick a date',
       className,
+      disablePast,
       ...props
     },
     ref,
@@ -744,6 +746,7 @@ const DateTimePicker = React.forwardRef<Partial<DateTimePickerRef>, DateTimePick
             onMonthChange={handleSelect}
             // yearRange={yearRange}
             locale={locale}
+            disablePast={disablePast}
             {...props}
           />
           {granularity !== 'day' && (
