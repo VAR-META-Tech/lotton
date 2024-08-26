@@ -5,7 +5,7 @@ type Props = {
   endTime: string | null;
 };
 
-export const PoolStatus: React.FC<Props> = ({ startTime, endTime }) => {
+export const Status: React.FC<Props> = ({ startTime, endTime }) => {
   const now = new Date();
   const start = startTime ? new Date(startTime) : null;
   const end = endTime ? new Date(endTime) : null;
