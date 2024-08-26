@@ -84,9 +84,7 @@ const Sidebar = () => {
             '-left-[16.25rem] md:left-0': !open,
           }
         )}>
-          <div className='delay-500 md:delay-0 bg-[#8B8B94] w-full h-[.0313rem]'/>
-
-          <Button className='bg-transparent h-[3.375rem] gap-2 rounded-none' onClick={handleLogout}>
+          <Button className='bg-transparent border-t-[.0313rem] border-[#8B8B94] h-[3.375rem] gap-2 rounded-none' onClick={handleLogout}>
             <LogOut /> LOG OUT
           </Button>
         </VStack>
