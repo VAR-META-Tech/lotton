@@ -3,7 +3,7 @@
 import { VStack } from "@/components/ui/Utilities";
 import PoolFilter from "./components/Filter";
 import { useCallback, useState } from "react";
-import { IGetAllPoolParams, PoolSchema } from "./components/types";
+import { IGetAllPoolParams, PoolFilterSchema } from "./components/types";
 import { IGetPoolsListResponse, IGetRoundsListResponse, useGetPools, useGetRounds } from "@/apis/pool";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PoolList from './components/PoolList';
@@ -32,7 +32,7 @@ export const PoolManagement = () => {
   } = useGetRounds(paramsRoundQuery);
 
   const handleSearchChange = useCallback(
-    (values: PoolSchema) => {
+    (values: PoolFilterSchema) => {
       (Object.keys(values) as (keyof typeof values)[]).forEach((key) => {
         if (activeTab === 'pools') {
           setParamsQuery({
