@@ -11,6 +11,7 @@ import { getLogger } from '@/utils/logger';
 import { TokenPriceService } from '../services/token_price.service';
 import { CrawlTokenService } from './crawl_token.service';
 import { CrawlTokenPriceService } from './crawl_token_price.service';
+import { CrawlWorkerService } from './crawl_pool.service';
 
 const logger = getLogger('ManagerService');
 
@@ -32,13 +33,14 @@ export class ManagerService {
 
   // Every hour
   startCronJob() {
-    this.cronJob = cron.schedule('0 0 * * * *', async () => {
+    this.cronJob = cron.schedule('0 * * * *', async () => {
       await this.init(); // Synchronize with database
     });
   }
 
   async init() {
-    await this.initNetworkToken();
+    await new CrawlWorkerService();
+    // await this.initNetworkToken();
   }
 
   private async initNetworkToken() {
