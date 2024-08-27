@@ -5,14 +5,17 @@ import { format } from 'date-fns';
 import { HStack } from '@/components/ui/Utilities';
 import { AnimatePresence, motion } from 'framer-motion';
 import { slideAnimation } from '@/modules/LandingPage/utils/const';
+import Link from 'next/link';
+import { Icons } from '@/assets/icons';
 
 interface Props {
   rounds: IGetPoolDetailRound[];
   currentRound: number;
   date: string | undefined;
+  isEndRound?: boolean;
 }
 
-const PoolRound: FC<Props> = ({ currentRound, date }) => {
+const PoolRound: FC<Props> = ({ currentRound, date, isEndRound = false }) => {
   const roundShow = currentRound >= 10 ? currentRound : `0${currentRound}`;
 
   return (
@@ -27,6 +30,13 @@ const PoolRound: FC<Props> = ({ currentRound, date }) => {
               </div>
 
               <div className="text-xs">{!!date && `Draw ${format(new Date(date), 'MMM dd, yyyy, HH:mm a')}`}</div>
+              {!!isEndRound && (
+                <Link href={'#'} target="_blank" className="text-xs text-primary flex gap-2 items-center">
+                  <span>Winning Ticket Block</span>
+
+                  <Icons.newTab size={12} />
+                </Link>
+              )}
             </div>
           </HStack>
         </motion.div>

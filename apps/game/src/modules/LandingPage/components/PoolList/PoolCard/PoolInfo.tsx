@@ -1,4 +1,4 @@
-import React, { FC, memo } from 'react';
+import React, { FC, memo, useMemo } from 'react';
 import { IGetPoolDetailPoolPrize } from '@/apis/pools';
 import { Icons } from '@/assets/icons';
 import { motion } from 'framer-motion';
@@ -13,21 +13,17 @@ interface Props {
   isShow: boolean;
   setIsShow: React.Dispatch<React.SetStateAction<boolean>>;
   poolPrizes: IGetPoolDetailPoolPrize[];
+  isEndRound?: boolean;
 }
 
-const PoolInfo: FC<Props> = ({ isShow, setIsShow, poolPrizes }) => {
+const PoolInfo: FC<Props> = ({ isShow, setIsShow, poolPrizes, isEndRound = false }) => {
   const toggleShow = () => {
     setIsShow(!isShow);
   };
 
-  return (
-    <div>
-      <motion.div
-        initial={{ height: 0, opacity: 0 }}
-        animate={{ height: isShow ? 'auto' : 0, opacity: isShow ? 1 : 0 }}
-        transition={{ duration: 0.3 }}
-        className="overflow-hidden"
-      >
+  const renderInfo = useMemo(() => {
+    if (!isEndRound) {
+      return (
         <div className="p-5 border-x-navigate-tab border-x">
           <VStack className="text-white ">
             <span className="text-xs">
@@ -49,6 +45,21 @@ const PoolInfo: FC<Props> = ({ isShow, setIsShow, poolPrizes }) => {
             </div>
           </VStack>
         </div>
+      );
+    }
+
+    return null;
+  }, [isEndRound, poolPrizes]);
+
+  return (
+    <div>
+      <motion.div
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: isShow ? 'auto' : 0, opacity: isShow ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+        className="overflow-hidden"
+      >
+        {renderInfo}
       </motion.div>
 
       <HStack onClick={toggleShow} pos={'center'} className="bg-navigate-tab py-3">
