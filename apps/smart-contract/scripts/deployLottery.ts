@@ -3,7 +3,7 @@ import { Lottery } from '../wrappers/Lottery';
 import { NetworkProvider } from '@ton/blueprint';
 
 export async function run(provider: NetworkProvider) {
-    const lottery = provider.open(await Lottery.fromInit(BigInt(Math.floor(Math.random() * 10000))));
+    const lottery = provider.open(await Lottery.fromInit());
 
     await lottery.send(
         provider.sender(),
@@ -18,5 +18,5 @@ export async function run(provider: NetworkProvider) {
 
     await provider.waitForDeploy(lottery.address);
 
-    console.log('ID', await lottery.getId());
+    console.log('ID', await lottery.getCurrentRound());
 }

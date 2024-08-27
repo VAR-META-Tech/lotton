@@ -116,3 +116,69 @@ export interface IGetRoundsResponse {
 
 
 export interface IGetRoundsListResponse extends TResponse<IGetRoundsResponse> { }
+
+export interface ICurrencyResCreate {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  id: number;
+  name: string;
+  icon: string | null;
+  decimals: number;
+  symbol: string;
+  contractAddress: string;
+  abi: string;
+  beginningBlock: string;
+  isActive: boolean;
+}
+
+export interface IResCreatePool {
+  name: string;
+  currency: ICurrencyResCreate;
+  sequency: number;
+  totalRounds: number;
+  startTime: string;
+  ticketPrice: number;
+  endTime: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  id: number;
+}
+
+export interface IPoolPrize {
+  matchNumber: number;
+  allocation: number;
+}
+
+export interface IPayloadCreatePool {
+  name: string;
+  currency: number;
+  startTime: string;
+  sequency: number;
+  ticketPrice: number;
+  poolPrizes: IPoolPrize[];
+  totalRounds: number;
+}
+
+export interface ITokenItem {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  id: number;
+  name: string;
+  icon: string | null;
+  decimals: number;
+  symbol: string;
+  contractAddress: string;
+  beginningBlock: string;
+  isActive: boolean;
+}
+
+
+export interface IGetTokensResponse {
+  items: ITokenItem[];
+  meta: IMeta;
+}
+
+export interface IGetTokenListResponse extends TResponse<IGetTokensResponse> { }

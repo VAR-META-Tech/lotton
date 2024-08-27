@@ -30,7 +30,7 @@ const PoolFilter: FC<Props> = ({ onSearchChange, loading, onClearValue }) => {
     }
   });
 
-  const StatusOptions = [
+  const statusOptions = [
     { label: 'All Status', value: 'all' },
     { label: 'Up Coming', value: POOL_STATUS.UP_COMING },
     { label: 'On Going', value: POOL_STATUS.ON_GOING },
@@ -62,7 +62,7 @@ const PoolFilter: FC<Props> = ({ onSearchChange, loading, onClearValue }) => {
           <div className="w-[100%] lg:w-[70%] grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div>
               <SelectField
-                data={StatusOptions}
+                data={statusOptions}
                 control={methods.control}
                 fullWidth
                 name="status"
@@ -112,7 +112,7 @@ const PoolFilter: FC<Props> = ({ onSearchChange, loading, onClearValue }) => {
               </Button>
             </HStack>
 
-            <Link href={ROUTES.POOL}>
+            <Link href={ROUTES.POOL_CREATE}>
               <Button className="min-w-32 min-h-8 rounded-sm bg-gradient-to-r from-[#FFBF00] to-[#ED9BD6]">
                 Create Pool
               </Button>
