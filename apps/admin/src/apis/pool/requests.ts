@@ -49,3 +49,12 @@ export const createPool = async (payload: IPayloadCreatePool): Promise<IResCreat
 
   return data;
 };
+
+export const deletePool = async (poolId: number): Promise<IResCreatePool> => {
+  const { data } = await request({
+    url: `/api/pools/${poolId}`,
+    method: 'DELETE',
+  });
+
+  return data;
+};
