@@ -1,5 +1,5 @@
 import { request } from '../axios';
-import type { IGetPoolDetailResponse, IGetPoolsListResponse, IGetPoolsParams, IGetRoundsListResponse, IGetRoundsParams, IGetTokenListResponse, IPayloadCreatePool, IResCreatePool } from './types';
+import type { IGetPoolDetailResponse, IGetPoolsListResponse, IGetPoolsParams, IGetRoundsListResponse, IGetRoundsParams, IGetTokenListResponse, IPayloadCreatePool, IPoolItem, IResCreatePool } from './types';
 
 export const getTokens = async (params?: any): Promise<IGetTokenListResponse> => {
   const { data } = await request({
@@ -50,10 +50,26 @@ export const createPool = async (payload: IPayloadCreatePool): Promise<IResCreat
   return data;
 };
 
-export const deletePool = async (poolId: number): Promise<IResCreatePool> => {
+export const deletePool = async (poolId: number): Promise<IPoolItem> => {
   const { data } = await request({
     url: `/api/pools/${poolId}`,
     method: 'DELETE',
+  });
+
+  return data;
+};
+
+export const updatePool = async ({
+  poolId,
+  payload,
+}: {
+  poolId: number;
+  payload:IPayloadCreatePool;
+}): Promise<IResCreatePool> => {
+  const { data } = await request({
+    url: `/api/pools/${poolId}`,
+    method: 'PUT',
+    data: payload,
   });
 
   return data;

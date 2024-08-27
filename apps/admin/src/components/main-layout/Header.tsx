@@ -31,7 +31,7 @@ const Header = () => {
 
         <HStack spacing={4}>
           <Show when={!!id || pathname.includes('create')}>
-            <Button size={'sm'} className='' variant="ghost" onClick={() => route.back()}>
+            <Button size={'sm'} variant="ghost" onClick={() => route.back()}>
               <ChevronLeft />
             </Button>
           </Show>

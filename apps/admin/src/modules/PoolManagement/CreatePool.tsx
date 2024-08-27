@@ -15,10 +15,12 @@ import { DateTimePickerField } from '@/components/ui/FormField/DateTimePickerFie
 import FormWrapper from '@/components/ui/FormWrapper';
 import { HStack, VStack } from '@/components/ui/Utilities';
 
-import { poolCreateSchema, PoolCreateSchema } from './components/types';
+import { poolSchema, PoolSchema } from './components/types';
 import { ROUTES } from '@/lib/routes';
 
-const SEQUENCY_OPTIONS = [
+export const SEQUENCY_OPTIONS = [
+  { label: '1 day', value: '1' },
+  { label: '3 days', value: '3' },
   { label: '1 week', value: '7' },
   { label: '2 weeks', value: '14' },
   { label: '1 month', value: '30' },
@@ -30,8 +32,8 @@ const SEQUENCY_OPTIONS = [
 export const CreatePool = () => {
   const route = useRouter();
 
-  const methods = useForm<PoolCreateSchema>({
-    resolver: zodResolver(poolCreateSchema),
+  const methods = useForm<PoolSchema>({
+    resolver: zodResolver(poolSchema),
   });
 
   const { data: tokenList } = useGetTokens({});
@@ -47,7 +49,7 @@ export const CreatePool = () => {
   const { mutate: createPoolMutate, isPending: isPendingCreate } = useCreatePool();
   const queryClient = useQueryClient();
 
-  const handleSubmit = (values: PoolCreateSchema) => {
+  const handleSubmit = (values: PoolSchema) => {
     createPoolMutate(
       {
         name: values.name,

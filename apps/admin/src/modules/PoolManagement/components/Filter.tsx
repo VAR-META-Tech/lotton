@@ -12,17 +12,17 @@ import { SelectField, TextField } from '@/components/ui/FormField';
 import FormWrapper from '@/components/ui/FormWrapper';
 import { HStack, VStack } from '@/components/ui/Utilities';
 
-import { PoolSchema, poolSchema } from './types';
+import { poolFilterSchema, PoolFilterSchema } from './types';
 
 interface Props {
   loading?: boolean;
-  onSearchChange: (valuesSearch: PoolSchema) => void;
+  onSearchChange: (valuesSearch: PoolFilterSchema) => void;
   onClearValue?: () => void;
 }
 
 const PoolFilter: FC<Props> = ({ onSearchChange, loading, onClearValue }) => {
-  const methods = useForm<PoolSchema>({
-    resolver: zodResolver(poolSchema),
+  const methods = useForm<PoolFilterSchema>({
+    resolver: zodResolver(poolFilterSchema),
     defaultValues: {
       // name: 'all',
       status: 'all',
@@ -37,7 +37,7 @@ const PoolFilter: FC<Props> = ({ onSearchChange, loading, onClearValue }) => {
     { label: 'Closed', value: POOL_STATUS.CLOSED },
   ];
 
-  const handleSearch: SubmitHandler<PoolSchema> = (values) => {
+  const handleSearch: SubmitHandler<PoolFilterSchema> = (values) => {
     onSearchChange({
       // name: values.name,
       status: values.status === 'all' ? undefined : values.status,

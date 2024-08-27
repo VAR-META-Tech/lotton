@@ -1,13 +1,13 @@
 import { validationMessages } from '@/lib/validations/validation.utility';
 import { z } from 'zod';
 
-export const poolSchema = z.object({
+export const poolFilterSchema = z.object({
   search: z.string().optional(),
   status: z.string().optional(),
   name: z.string().optional(),
 });
 
-export type PoolSchema = z.infer<typeof poolSchema>;
+export type PoolFilterSchema = z.infer<typeof poolFilterSchema>;
 
 export interface IGetAllPoolParams {
   search?: string;
@@ -18,7 +18,7 @@ export interface IGetAllPoolParams {
   sort?: string;
 }
 
-const createNumberValidation = (fieldName: string) =>
+const poolNumberValidation = (fieldName: string) =>
   z
     .string({ required_error: `${fieldName} field is required` })
     .trim()
@@ -31,21 +31,22 @@ const createNumberValidation = (fieldName: string) =>
     .refine((data) => Number(data) >= 0, `${fieldName} must be positive integer numbers.`)
     .refine((data) => Number.isInteger(Number(data)), `${fieldName} must not be a decimal.`);
 
-export const poolCreateSchema = z.object({
+export const poolSchema = z.object({
   name: z.string({ required_error: validationMessages.required('Name')}).trim().refine((data) => {
     if (!data) return false;
     return true;
   }, `Name field is required`),
-  sequency: createNumberValidation('Sequency'),
+  sequency: poolNumberValidation('Sequency'),
   currency: z.string({ required_error: validationMessages.required('Currency') }),
-  totalRounds: createNumberValidation('Total Rounds'),
+  totalRounds: poolNumberValidation('Total Rounds'),
+  upcomingRound: z.string().optional(),
   startTime: z.date({ required_error: validationMessages.required('Start time') }),
   endTime: z.date().optional(),
-  ticketPrice: createNumberValidation('Ticket Price'),
-  match1: createNumberValidation('Match 1'),
-  match2: createNumberValidation('Match 2'),
-  match3: createNumberValidation('Match 3'),
-  match4: createNumberValidation('Match 4'),
+  ticketPrice: poolNumberValidation('Ticket Price'),
+  match1: poolNumberValidation('Match 1'),
+  match2: poolNumberValidation('Match 2'),
+  match3: poolNumberValidation('Match 3'),
+  match4: poolNumberValidation('Match 4'),
 });
 
-export type PoolCreateSchema = z.infer<typeof poolCreateSchema>;
+export type PoolSchema = z.infer<typeof poolSchema>;
