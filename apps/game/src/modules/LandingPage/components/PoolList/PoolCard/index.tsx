@@ -44,12 +44,12 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
       />
 
       <div className="border-x-navigate-tab border-x">
-        <PoolRound rounds={rounds} currentRound={currentRound} date={roundActive?.endTime} />
+        <PoolRound rounds={rounds} currentRound={currentRound} date={roundActive?.endTime} isEndRound={false} />
 
-        <PoolPrizePot currentRound={currentRound} ticketPrice={Number(pool?.ticketPrice || 0)} />
+        <PoolPrizePot currentRound={currentRound} ticketPrice={Number(pool?.ticketPrice || 0)} isEndRound={false} />
       </div>
 
-      <PoolInfo isShow={isShow} setIsShow={setIsShow} poolPrizes={poolPrizes} />
+      <PoolInfo isShow={isShow} setIsShow={setIsShow} poolPrizes={poolPrizes} isEndRound={false} />
     </div>
   );
 };
