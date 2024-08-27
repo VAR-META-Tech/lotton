@@ -1,5 +1,5 @@
 import React, { FC, memo, useMemo } from 'react';
-import { IGetPoolDetailPoolPrize } from '@/apis/pools';
+import { IGetPoolDetailCurrency, IGetPoolDetailPoolPrize } from '@/apis/pools';
 import { Icons } from '@/assets/icons';
 import { motion } from 'framer-motion';
 
@@ -14,9 +14,10 @@ interface Props {
   setIsShow: React.Dispatch<React.SetStateAction<boolean>>;
   poolPrizes: IGetPoolDetailPoolPrize[];
   isEndRound?: boolean;
+  currency: IGetPoolDetailCurrency | undefined;
 }
 
-const PoolInfo: FC<Props> = ({ isShow, setIsShow, poolPrizes, isEndRound = false }) => {
+const PoolInfo: FC<Props> = ({ isShow, setIsShow, poolPrizes, isEndRound = false, currency }) => {
   const toggleShow = () => {
     setIsShow(!isShow);
   };
@@ -37,7 +38,7 @@ const PoolInfo: FC<Props> = ({ isShow, setIsShow, poolPrizes, isEndRound = false
                   <MatchItem
                     key={`${item?.id}-${index}`}
                     title={`Match first ${item?.matchNumber}`}
-                    value={`${prettyNumber(Number(2500 * allocationRate).toFixed(2))} TON`}
+                    value={`${prettyNumber(Number(2500 * allocationRate).toFixed(2))} ${currency?.symbol || ''}`}
                     subValue={`~ ${prettyNumber(Number(10000 * allocationRate).toFixed(2))} USD`}
                   />
                 );
@@ -48,7 +49,43 @@ const PoolInfo: FC<Props> = ({ isShow, setIsShow, poolPrizes, isEndRound = false
       );
     }
 
-    return null;
+    return (
+      <VStack className="p-5 border-x-navigate-tab border-x">
+        <VStack spacing={4}>
+          <VStack spacing={2}>
+            <span className="text-white font-medium text-base">Prize Pot</span>
+
+            <span>
+              <span className="text-2xl font-semibold text-primary">{`${prettyNumber(3953)} ${currency?.symbol || ''}`}</span>{' '}
+              <span className="text-sm text-gray-color">~ {prettyNumber(Number(10000).toFixed(2))} USD</span>
+            </span>
+          </VStack>
+
+          <VStack spacing={12}>
+            <span className="text-sm">Total ticket this round: 89</span>
+            <span className="text-sm">Match the wining value in the same order to share prize.</span>
+          </VStack>
+        </VStack>
+        <div className="grid grid-cols-2 gap-3">
+          {poolPrizes?.map((item, index) => {
+            const allocationRate = Number(item?.allocation) / 100;
+            return (
+              <MatchItem
+                key={`${item?.id}-${index}`}
+                title={`Match first ${item?.matchNumber}`}
+                value={`${prettyNumber(Number(2500 * allocationRate).toFixed(2))} ${currency?.symbol || ''}`}
+                subValue={`~ ${prettyNumber(Number(10000 * allocationRate).toFixed(2))} USD`}
+              >
+                <VStack spacing={2} className="mt-1">
+                  <span className="text-xs">61.170005 TON each</span>
+                  <span className="text-xs">4 Winning Tickets</span>
+                </VStack>
+              </MatchItem>
+            );
+          })}
+        </div>
+      </VStack>
+    );
   }, [isEndRound, poolPrizes]);
 
   return (

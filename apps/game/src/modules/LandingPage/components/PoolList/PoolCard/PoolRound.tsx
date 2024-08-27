@@ -10,14 +10,12 @@ import { Icons } from '@/assets/icons';
 
 interface Props {
   rounds: IGetPoolDetailRound[];
-  currentRound: number;
+  currentRound: string;
   date: string | undefined;
   isEndRound?: boolean;
 }
 
 const PoolRound: FC<Props> = ({ currentRound, date, isEndRound = false }) => {
-  const roundShow = currentRound >= 10 ? currentRound : `0${currentRound}`;
-
   return (
     <div className="text-white px-5 py-4 min-h-20">
       <AnimatePresence mode="wait">
@@ -26,7 +24,7 @@ const PoolRound: FC<Props> = ({ currentRound, date, isEndRound = false }) => {
             <div className="space-y-2">
               <div>
                 <span className="font-medium">Round</span>{' '}
-                <span className="bg-navigate-tab px-3 py-1 rounded-lg h-8">{roundShow}</span>
+                <span className="bg-navigate-tab px-3 py-1 rounded-lg h-8">{currentRound}</span>
               </div>
 
               <div className="text-xs">{!!date && `Draw ${format(new Date(date), 'MMM dd, yyyy, HH:mm a')}`}</div>

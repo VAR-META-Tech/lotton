@@ -9,31 +9,37 @@ import { ConnectWallet } from '../../ConnectWallet';
 import BuyTicketDrawer from '../BuyTicketDrawer';
 import Link from 'next/link';
 import { ROUTES } from '@/lib/routes';
+import { useBuyTicketStore } from '@/stores/BuyTicketStore';
+import { IGetPoolDetailCurrency } from '@/apis/pools';
 
 interface Props {
   holdingTicket: number;
   ticketPrice: number;
+  poolId: number;
+  roundId: number;
+  currency: IGetPoolDetailCurrency | undefined;
 }
 
-const PoolAction: FC<Props> = ({ holdingTicket, ticketPrice }) => {
+const PoolAction: FC<Props> = ({ holdingTicket, ticketPrice, poolId, roundId, currency }) => {
   const { isLoggedIn, status } = useAuth();
+  const setPoolId = useBuyTicketStore.use.setPoolId();
 
   const renderBuyTicketsButton = useCallback(() => {
     return (
-      <BuyTicketDrawer ticketPrice={ticketPrice}>
-        <VStack align={'center'}>
-          <span className="text-center text-white text-xs">
-            You have{' '}
-            <Link href={ROUTES.CHECK} className="underline">
-              <span className="text-sm font-bold">{holdingTicket}</span>{' '}
-              <span className="text-xs">{holdingTicket > 1 ? 'tickets' : 'ticket'}</span>
-            </Link>{' '}
-            this round
-          </span>
+      <VStack align={'center'}>
+        <span className="text-center text-white text-xs">
+          You have{' '}
+          <Link href={ROUTES.CHECK} className="underline">
+            <span className="text-sm font-bold">{holdingTicket}</span>{' '}
+            <span className="text-xs">{holdingTicket > 1 ? 'tickets' : 'ticket'}</span>
+          </Link>{' '}
+          this round
+        </span>
 
-          <Button className="bg-gradient-to-r from-primary to-[#ED9BD6]">Buy Tickets</Button>
-        </VStack>
-      </BuyTicketDrawer>
+        <Button onClick={() => setPoolId(poolId)} className="bg-gradient-to-r from-primary to-[#ED9BD6]">
+          Buy Tickets
+        </Button>
+      </VStack>
     );
   }, [holdingTicket, ticketPrice]);
 
@@ -47,7 +53,13 @@ const PoolAction: FC<Props> = ({ holdingTicket, ticketPrice }) => {
     return <ConnectWallet />;
   }, [isLoggedIn, renderBuyTicketsButton, status]);
 
-  return <div>{renderComponent}</div>;
+  return (
+    <div>
+      {renderComponent}
+
+      <BuyTicketDrawer ticketPrice={ticketPrice} poolId={poolId || 0} roundId={roundId} currency={currency} />
+    </div>
+  );
 };
 
 export default PoolAction;

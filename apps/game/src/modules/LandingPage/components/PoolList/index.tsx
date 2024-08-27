@@ -30,8 +30,8 @@ const PoolList = () => {
     return (
       <CarouselContent className="-ml-[3rem]" ref={carouselRef}>
         {pools?.map((pool, index) => (
-          <CarouselItem key={`${pool?.id}-${index}`} className="pl-[3rem] basis-[100%]">
-            <PoolCard isActive={index === selectedIndex} poolId={pool?.id} isShow={isShow} setIsShow={setIsShow} />
+          <CarouselItem key={`${pool?.id || 0}-${index}`} className="pl-[3rem] basis-[100%]">
+            <PoolCard isActive={index === selectedIndex} poolId={pool?.id || 0} isShow={isShow} setIsShow={setIsShow} />
           </CarouselItem>
         ))}
       </CarouselContent>
