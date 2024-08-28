@@ -1,9 +1,18 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { BaseTime } from './base/time.entity';
 import { Token } from './token.entity';
 
 @Entity()
+@Index('transaction', ['transactionHash'], {
+  unique: true,
+})
 export class Transaction extends BaseTime {
   @PrimaryGeneratedColumn()
   id: number;
@@ -20,8 +29,8 @@ export class Transaction extends BaseTime {
   @Column({ length: 20, nullable: false })
   blockTimestamp: string;
 
-  @Column({ length: 20, nullable: false })
-  blockNumber: string;
+  // @Column({ length: 20, nullable: false })
+  // blockNumber: string;
 
   @Column({ length: 255, nullable: false })
   transactionHash: string;

@@ -25,4 +25,47 @@ export class DecodeTransactionEvent {
       creator: _creator,
     };
   }
+
+  static loadTicketPayoutResponse(slice: Slice) {
+    const sc_0 = slice;
+    const _ticket = sc_0.loadStringRefTail();
+    return { $$type: 'TicketPayoutResponse' as const, ticket: _ticket };
+  }
+
+  static loadTicketBoughtEvent(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 1839181562) {
+      throw Error('Invalid prefix');
+    }
+    const _poolId = sc_0.loadIntBig(257);
+    const _roundId = sc_0.loadIntBig(257);
+    const _quantity = sc_0.loadIntBig(257);
+    const sc_1 = sc_0.loadRef().beginParse();
+    const _buyer = sc_1.loadAddress();
+    const _tickets = this.loadTicketPayoutResponse(sc_1);
+    return {
+      $$type: 'TicketBoughtEvent' as const,
+      poolId: _poolId,
+      roundId: _roundId,
+      quantity: _quantity,
+      buyer: _buyer,
+      tickets: _tickets,
+    };
+  }
+
+  static loadBuyTicket(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 3748203161) {
+      throw Error('Invalid prefix');
+    }
+    const _poolId = sc_0.loadIntBig(257);
+    const _roundId = sc_0.loadIntBig(257);
+    const _quantity = sc_0.loadIntBig(257);
+    return {
+      $$type: 'BuyTicket' as const,
+      poolId: _poolId,
+      roundId: _roundId,
+      quantity: _quantity,
+    };
+  }
 }

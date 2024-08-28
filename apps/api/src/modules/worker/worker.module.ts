@@ -5,8 +5,11 @@ import {
   LatestBlock,
   Network,
   NetworkToken,
+  PoolRound,
   Token,
   TokenPrice,
+  Transaction,
+  UserTicket,
 } from '@/database/entities';
 
 import { ServicesModule } from '../services/services.module';
@@ -20,6 +23,9 @@ import { ManagerService } from './manager.service';
       NetworkToken,
       TokenPrice,
       LatestBlock,
+      Transaction,
+      UserTicket,
+      PoolRound,
     ]),
     ServicesModule,
   ],

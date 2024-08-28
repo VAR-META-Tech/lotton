@@ -1,19 +1,23 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { BaseTime } from './base/time.entity';
 import { PoolRound } from './pool_round.entity';
 import { Transaction } from './transaction.entity';
-import { User } from './user.entity';
 
 @Entity()
+@Index('user_ticket', ['code', 'userWallet', 'transaction'], { unique: true })
 export class UserTicket extends BaseTime {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.id, {
-    onDelete: 'CASCADE',
-  })
-  user: User;
+  @Column()
+  userWallet: string;
 
   @ManyToOne(() => PoolRound, (round) => round.id, {
     onDelete: 'CASCADE',
