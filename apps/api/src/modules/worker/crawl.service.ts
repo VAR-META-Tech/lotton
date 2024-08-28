@@ -9,7 +9,7 @@ import { Repository } from 'typeorm';
 import type { StellaConfig } from '@/configs';
 import { LatestBlock } from '@/database/entities';
 
-import { DecodeTransactionEvent } from './decodeTransactionEvent';
+import { DecodeTransactionEvent } from './decode-transaction-event';
 
 @Injectable()
 export class CrawlWorkerService {
@@ -30,17 +30,6 @@ export class CrawlWorkerService {
         infer: true,
       }),
     );
-
-    this.doCrawlJob();
-  }
-
-  async doJob() {
-    const myAddress = Address.parse(
-      'EQB7hoJ3UHzvd9zAIg2D6IWBCV_E5SzXN3DueQwNuwVcGtHH',
-    );
-    // const { stack } = await this.tonClient.sendMessage();
-
-    // console.log(stack.readAddress());
   }
 
   loadPoolCreated(slice: Slice) {
@@ -64,45 +53,41 @@ export class CrawlWorkerService {
   }
 
   async doCrawlJob() {
-    while (true) {
-      try {
-        const currentBlockNumber = (await this.getCurrentBloc()).blockNumber;
-        const latestBlockNumber = (await this.getContractState())
-          .lastTransaction.lt;
+    try {
+      const currentBlockNumber = (await this.getCurrentBloc()).blockNumber;
+      const latestBlockNumber = (await this.getContractState()).lastTransaction
+        .lt;
 
-        if (+currentBlockNumber > +latestBlockNumber) return;
+      if (+currentBlockNumber > +latestBlockNumber) return;
 
-        const transactions = await this.getTransactions(
-          latestBlockNumber,
-          currentBlockNumber.toString(),
-        );
+      const transactions = await this.getTransactions(
+        latestBlockNumber,
+        (currentBlockNumber + 1).toString(),
+      );
 
-        for (const tx of transactions) {
-          const isAbortedTx = tx.description?.['aborted'];
-          if (isAbortedTx) continue;
+      for (const tx of transactions) {
+        const isAbortedTx = tx.description?.['aborted'];
+        if (isAbortedTx) continue;
 
-          const inMsg = tx.inMessage;
-          if (inMsg?.info.type == 'internal') {
-            const originalBody = inMsg?.body.beginParse();
-            const body = originalBody.clone();
-            const op = body.loadUint(32);
-            switch (op) {
-              case 690511526:
-                this.createPoolEvent(tx);
-                break;
+        const inMsg = tx.inMessage;
+        if (inMsg?.info.type == 'internal') {
+          const originalBody = inMsg?.body.beginParse();
+          const body = originalBody.clone();
+          const op = body.loadUint(32);
+          switch (op) {
+            case 690511526:
+              this.createPoolEvent(tx);
+              break;
 
-              default:
-                break;
-            }
+            default:
+              break;
           }
         }
-
-        await this.updateBlockLt(latestBlockNumber);
-      } catch (error) {
-        console.log(error);
       }
 
-      await this.wait(5000);
+      await this.updateBlockLt(latestBlockNumber);
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -111,6 +96,8 @@ export class CrawlWorkerService {
     const originalBody = outMsgs?.body.beginParse();
     const body = originalBody.clone();
     const payload = DecodeTransactionEvent.loadPoolCreatedEvent(originalBody);
+
+    return { payload, body };
   }
 
   async updateBlockLt(lt: string) {
@@ -134,11 +121,10 @@ export class CrawlWorkerService {
     const contractState = await this.tonClient.getContractState(
       this.gameContractAddress,
     );
-    console.log(contractState);
     return contractState;
   }
 
-  async getTransactions(fromLt: string, toLt: string) {
+  async getTransactions(_fromLt: string, _toLt: string) {
     return this.tonClient.getTransactions(this.gameContractAddress, {
       // lt: fromLt,
       // to_lt: toLt,
@@ -147,11 +133,6 @@ export class CrawlWorkerService {
   }
 
   async _doCrawlJob() {
-    const myAddress = Address.parse(
-      'EQB7hoJ3UHzvd9zAIg2D6IWBCV_E5SzXN3DueQwNuwVcGtHH',
-    );
-    const count = 0;
-
     const test = await this.tonClient.getMasterchainInfo();
 
     console.log(test.latestSeqno);
