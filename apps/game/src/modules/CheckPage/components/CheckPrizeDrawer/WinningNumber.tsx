@@ -1,15 +1,19 @@
 import { HStack, VStack } from '@/components/ui/Utilities';
+import { VStackProps } from '@/components/ui/Utilities/v-stack';
+import { cn } from '@/lib/utils';
 import { FC } from 'react';
 
-interface IWinningNumberProps {
+interface IWinningNumberProps extends VStackProps {
   code?: string;
+  titleClassName?: IWinningNumberProps['className'];
 }
 
-const WinningNumber: FC<IWinningNumberProps> = ({ code = '    ' }) => {
+const WinningNumber: FC<IWinningNumberProps> = ({ code = '    ', titleClassName, className, ...props }) => {
   const codeSplit = code.split('');
+
   return (
-    <VStack className="container p-4 py-8" spacing={32}>
-      <p className="font-bold">WINNING NUMBER</p>
+    <VStack className={cn('w-full', className)} spacing={32} {...props}>
+      <p className={cn('font-bold', titleClassName)}>WINNING NUMBER</p>
 
       <HStack spacing={32} pos={'center'}>
         {codeSplit.map((codeItem, index) => (

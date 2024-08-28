@@ -685,6 +685,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.10(ts-node@10.9.2(@types/node@20.11.24)(typescript@5.4.5)))
+      tonweb:
+        specifier: ^0.0.66
+        version: 0.0.66(expo@51.0.31(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2)))(react-native@0.75.2(@babel/core@7.25.2)(@babel/preset-env@7.25.3(@babel/core@7.25.2))(@types/react@18.2.61)(react@18.2.0)(typescript@5.4.5))
       vaul:
         specifier: ^0.9.1
         version: 0.9.1(@types/react-dom@18.2.19)(@types/react@18.2.61)(react-dom@18.3.1(react@18.2.0))(react@18.2.0)

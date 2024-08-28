@@ -14,7 +14,7 @@ const MatchItem = forwardRef<HTMLDivElement, Props>(({ title, value, subValue, c
     <VStack
       ref={ref}
       {...props}
-      className={cn('col-span-1 border border-gray-color rounded-[0.625rem] p-2', className)}
+      className={cn('col-span-1 border border-navigate-tab rounded-[0.625rem] p-2', className)}
       spacing={0}
     >
       <span className="text-xs text-primary">{title}</span>
