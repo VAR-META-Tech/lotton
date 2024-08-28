@@ -16,6 +16,9 @@ export class Pool extends BaseTime {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ nullable: true })
+  poolIdOnChain: number;
+
   @Column({ length: 100, nullable: true })
   name: string;
 
