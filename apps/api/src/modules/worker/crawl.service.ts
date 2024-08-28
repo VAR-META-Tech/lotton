@@ -46,7 +46,7 @@ export class CrawlWorkerService {
       const latestBlockNumber = (await this.getContractState()).lastTransaction
         .lt;
 
-      if (+currentBlockNumber > +latestBlockNumber) return;
+      if (+currentBlockNumber >= +latestBlockNumber) return;
 
       const transactions = await this.getTransactions(
         latestBlockNumber,
@@ -209,11 +209,10 @@ export class CrawlWorkerService {
     return contractState;
   }
 
-  async getTransactions(_fromLt: string, _toLt: string) {
+  async getTransactions(fromLt: string, toLt: string) {
     return this.tonClient.getTransactions(this.gameContractAddress, {
-      // lt: fromLt,
-      // to_lt: toLt,
-      to_lt: '25262610000001',
+      lt: fromLt,
+      to_lt: toLt,
       limit: 100,
     });
   }
