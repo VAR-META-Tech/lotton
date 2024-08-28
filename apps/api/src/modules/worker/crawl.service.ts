@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import type { Slice, Transaction } from '@ton/core';
+import type { Transaction } from '@ton/core';
 import { Address } from '@ton/core';
 import { TonClient } from '@ton/ton';
+import TonWeb from 'tonweb';
 import { Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
+import type { PoolRound, Token } from '@/database/entities';
+import { UserTicket } from '@/database/entities';
+import { Transaction as TransactionDB } from '@/database/entities';
 import { LatestBlock } from '@/database/entities';
 
 import { DecodeTransactionEvent } from './decode-transaction-event';
@@ -20,6 +24,10 @@ export class CrawlWorkerService {
     @InjectRepository(LatestBlock)
     private readonly latestBlockRepository: Repository<LatestBlock>,
     private readonly configService: ConfigService<StellaConfig>,
+    private readonly transactionRepository: Repository<TransactionDB>,
+    private readonly tokenRepository: Repository<Token>,
+    private readonly userTicketRepository: Repository<UserTicket>,
+    private readonly poolRoundRepository: Repository<PoolRound>,
   ) {
     this.tonClient = new TonClient({
       endpoint: 'https://testnet.toncenter.com/api/v2/jsonRPC', // await getHttpEndpoint({ network: 'testnet' }),
@@ -30,26 +38,6 @@ export class CrawlWorkerService {
         infer: true,
       }),
     );
-  }
-
-  loadPoolCreated(slice: Slice) {
-    const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 690511526) {
-      throw Error('Invalid prefix');
-    }
-    const _ticketPrice = sc_0.loadUintBig(32);
-    const _initialRounds = sc_0.loadUintBig(8);
-    const _startTime = sc_0.loadUintBig(32);
-    const _endTime = sc_0.loadUintBig(32);
-    const _active = sc_0.loadBit();
-    return {
-      $$type: 'PoolCreated' as const,
-      ticketPrice: _ticketPrice,
-      initialRounds: _initialRounds,
-      startTime: _startTime,
-      endTime: _endTime,
-      active: _active,
-    };
   }
 
   async doCrawlJob() {
@@ -78,6 +66,9 @@ export class CrawlWorkerService {
             case 690511526:
               this.createPoolEvent(tx);
               break;
+            case 3748203161:
+              this.buyTicketsEvent(tx);
+              break;
 
             default:
               break;
@@ -89,6 +80,100 @@ export class CrawlWorkerService {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async buyTicketsEvent(tx: Transaction) {
+    try {
+      const inMsgs = tx.inMessage;
+      const outMsgs = tx.outMessages
+        .values()
+        .filter((msg) => msg.info.type === 'external-out');
+      if (outMsgs.length === 0) return;
+
+      const originalOutMsgBody = outMsgs[0]?.body.beginParse();
+      const originalInMsgBody = inMsgs?.body.beginParse();
+      const payloadOutMsg =
+        DecodeTransactionEvent.loadTicketBoughtEvent(originalOutMsgBody);
+      const payloadInMsg =
+        DecodeTransactionEvent.loadBuyTicket(originalInMsgBody);
+
+      // Create transaction buy ticket
+      const txHash = tx.hash().toString('hex');
+      const token = await this.tokenRepository.findOneBy({ symbol: 'TON' });
+
+      const newTransaction: Partial<TransactionDB> = {
+        fromAddress: this.parseAddress(inMsgs.info.src.toString()),
+        toAddress: this.parseAddress(tx.inMessage.info.dest.toString()),
+        value: payloadInMsg.quantity.toString(),
+        blockTimestamp: tx.lt.toString(),
+        transactionHash: txHash,
+        token,
+        id: null,
+      };
+
+      await this.transactionRepository
+        .createQueryBuilder()
+        .insert()
+        .into(TransactionDB)
+        .values(newTransaction)
+        .orUpdate(
+          ['fromAddress', 'toAddress', 'value', 'blockTimestamp'],
+          ['transactionHash'],
+        )
+        .execute();
+
+      const transaction = await this.transactionRepository.findOneBy({
+        transactionHash: txHash,
+      });
+
+      const tickets = this.splitTickets(
+        payloadOutMsg.tickets.ticket,
+        Number(payloadInMsg.quantity),
+      );
+
+      const roundExist = await this.poolRoundRepository.findOneBy({
+        id: Number(payloadOutMsg.roundId),
+      });
+
+      // Create user tickets
+      await this.userTicketRepository
+        .createQueryBuilder()
+        .insert()
+        .into(UserTicket)
+        .values(
+          tickets.map((t) => ({
+            id: null,
+            userWallet: this.parseAddress(inMsgs.info.src.toString()),
+            round: roundExist,
+            code: t,
+            transaction: transaction,
+          })),
+        )
+        .orUpdate(['roundId'], ['transactionId', 'userWallet', 'code'])
+        .execute();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  splitTickets(ticketsList: string, quantity: number) {
+    const ticketsString = ticketsList
+      .replace(/,/g, '')
+      .substring(0, 4 * 2 * quantity);
+
+    const tickets = [];
+    for (let i = 0; i < ticketsString.length; i += 8) {
+      const ticket = ticketsString.substring(i, i + 8);
+      let ticketConvert = '';
+
+      for (let i = 0; i < ticket.length; i += 2) {
+        const ticketChar = ticket.substring(i, i + 2);
+        ticketConvert += String.fromCharCode(+ticketChar);
+      }
+      tickets.push(ticketConvert);
+    }
+
+    return tickets;
   }
 
   async createPoolEvent(tx: Transaction) {
@@ -128,267 +213,18 @@ export class CrawlWorkerService {
     return this.tonClient.getTransactions(this.gameContractAddress, {
       // lt: fromLt,
       // to_lt: toLt,
+      to_lt: '25262610000001',
       limit: 100,
     });
   }
 
-  async _doCrawlJob() {
-    const test = await this.tonClient.getMasterchainInfo();
-
-    console.log(test.latestSeqno);
-
-    // while (count < 2) {
-    //   const transactions = await this.tonClient.getTransactions(myAddress, {
-    //     limit: 10,
-    //   });
-
-    //   // for (const tx of transactions) {
-    //   //   const inMsg = tx.inMessage;
-    //   //   if (inMsg?.info.type == 'internal') {
-    //   //     const sender = inMsg?.info.src;
-    //   //     const value = inMsg?.info.value.coins;
-
-    //   //     const originalBody = inMsg?.body.beginParse();
-    //   //     let body = originalBody.clone();
-    //   //     const op = body.loadUint(32);
-
-    //   //     if (op === 690511526) {
-    //   //       // console.log(op, this.loadPoolCreated(originalBody));
-    //   //     }
-    //   //     // console.log(this.parseBody(inMsg?.body));
-    //   //     // console.log(this.parseBody(inMsg?.body));
-
-    //   //     // const inHash = beginCell().store(storeMessage(inMsg)).endCell().hash().toString('hex')
-
-    //   //     // if (op == 0) {
-    //   //     //   // if opcode is 0: it's a simple message with comment
-    //   //     //   const comment = body.loadStringTail();
-    //   //     //   console.log(
-    //   //     //     `Simple transfer from ${sender} with value ${fromNano(
-    //   //     //       value,
-    //   //     //     )} TON and comment: "${comment}"`,
-    //   //     //   );
-    //   //     // } else if (op == 0x7362d09c) {
-    //   //     //   // if opcode is 0x7362d09c: it's a Jetton transfer notification
-
-    //   //     //   body.skip(64); // skip query_id
-    //   //     //   const jettonAmount = body.loadCoins();
-    //   //     //   const jettonSender = body.loadAddressAny();
-    //   //     //   const originalForwardPayload = body.loadBit()
-    //   //     //     ? body.loadRef().beginParse()
-    //   //     //     : body;
-    //   //     //   let forwardPayload = originalForwardPayload.clone();
-
-    //   //     //   // IMPORTANT: we have to verify the source of this message because it can be faked
-    //   //     //   const runStack = (
-    //   //     //     await this.tonClient.runMethod(sender, 'get_wallet_data')
-    //   //     //   ).stack;
-    //   //     //   runStack.skip(2);
-    //   //     //   const jettonMaster = runStack.readAddress();
-    //   //     //   const jettonWallet = (
-    //   //     //     await this.tonClient.runMethod(
-    //   //     //       jettonMaster,
-    //   //     //       'get_wallet_address',
-    //   //     //       [
-    //   //     //         {
-    //   //     //           type: 'slice',
-    //   //     //           cell: beginCell().storeAddress(myAddress).endCell(),
-    //   //     //         },
-    //   //     //       ],
-    //   //     //     )
-    //   //     //   ).stack.readAddress();
-    //   //     //   if (!jettonWallet.equals(sender)) {
-    //   //     //     // if sender is not our real JettonWallet: this message was faked
-    //   //     //     console.log(`FAKE Jetton transfer`);
-    //   //     //     continue;
-    //   //     //   }
-
-    //   //     //   if (forwardPayload.remainingBits < 32) {
-    //   //     //     // if forward payload doesn't have opcode: it's a simple Jetton transfer
-    //   //     //     console.log(
-    //   //     //       `Jetton transfer from ${jettonSender} with value ${fromNano(
-    //   //     //         jettonAmount,
-    //   //     //       )} Jetton`,
-    //   //     //     );
-    //   //     //   } else {
-    //   //     //     const forwardOp = forwardPayload.loadUint(32);
-    //   //     //     if (forwardOp == 0) {
-    //   //     //       // if forward payload opcode is 0: it's a simple Jetton transfer with comment
-    //   //     //       const comment = forwardPayload.loadStringTail();
-    //   //     //       console.log(
-    //   //     //         `Jetton transfer from ${jettonSender} with value ${fromNano(
-    //   //     //           jettonAmount,
-    //   //     //         )} Jetton and comment: "${comment}"`,
-    //   //     //       );
-    //   //     //     } else {
-    //   //     //       // if forward payload opcode is something else: it's some message with arbitrary structure
-    //   //     //       // you may parse it manually if you know other opcodes or just print it as hex
-    //   //     //       console.log(
-    //   //     //         `Jetton transfer with unknown payload structure from ${jettonSender} with value ${fromNano(
-    //   //     //           jettonAmount,
-    //   //     //         )} Jetton and payload: ${originalForwardPayload}`,
-    //   //     //       );
-    //   //     //     }
-
-    //   //     //     console.log(`Jetton Master: ${jettonMaster}`);
-    //   //     //   }
-    //   //     // } else if (op == 0x05138d91) {
-    //   //     //   // if opcode is 0x05138d91: it's a NFT transfer notification
-
-    //   //     //   body.skip(64); // skip query_id
-    //   //     //   const prevOwner = body.loadAddress();
-    //   //     //   const originalForwardPayload = body.loadBit()
-    //   //     //     ? body.loadRef().beginParse()
-    //   //     //     : body;
-    //   //     //   let forwardPayload = originalForwardPayload.clone();
-
-    //   //     //   // IMPORTANT: we have to verify the source of this message because it can be faked
-    //   //     //   const runStack = (
-    //   //     //     await this.tonClient.runMethod(sender, 'get_nft_data')
-    //   //     //   ).stack;
-    //   //     //   runStack.skip(1);
-    //   //     //   const index = runStack.readBigNumber();
-    //   //     //   const collection = runStack.readAddress();
-    //   //     //   const itemAddress = (
-    //   //     //     await this.tonClient.runMethod(
-    //   //     //       collection,
-    //   //     //       'get_nft_address_by_index',
-    //   //     //       [{ type: 'int', value: index }],
-    //   //     //     )
-    //   //     //   ).stack.readAddress();
-
-    //   //     //   if (!itemAddress.equals(sender)) {
-    //   //     //     console.log(`FAKE NFT Transfer`);
-    //   //     //     continue;
-    //   //     //   }
-
-    //   //     //   if (forwardPayload.remainingBits < 32) {
-    //   //     //     // if forward payload doesn't have opcode: it's a simple NFT transfer
-    //   //     //     console.log(`NFT transfer from ${prevOwner}`);
-    //   //     //   } else {
-    //   //     //     const forwardOp = forwardPayload.loadUint(32);
-    //   //     //     if (forwardOp == 0) {
-    //   //     //       // if forward payload opcode is 0: it's a simple NFT transfer with comment
-    //   //     //       const comment = forwardPayload.loadStringTail();
-    //   //     //       console.log(
-    //   //     //         `NFT transfer from ${prevOwner} with comment: "${comment}"`,
-    //   //     //       );
-    //   //     //     } else {
-    //   //     //       // if forward payload opcode is something else: it's some message with arbitrary structure
-    //   //     //       // you may parse it manually if you know other opcodes or just print it as hex
-    //   //     //       console.log(
-    //   //     //         `NFT transfer with unknown payload structure from ${prevOwner} and payload: ${originalForwardPayload}`,
-    //   //     //       );
-    //   //     //     }
-    //   //     //   }
-
-    //   //     //   console.log(`NFT Item: ${itemAddress}`);
-    //   //     //   console.log(`NFT Collection: ${collection}`);
-    //   //     // } else {
-    //   //     //   // if opcode is something else: it's some message with arbitrary structure
-    //   //     //   // you may parse it manually if you know other opcodes or just print it as hex
-    //   //     //   console.log(
-    //   //     //     `Message with unknown structure from ${sender} with value ${fromNano(
-    //   //     //       value,
-    //   //     //     )} TON and body: ${originalBody}`,
-    //   //     //   );
-    //   //     // }
-    //   //   }
-    //   // }
-
-    //   count++;
-    // }
-
-    // const onBatchLoaded: BatchLoadedHandler = (event) => {
-    //   const { offsetLt, offsetHash, transactions } = event;
-    //   if (offsetLt) {
-    //     console.log(
-    //       `Got ${transactions.length} transaction(s) before ` +
-    //         `transaction #${offsetLt}:${offsetHash}`,
-    //     );
-    //   } else {
-    //     console.log(`Got ${transactions.length} last transaction(s)`);
-    //   }
-    // };
-
-    // const onTransactionDiscovered: TransactionDiscoveredHandler = (event) => {
-    //   const { transaction } = event;
-    //   const { lt, hash } = transaction.transaction_id;
-    //   console.log(`Discovered transaction #${lt}:${hash}`);
-    // };
-
-    // const onHttpError: HttpErrorHandler = (error) => console.error(error);
-
-    // let skipBeforeTime: number | undefined;
-
-    // while (true) {
-    //   const result = await getAddressTransactions({
-    //     provider: this.provider,
-    //     address: myAddress,
-    //     skipBeforeTime,
-    //     itemsPerPage: 5,
-    //     useHistoricalNodes: true,
-    //     onBatchLoaded,
-    //     onTransactionDiscovered,
-    //     onHttpError,
-    //   });
-
-    //   const { bits, ...rest } = await this.provider.call2(myAddress, 'owner');
-
-    //   // let nextItemIndex = stack.readBigNumber();
-    //   // let contentRoot = stack.readCell();
-    //   // let owner = stack.readAddress();
-
-    //   console.log(rest, bits);
-    //   console.log(bits.readBigNumber());
-
-    //   for (const transaction of result.transactions) {
-    //     const { lt, hash } = transaction.transaction_id;
-
-    //     const { source, destination, value, msg_data, ...inMsg } =
-    //       transaction.in_msg;
-
-    //     const isExternal = !source;
-
-    //     const hasOutMessages = transaction.out_msgs.length > 0;
-
-    //     let payload: Uint8Array | undefined;
-    //     let message: string | undefined;
-
-    //     switch (msg_data['@type']) {
-    //       case 'msg.dataText': {
-    //         message = TonWeb.utils.base64toString(msg_data.text || '');
-    //         break;
-    //       }
-    //       case 'msg.dataRaw': {
-    //         payload = TonWeb.utils.base64ToBytes(msg_data.body || '');
-    //         break;
-    //       }
-    //       default: {
-    //         console.warn(`Unknown payload type: ${msg_data['@type']}`);
-    //         break;
-    //       }
-    //     }
-
-    //     console.log(
-    //       `Processing transaction #${lt}:${hash}\n` +
-    //         `from: ${isExternal ? 'external' : source}\n` +
-    //         `to: ${destination}\n` +
-    //         `value: ${TonWeb.utils.fromNano(value)}\n` +
-    //         `has out messages: ${hasOutMessages ? 'Yes' : 'No'}\n` +
-    //         (message ? `message: ${message}\n` : ''),
-    //     );
-    //   }
-
-    //   skipBeforeTime = result.lastTransactionTime;
-
-    //   console.log(`Waiting for 5 seconds…`);
-
-    await this.wait(5 * 1000);
-    // }
-  }
-
   wait(timeout: number) {
     return new Promise((resolve) => setTimeout(resolve, timeout));
+  }
+
+  parseAddress(address: string) {
+    if (TonWeb.utils.Address.isValid(address))
+      return Address.parse(address).toRawString();
+    return address;
   }
 }
