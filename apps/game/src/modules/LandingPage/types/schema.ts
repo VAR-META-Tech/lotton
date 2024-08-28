@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-export const bondRequestPendingFilterSchema = z.object({
-  amount: z.string().optional(),
+export const buyTicketSchema = z.object({
+  amount: z.number(),
 });
 
-export type TransactionHistoryFilterType = z.infer<typeof bondRequestPendingFilterSchema>;
+export type BuyTicketType = z.infer<typeof buyTicketSchema>;

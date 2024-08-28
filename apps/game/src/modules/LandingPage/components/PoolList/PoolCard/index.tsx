@@ -22,11 +22,26 @@ interface Props extends HTMLAttributes<HTMLDivElement> {
 }
 
 const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, ...props }) => {
-  const [currentRound, setCurrentRound] = useState<number>(MIN_ROUND);
+  const [currentRound, setCurrentRound] = useState<number>(0);
 
-  const { pool, rounds, poolPrizes } = useGetPoolDetail({ poolId, isActive });
+  const { pool, rounds, poolPrizes, currency } = useGetPoolDetail({ poolId: poolId || 0, isActive });
+  const roundActive = rounds[currentRound];
+  const roundActiveNumber = roundActive
+    ? `${roundActive.roundNumber < 10 ? `0${roundActive.roundNumber}` : roundActive.roundNumber}`
+    : '00';
 
-  const roundActive = useMemo(() => rounds?.find((item) => item.roundNumber === currentRound), [currentRound, rounds]);
+  const isEndRound = useMemo(() => {
+    if (!rounds) return false;
+
+    const roundEndtime = new Date(roundActive?.endTime);
+    const now = new Date();
+
+    if (now > roundEndtime) {
+      return true;
+    }
+
+    return false;
+  }, [roundActive?.endTime]);
 
   return (
     <div {...props} className={cn('w-full rounded-xl overflow-hidden relative', className)}>
@@ -39,17 +54,35 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
       <RoundAction
         minRound={MIN_ROUND}
         maxRound={rounds?.length || 0}
-        currentRound={currentRound}
+        currentRound={roundActiveNumber}
         setCurrentRound={setCurrentRound}
       />
 
       <div className="border-x-navigate-tab border-x">
-        <PoolRound rounds={rounds} currentRound={currentRound} date={roundActive?.endTime} isEndRound={false} />
+        <PoolRound
+          rounds={rounds}
+          currentRound={roundActiveNumber}
+          date={roundActive?.endTime}
+          isEndRound={isEndRound}
+        />
 
-        <PoolPrizePot currentRound={currentRound} ticketPrice={Number(pool?.ticketPrice || 0)} isEndRound={false} />
+        <PoolPrizePot
+          currentRound={roundActiveNumber}
+          ticketPrice={Number(pool?.ticketPrice || 0)}
+          poolId={poolId || 0}
+          roundId={roundActive?.id || 0}
+          currency={currency}
+          isEndRound={isEndRound}
+        />
       </div>
 
-      <PoolInfo isShow={isShow} setIsShow={setIsShow} poolPrizes={poolPrizes} isEndRound={false} />
+      <PoolInfo
+        isShow={isShow}
+        setIsShow={setIsShow}
+        poolPrizes={poolPrizes}
+        currency={currency}
+        isEndRound={isEndRound}
+      />
     </div>
   );
 };

@@ -6,16 +6,18 @@ import React, { Dispatch, FC, HTMLAttributes, SetStateAction, useCallback } from
 interface Props {
   minRound: number;
   maxRound: number;
-  currentRound: number;
+  currentRound: string;
   setCurrentRound: Dispatch<SetStateAction<number>>;
 }
 
 const RoundAction: FC<Props> = ({ minRound, maxRound, currentRound, setCurrentRound }) => {
+  const roundNumber = Number(currentRound || 0);
+
   const handleChangeRound = useCallback(
     (type: 'plus' | 'minus') => {
       const isPlus = type === 'plus';
 
-      if ((isPlus && currentRound === maxRound) || (!isPlus && currentRound === minRound)) return;
+      if ((isPlus && roundNumber === maxRound) || (!isPlus && roundNumber === minRound)) return;
 
       if (isPlus) {
         setCurrentRound((prev) => prev + 1);
@@ -29,11 +31,11 @@ const RoundAction: FC<Props> = ({ minRound, maxRound, currentRound, setCurrentRo
 
   return (
     <div className="space-x-5 absolute top-24 right-5 z-20">
-      <RoundButton isDisabled={currentRound === minRound} onClick={() => handleChangeRound('minus')}>
+      <RoundButton isDisabled={roundNumber === minRound} onClick={() => handleChangeRound('minus')}>
         <Icons.arrowLeft color="#fff" />
       </RoundButton>
 
-      <RoundButton isDisabled={currentRound === maxRound} onClick={() => handleChangeRound('plus')}>
+      <RoundButton isDisabled={roundNumber === maxRound} onClick={() => handleChangeRound('plus')}>
         <Icons.arrowRight color="#fff" />
       </RoundButton>
     </div>

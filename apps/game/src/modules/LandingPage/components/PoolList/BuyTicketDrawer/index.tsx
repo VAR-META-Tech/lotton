@@ -6,25 +6,35 @@ import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTr
 
 import BuyTicketForm from './BuyTicketForm';
 import BuyTicketNote from './BuyTicketNote';
+import { useBuyTicketStore } from '@/stores/BuyTicketStore';
+import { IGetPoolDetailCurrency } from '@/apis/pools';
 
 interface Props {
   ticketPrice: number;
+  poolId: number;
+  roundId: number;
+  currency: IGetPoolDetailCurrency | undefined;
 }
 
-const BuyTicketDrawer: FCC<Props> = ({ children, ticketPrice }) => {
+const BuyTicketDrawer: FCC<Props> = ({ children, ticketPrice, poolId, roundId, currency }) => {
+  const currentPoolId = useBuyTicketStore.use.poolId();
+  const setPoolId = useBuyTicketStore.use.setPoolId();
+
+  const handleClose = () => {
+    setPoolId(undefined);
+  };
+
   return (
-    <Drawer>
+    <Drawer open={currentPoolId === poolId} onClose={handleClose}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent>
         <div className="w-full">
           <DrawerHeader className="flex justify-between container">
             <DrawerTitle className="text-white text-2xl font-semibold">Buy Tickets</DrawerTitle>
 
-            <DrawerClose asChild>
-              <button>
-                <Icons.x className="text-gray-color" />
-              </button>
-            </DrawerClose>
+            <button onClick={handleClose}>
+              <Icons.x className="text-gray-color" />
+            </button>
           </DrawerHeader>
           <div className="border-t-[1px] border-t-gray-color max-h-[70vh] overflow-auto">
             <div className="pt-5 pb-20 px-4 space-y-10 container">
@@ -33,7 +43,7 @@ const BuyTicketDrawer: FCC<Props> = ({ children, ticketPrice }) => {
               </div>
 
               <div className="space-y-10">
-                <BuyTicketForm ticketPrice={ticketPrice} />
+                <BuyTicketForm ticketPrice={ticketPrice} roundId={roundId} currency={currency} />
 
                 <BuyTicketNote />
               </div>

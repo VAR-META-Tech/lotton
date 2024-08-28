@@ -1,12 +1,41 @@
-import * as React from 'react';
-import * as LabelPrimitive from '@radix-ui/react-label';
+import type * as LabelPrimitive from '@radix-ui/react-label';
 import { Slot } from '@radix-ui/react-slot';
-import { Controller, ControllerProps, FieldPath, FieldValues, FormProvider, useFormContext } from 'react-hook-form';
+import * as React from 'react';
+import type { ControllerProps, FieldPath, FieldValues, SubmitHandler, UseFormReturn } from 'react-hook-form';
+import { Controller, FormProvider, useFormContext } from 'react-hook-form';
 
-import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+import type { FCC } from '@/types';
 
-const Form = FormProvider;
+export interface FormWrapperProps<T extends FieldValues> {
+  form: UseFormReturn<T, any>;
+  onSubmit: SubmitHandler<T>;
+  children?: React.ReactNode;
+  formId?: string;
+  className?: string;
+}
+
+const FormWrapper = <TFormValue extends FieldValues>({
+  form,
+  onSubmit,
+  children,
+  formId = 'form-submit-wrapper',
+  className,
+}: FormWrapperProps<TFormValue>) => {
+  return (
+    <FormProvider {...form}>
+      <form
+        noValidate
+        className={className}
+        id={formId}
+        onSubmit={form.handleSubmit(onSubmit as SubmitHandler<TFormValue>)}
+      >
+        {children}
+      </form>
+    </FormProvider>
+  );
+};
 
 type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,
@@ -59,26 +88,19 @@ type FormItemContextValue = {
 
 const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue);
 
-const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => {
-    const id = React.useId();
+const FormItem: FCC = ({ children }) => {
+  const id = React.useId();
 
-    return (
-      <FormItemContext.Provider value={{ id }}>
-        <div ref={ref} className={cn('space-y-2', className)} {...props} />
-      </FormItemContext.Provider>
-    );
-  }
-);
+  return <FormItemContext.Provider value={{ id }}>{children}</FormItemContext.Provider>;
+};
 FormItem.displayName = 'FormItem';
 
 const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
 >(({ className, ...props }, ref) => {
-  const { error, formItemId } = useFormField();
-
-  return <Label ref={ref} className={cn(error && 'text-destructive', className)} htmlFor={formItemId} {...props} />;
+  const { formItemId } = useFormField();
+  return <Label ref={ref} className={cn('mb-1.5 block', className)} htmlFor={formItemId} {...props} />;
 });
 FormLabel.displayName = 'FormLabel';
 
@@ -126,4 +148,4 @@ const FormMessage = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<
 );
 FormMessage.displayName = 'FormMessage';
 
-export { useFormField, Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField };
+export { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, FormWrapper, useFormField };
