@@ -14,6 +14,8 @@ import type { TelegramConfig } from './telegram.config';
 import telegram from './telegram.config';
 import type { UserAuthConfig } from './user_auth.config';
 import userAuth from './user_auth.config';
+import type { ContractConfig } from './contract.config';
+import contract from './contract.config';
 
 export const load: ConfigFactory[] = [
   main,
@@ -23,6 +25,7 @@ export const load: ConfigFactory[] = [
   adminAuth,
   userAuth,
   telegram,
+  contract,
 ];
 
 export type StellaConfig = {
@@ -33,4 +36,5 @@ export type StellaConfig = {
   adminAuth: AdminAuthConfig;
   userAuth: UserAuthConfig;
   telegram: TelegramConfig;
+  contract: ContractConfig;
 };

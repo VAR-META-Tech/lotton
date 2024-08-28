@@ -4,14 +4,16 @@ import type { ScheduledTask } from 'node-cron';
 import cron from 'node-cron';
 import { DataSource, Repository } from 'typeorm';
 
-import { NetworkToken } from '@/database/entities';
+import { LatestBlock, NetworkToken } from '@/database/entities';
 import { getFromCache } from '@/utils/cache';
 import { getLogger } from '@/utils/logger';
 
 import { TokenPriceService } from '../services/token_price.service';
 import { CrawlTokenService } from './crawl_token.service';
 import { CrawlTokenPriceService } from './crawl_token_price.service';
-import { CrawlWorkerService } from './crawl_pool.service';
+import { CrawlWorkerService } from './crawl.service';
+import { StellaConfig } from '@/configs';
+import { ConfigService } from '@nestjs/config';
 
 const logger = getLogger('ManagerService');
 
@@ -26,6 +28,9 @@ export class ManagerService {
     private readonly networkTokenRepository: Repository<NetworkToken>,
     private readonly dataSource: DataSource,
     private readonly tokenPriceService: TokenPriceService,
+    @InjectRepository(LatestBlock)
+    private readonly latestBlockRepository: Repository<LatestBlock>,
+    private readonly configService: ConfigService<StellaConfig>,
   ) {
     this.init();
     this.startCronJob();
@@ -39,7 +44,10 @@ export class ManagerService {
   }
 
   async init() {
-    await new CrawlWorkerService();
+    await new CrawlWorkerService(
+      this.latestBlockRepository,
+      this.configService,
+    );
     // await this.initNetworkToken();
   }
 
