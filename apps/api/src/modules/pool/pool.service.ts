@@ -4,14 +4,20 @@ import dayjs from 'dayjs';
 import { Repository } from 'typeorm';
 
 import { Causes } from '@/common/exceptions/causes';
+import type { User } from '@/database/entities';
 import { Pool, PoolPrize, PoolRound, Token } from '@/database/entities';
 import type { QueryPaginationDto } from '@/shared/dto/pagination.query';
 import { PoolRoundStatusEnum } from '@/shared/enums';
+import type { FetchResult } from '@/utils/paginate';
 import { FetchType, paginateEntities } from '@/utils/paginate';
 
 import { PoolRoundService } from '../poolRound/poolRound.service';
 import type { CreatePoolDto, PoolPrizes } from './dto/create-pool.dto';
-import type { PoolQueryDto } from './dto/get-pool.query';
+import {
+  type PoolQueryDto,
+  type UserPoolDto,
+  UserPoolType,
+} from './dto/get-pool.query';
 import type { UpdatePoolDto } from './dto/update-pool.dto';
 
 export class PoolService {
@@ -302,5 +308,56 @@ export class PoolService {
         .toDate());
 
     return pool;
+  }
+  async findJoinedPools(
+    user: User,
+    query: UserPoolDto,
+    pagination: QueryPaginationDto,
+  ): Promise<FetchResult<Pool>> {
+    try {
+      const { type = UserPoolType.JOINED } = query;
+      const queryBuilder = this.poolRepository
+        .createQueryBuilder('pool')
+        .leftJoinAndSelect('pool.rounds', 'rounds')
+        .leftJoinAndSelect('rounds.ticket', 'ticket')
+        .where('ticket.userWallet = :userWallet', { userWallet: user.wallet });
+
+      const count = await queryBuilder
+        .clone()
+        .groupBy('rounds.id')
+        .select(['count(ticket.id) as totalTicket', 'rounds.id as roundId'])
+        .getRawMany();
+
+      if (type == UserPoolType.WINNER) {
+        queryBuilder.andWhere('ticket.winningMatch > 0');
+      }
+
+      return this.mapTicket(
+        await paginateEntities<Pool>(
+          queryBuilder,
+          pagination,
+          FetchType.MANAGED,
+        ),
+        count,
+      );
+    } catch (error) {
+      console.log({ error });
+
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  mapTicket(data: FetchResult<Pool>, rounds: any[]) {
+    return {
+      ...data,
+      items: data.items.map((item) => ({
+        ...item,
+        rounds: item.rounds.map((round) => ({
+          totalTicket: rounds.find((item) => item.roundId == round.id)
+            .totalTicket,
+          ...round,
+        })),
+      })),
+    };
   }
 }
