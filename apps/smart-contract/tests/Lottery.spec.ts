@@ -86,13 +86,13 @@ describe('Lottery', () => {
         console.log('balance', balance);
         const ticket = await lottery.send(
             provider.getSender(), {
-                value: toNano('1.05'),
+                value: toNano('3.05'),
             },
             {
                 $$type: 'BuyTicket',
                 poolId: 1n,
                 roundId: 1n,
-                quantity: 1n
+                quantity: 3n
             }
         );
         const balance2 = await provider.getBalance();
@@ -101,13 +101,13 @@ describe('Lottery', () => {
         expect(ticket.transactions).toHaveTransaction({
             from: provider.address,
             to: lottery.address,
-            success: false,
+            success: true,
         });
     });
 
     it('should return user ticket', async () => {
         const provider = await blockchain.treasury('wallet');
-        const ticket = await lottery.getUsersTicket();
+        const ticket = await lottery.getUsersTicket(1n, 1n);
         console.log('ticket', ticket);
         expect(ticket).toBe(1n);
     });
