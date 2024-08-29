@@ -1,6 +1,7 @@
 node_modules
 temp
 build
+!build/Lottery/*.ts
 dist
 .DS_Store
 

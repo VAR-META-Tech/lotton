@@ -1,121 +1,68 @@
 import "@stdlib/deploy";
+import "@stdlib/ownable";
 
 // Constants
-const SECONDS_PER_HOUR: Int = 3600;
-const TICKET_DIGITS: Int = 5;
+const TICKET_DIGITS: Int = 4;
 const MAX_TICKET_NUMBER: Int = 99999;
 
-struct Pool {
-    poolId: Int as uint32;
-    creator: Address;
-    rounds: map<Int, RoundConfig>;
-    startTime: Int as uint32;
-    endTime: Int as uint32;
-    active: Bool;
-}
-
-// Struct to represent a round configuration
-struct RoundConfig {
-    roundId: Int as uint32;
-    poolId: Int as uint32;
-    ticketPrice: Int as coins;
-    startTime: Int as uint32;
-    endTime: Int as uint32;
-    active: Bool;
-}
-
-struct TicketPayoutResponse {
-    ticket: String;
-}
-
-struct RandomTicketResponse {
-    ASCIINumber: Int;
-    ticket: String;
-}
-
-struct Ticket {
-    ticket: String;
-    ticketNumber: Int;
-    owner: Address;
-}
-
-message PoolCreated {
-    ticketPrice: Int as uint32;
-    initialRounds: Int as uint8;
-    startTime: Int as uint32;
-    endTime: Int as uint32;
-    active: Bool;
-}
-
-message PoolCreatedEvent {
-    poolId: Int;
-    ticketPrice: Int as uint32;
-    initialRounds: Int as uint8;
-    startTime: Int as uint32;
-    endTime: Int as uint32;
-    active: Bool;
-    creator: Address;
-}
-
-message WinningNumbersDrawnEvent {
-    poolId: Int;
-    roundId: Int;
-    winningNumber: Int;
-}
-
-message RoundCreated {
-    roundId: Int;
-    poolId: Int;
-    ticketPrice: Int as uint32;
-    startTime: Int as uint32;
-    endTime: Int as uint32;
-}
-
-message RewardSetting {
-    match: Int;
-    percent: Int;
-}
-
-message BuyTicket {
-    poolId: Int;
-    roundId: Int;
-    quantity: Int;
-}
-
 // Main contract
-contract Lottery with Deployable {
+contract Lottery with Deployable, Ownable {
     owner: Address;
+    admin: Address;
     currentRoundId: Int;
     currentPoolId: Int;
-    rounds: map<Int, RoundConfig>;
-    winningNumbers: map<Int,Int>;
     pools: map<Int, Pool>;
     nextPoolId: Int;
-    usersTicket: map<Address,TicketPayoutResponse>;
-    ticketsUser: map<Int,Ticket>;
-    ticketsIndex: map<Int,Int>;
-    ticketArrayLength:Int=0;
-    balance: Int as uint256 =0;
+    usersTicket: map<Int, RoundTicket>;
     rewardSettings: map<Int,Int>;
-    result: Int;
+    result: map<Int,Result>;
+    rewardPools: map<Int,Int>;
+    publicKey: Int?;
+    claimData: map<Int, ClaimInfo>;
 
     init() {
         self.owner = sender();
+        self.admin = sender();
         self.currentRoundId = 1;
         self.currentPoolId = 1;
         self.nextPoolId = 1;
-        self.result = 0;
+        self.publicKey = 0;
+        // Default reward settings
         self.rewardSettings.set(1, 10);
         self.rewardSettings.set(2, 20);
         self.rewardSettings.set(3, 30);
         self.rewardSettings.set(4, 40);
-        self.rewardSettings.set(5, 50);
     }
 
-    // ----------------- Admin functions ----------------- //
+    // =============== Private Methods ============== //
 
-    fun createPool(initialRounds: Int, config: RoundConfig) {
-        require(sender() == self.owner, "Only owner can create pool");
+    fun requireOwnerOrAdmin() {
+        require(sender() == self.owner || sender() == self.admin, "Only the owner or admin can call this function");
+    }
+
+    fun setAdmin(admin: Address) {
+        self.requireOwner();
+        self.admin = admin;
+    }
+
+    fun getLength(content: Slice): Int {
+        let i: Int = 0;
+        let length: Int = 0;
+        let needBreak: Bool = false;
+        do {
+            let char: Int = content.loadUint(8);
+            needBreak = char == 0;
+            if (!needBreak) {
+                i = i + 8;
+                length = length + 1;
+            }
+        } until (needBreak);
+        return length;
+    }
+
+
+    fun createPool(initialRounds: Int, sequence: Int, config: RoundConfig) {
+        self.requireOwnerOrAdmin();
 
         let poolId: Int = self.nextPoolId;
         self.nextPoolId += 1;
@@ -126,14 +73,19 @@ contract Lottery with Deployable {
             rounds: emptyMap(),
             startTime: config.startTime,
             endTime: config.endTime,
+            sequence: sequence,
             active: true
+        };
+
+        let roundTickets = RoundTicket{
+            rounds: emptyMap()
         };
 
         let index: Int = 1;
         self.currentRoundId = index;
         repeat (initialRounds) {
-            let startTime: Int = config.startTime + (index - 1) * SECONDS_PER_HOUR * 24;
-            let endRoundTime: Int = config.startTime + index * SECONDS_PER_HOUR * 24;
+            let startTime: Int = config.startTime + (index - 1) * sequence;
+            let endRoundTime: Int = config.startTime + index * sequence;
             let roundConfig: RoundConfig = RoundConfig{
                 roundId: index,
                 poolId: poolId,
@@ -142,10 +94,14 @@ contract Lottery with Deployable {
                 endTime: config.endTime < endRoundTime ? config.endTime : endRoundTime,
                 active: true
             };
+            roundTickets.rounds.set(index, UserTicket{
+                users: emptyMap()
+            });
             pool.rounds.set(index, roundConfig);
             index += 1;
         }
         self.pools.set(poolId, pool);
+        self.usersTicket.set(poolId, roundTickets);
         self.currentPoolId = poolId;
 
         emit(PoolCreatedEvent{
@@ -155,12 +111,13 @@ contract Lottery with Deployable {
             startTime: config.startTime,
             endTime: config.endTime,
             active: true,
+            sequence,
             creator: sender()
         }.toCell());
     }
 
     fun rewardSettings(match:Int, percent: Int) {
-        require(sender() == self.owner, "Only owner can set reward settings");
+        self.requireOwnerOrAdmin();
         require(match >= 1 && match <= TICKET_DIGITS, "Invalid match number");
         require(percent >= 0 && percent <= 100, "Invalid reward percentage");
         self.rewardSettings.set(match, percent);
@@ -219,32 +176,42 @@ contract Lottery with Deployable {
         return 0;
     }
 
-    fun createTicket(user: Address, quantity: Int) {
-        let sb: StringBuilder = beginString();
+    fun createTicket(user: Address, poolId: Int, roundId: Int, quantity: Int): String {
+        let newTickets: StringBuilder = beginString();
+
         repeat (quantity) {
             let rs: RandomTicketResponse = self.generateRandomASCIIString(TICKET_DIGITS);
             let ticketNumber: Int = rs.ASCIINumber;
             let ticket: String = rs.ticket;
-            if(self.usersTicket.get(user)!=null){
-                let ticketPayoutResponse: TicketPayoutResponse = self.usersTicket.get(user)!!;
-                sb.append(ticket);
-                sb.append(",");
-                sb.append(ticketPayoutResponse.ticket);
-            }else{
-                sb.append(ticket);
+
+            if (newTickets.toString() != "") {
+                newTickets.append(",");
             }
+            newTickets.append(ticket);
+
             let ticketData: Ticket = Ticket {
                 ticket,
                 ticketNumber,
                 owner: user
             };
-            self.ticketsUser.set(ticketNumber,ticketData);
-            self.ticketArrayLength= self.ticketArrayLength + 1;
-            self.ticketsIndex.set(self.ticketArrayLength,ticketNumber);
         }
-        self.usersTicket.set(user,TicketPayoutResponse {
-            ticket:sb.toString()
+
+        let existingTickets: TicketPayoutResponse? = self.usersTicket.get(poolId)!!.rounds.get(roundId)!!.users.get(user);
+        if (newTickets.toString() != "" && existingTickets != null) {
+            newTickets.append(",");
+        }
+        if (existingTickets != null) {
+            let ticketPayoutResponse: TicketPayoutResponse = existingTickets!!;
+            newTickets.append(ticketPayoutResponse.ticket);
+        }
+
+        let allTickets: String = newTickets.toString();
+        let usersTicket = self.usersTicket.get(poolId)!!.rounds.get(roundId)!!;
+        usersTicket.users.set(user, TicketPayoutResponse{
+            ticket: allTickets
         });
+
+        return allTickets;
     }
 
     fun buyTicket(poolId: Int, roundId: Int, quantity: Int) {
@@ -270,17 +237,24 @@ contract Lottery with Deployable {
         require(context().value >= totalCost, "Insufficient funds sent");
 
         // gen random ticket code
-        self.createTicket(user, quantity);
-        self.balance += totalCost;
+        let tickets: String = self.createTicket(user, poolId, roundId, quantity);
 
         // Send any excess funds back to the user
         if (context().value > totalCost) {
             send(SendParameters{
                 to: user,
                 value: context().value - totalCost,
-                mode: SendIgnoreErrors
+                mode: (SendRemainingValue + SendIgnoreErrors),
             });
         }
+
+        emit(TicketBoughtEvent{
+            roundId: roundId,
+            poolId: poolId,
+            quantity: quantity,
+            buyer: user,
+            tickets: tickets
+        }.toCell());
     }
 
     // Internal functions
@@ -299,50 +273,55 @@ contract Lottery with Deployable {
     }
 
     // Function to calculate the prize for a ticket
-    fun drawWinningNumbers() {
-        // Implementation for drawing winning numbers
-        require(sender() == self.owner, "Only owner can draw winners");
-        require(self.result == 0, "Winning numbers already drawn");
-        let round = self.currentRound();
-        require(round != null, "Round does not exist");
+    fun drawWinningNumbers(poolId: Int, roundId: Int, latestTxHash: String?) {
+        self.requireOwnerOrAdmin();
+        let resultPool = self.result.get(poolId);
+        if (resultPool != null) {
+            let resultRound: Int? = resultPool!!.rounds.get(roundId);
+            if (resultRound != null) {
+                require(false, "Winning numbers already drawn");
+            }
+        } else {
+            self.result.set(poolId, Result{
+                rounds: emptyMap()
+            });
+            resultPool = self.result.get(poolId);
+        }
+        //let round = self.roundById(poolId, roundId);
+        //require(round != null, "Round does not exist");
 
-        let roundInfo = round!!;
-        require(now() >= roundInfo.endTime, "Round is still active");
+        //let roundInfo = round!!;
+        //require(now() >= roundInfo.endTime, "Round is still active");
 
         let rs: RandomTicketResponse = self.generateRandomASCIIString(TICKET_DIGITS);
-        let ticketNumber: Int = rs.ASCIINumber;
-        self.result = ticketNumber;
+        let ticketNumber = rs.ASCIINumber;
 
-        emit(WinningNumbersDrawnEvent{
-            poolId: round.poolId,
-            roundId: roundInfo.roundId,
-            winningNumber: ticketNumber
-        }.toCell());
+        let resultData = resultPool!!;
+        resultData.rounds.set(roundId, ticketNumber);
+
+//        emit(WinningNumbersDrawnEvent{
+//            poolId: roundInfo.poolId,
+//            roundId: roundInfo.roundId,
+//            winningNumber: ticketNumber
+//        }.toCell());
     }
 
-    fun calculatePrizes(roundId: Int) {
-        // Implementation for calculating and distributing prizes
-
+    fun getMessageHash(poolId: Int, roundId: Int, amount: Int, receiver: Address): Int {
+        let signatureData: Cell = beginCell()
+            .storeInt(poolId, 32)
+            .storeInt(roundId, 32)
+            .storeAddress(receiver)
+            .storeCoins(amount)
+            .endCell();
+        return signatureData.hash();
     }
 
-    fun clear() {
-        self.usersTicket = emptyMap();
-        self.ticketsUser = emptyMap();
-        self.ticketsIndex = emptyMap();
-        self.ticketArrayLength = 0;
-        self.balance = 0;
-        self.result = 0;
-    }
-
-    fun claimPrize(roundId: Int) {
-    // Implementation for claiming prizes
-    }
-
-    receive(msg: PoolCreated) {
+    receive(msg: CreatePool) {
         let initialRounds: Int = msg.initialRounds;
         let ticketPrice: Int = msg.ticketPrice;
         let startTime: Int = msg.startTime;
         let endTime: Int = msg.endTime;
+        let sequence: Int = msg.sequence;
 
         let config: RoundConfig = RoundConfig{
             roundId: 0, // Sẽ được set trong hàm createPool
@@ -353,7 +332,7 @@ contract Lottery with Deployable {
             active: true
         };
 
-        self.createPool(initialRounds, config);
+        self.createPool(initialRounds, sequence, config);
     }
 
     receive(msg: RewardSetting) {
@@ -369,25 +348,78 @@ contract Lottery with Deployable {
         self.buyTicket(poolId, roundId, quantity);
     }
 
-    // Getter functions
-    get fun owner(): Address {
-        return self.owner;
+    receive(msg: DrawWinningNumbers) {
+        let poolId: Int = msg.poolId;
+        let roundId: Int = msg.roundId;
+        let latestTxHash: String = msg.latestTxHash;
+        self.drawWinningNumbers(poolId, roundId, latestTxHash);
     }
 
-    get fun currentPool(): Int {
-        return self.currentPoolId;
+    receive(msg: SetAdmin) {
+        self.setAdmin(msg.admin);
+    }
+
+    receive(msg: Claim){
+        let msgHash: Int = self.getMessageHash(msg.poolId, msg.roundId, msg.amount, msg.receiver);
+        require(checkSignature(msgHash, msg.signature, self.publicKey!!), "Invalid signature");
+
+        let isClaimed: Bool = self.isClaim(msg.poolId, msg.roundId, msg.receiver);
+        require(!isClaimed, "Invalid claim");
+
+        let claimUser = UserClaim{
+            user: emptyMap()
+        };
+        claimUser.user.set(msg.receiver, true);
+
+        let claimPool = self.claimData.get(msg.poolId);
+        if (claimPool == null) {
+            let claimInfo = ClaimInfo {
+                info: emptyMap()
+            };
+            claimInfo.info.set(msg.roundId, claimUser);
+            self.claimData.set(msg.poolId, claimInfo);
+        } else {
+            let claimInfo = claimPool!!.info.get(msg.roundId)!!;
+            if (claimInfo.user.get(msg.receiver) == null){
+                claimInfo.user.set(msg.receiver, true);
+            } else {
+                require(false, "Invalid claim");
+            }
+        }
+        //send the token to user
+        send(SendParameters{
+            to: msg.receiver,
+            value: msg.amount,
+            mode: (SendRemainingValue + SendIgnoreErrors),
+        });
+
+        emit(ClaimedEvent{
+            poolId: msg.poolId,
+            roundId: msg.roundId,
+            amount: msg.amount,
+            receiver: msg.receiver
+        }.toCell());
+    }
+
+    // Getter functions
+    get fun adminAddress(): Address {
+        return self.admin;
+    }
+
+    get fun currentPool(): map<Int, Pool>{
+        return self.pools;
     }
 
     get fun poolById(poolId: Int): Pool? {
         return self.pools.get(poolId);
     }
 
-    get fun usersTicket(): map<Address,TicketPayoutResponse> {
-        return self.usersTicket;
+    get fun usersTicket(poolId: Int, roundId: Int): UserTicket {
+        return self.usersTicket.get(poolId)!!.rounds.get(roundId)!!;
     }
 
-    get fun userTicketByAddress(user: Address): TicketPayoutResponse? {
-        return self.usersTicket.get(user);
+    get fun userTicketByAddress(poolId: Int, roundId: Int, user: Address): TicketPayoutResponse? {
+        return self.usersTicket.get(poolId)!!.rounds.get(roundId)!!.users.get(user);
     }
 
     get fun currentRound(): RoundConfig? {
@@ -398,7 +430,169 @@ contract Lottery with Deployable {
         return self.pools.get(poolId)!!.rounds.get(roundId)!!;
     }
 
-    get fun winningNumbers(roundId: Int): Int? {
-        return self.winningNumbers.get(roundId);
+    get fun resultByRound(poolId: Int, roundId: Int): Int? {
+        let resultPool: Result? = self.result.get(poolId);
+        if (resultPool != null) {
+            return resultPool!!.rounds.get(roundId);
+        }
+        return null;
     }
+
+    get fun resultByPool(poolId: Int): Result? {
+        return self.result.get(poolId);
+    }
+
+    get fun isClaim(poolId: Int, roundId: Int, receiver: Address): Bool{
+        let isClaimed: Bool? = self.claimData.get(poolId)!!.info.get(roundId)!!.user.get(receiver);
+        if (isClaimed != null) {
+            let isClaimedValue: Bool = self.claimData.get(poolId)!!.info.get(roundId)!!.user.get(receiver)!!;
+            if(isClaimedValue){
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+// ---------------- Structs ---------------- //
+
+struct Pool {
+    poolId: Int as uint32;
+    creator: Address;
+    rounds: map<Int, RoundConfig>;
+    startTime: Int as uint32;
+    endTime: Int as uint32;
+    sequence: Int as uint32;
+    active: Bool;
+}
+
+// Struct to represent a round configuration
+struct RoundConfig {
+    roundId: Int as uint32;
+    poolId: Int as uint32;
+    ticketPrice: Int as coins;
+    startTime: Int as uint32;
+    endTime: Int as uint32;
+    active: Bool;
+}
+
+struct TicketPayoutResponse {
+    ticket: String;
+}
+
+struct RandomTicketResponse {
+    ASCIINumber: Int;
+    ticket: String;
+}
+
+struct Ticket {
+    ticket: String;
+    ticketNumber: Int;
+    owner: Address;
+}
+
+struct UserTicket {
+    users: map<Address, TicketPayoutResponse>
+}
+struct RoundTicket {
+    rounds: map<Int, UserTicket>
+}
+
+struct Winner {
+    ticket: String;
+    owner: Address;
+    prize: Int as coins;
+}
+
+struct ClaimInfo {
+    info: map<Int, UserClaim>;
+}
+
+struct UserClaim {
+    user: map<Address, Bool>;
+}
+
+struct Result {
+    rounds: map<Int, Int>;
+}
+// ---------------- Messages ---------------- //
+
+message CreatePool {
+    jettonWallet: Address;
+    ticketPrice: Int as uint32;
+    initialRounds: Int as uint8;
+    startTime: Int as uint32;
+    endTime: Int as uint32;
+    sequence: Int as uint32;
+    active: Bool;
+}
+
+message Claim {
+    poolId: Int;
+    roundId: Int;
+    amount: Int as coins;
+    receiver: Address;
+    signature: Slice;
+}
+
+message WinningNumbersDrawnEvent {
+    poolId: Int;
+    roundId: Int;
+    winningNumber: Int;
+}
+
+message RewardSetting {
+    match: Int;
+    percent: Int;
+}
+
+message BuyTicket {
+    poolId: Int;
+    roundId: Int;
+    quantity: Int;
+}
+
+message DrawWinningNumbers {
+    poolId: Int;
+    roundId: Int;
+    latestTxHash: String;
+}
+
+message SetAdmin {
+    admin: Address;
+}
+
+// ---------------- Events ---------------- //
+message PoolCreatedEvent {
+    poolId: Int;
+    ticketPrice: Int as uint32;
+    initialRounds: Int as uint8;
+    startTime: Int as uint32;
+    endTime: Int as uint32;
+    active: Bool;
+    sequence: Int as uint32;
+    creator: Address;
+}
+
+message RoundCreated {
+    roundId: Int;
+    poolId: Int;
+    ticketPrice: Int as uint32;
+    startTime: Int as uint32;
+    endTime: Int as uint32;
+}
+
+message TicketBoughtEvent {
+    poolId: Int;
+    roundId: Int;
+    quantity: Int;
+    buyer: Address;
+    tickets: String
+}
+
+message ClaimedEvent {
+    poolId: Int;
+    roundId: Int;
+    amount: Int as coins;
+    receiver: Address;
 }

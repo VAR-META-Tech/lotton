@@ -50,11 +50,13 @@ describe('Lottery', () => {
                 value: toNano('0.05'),
             },
             {
-                $$type: 'PoolCreated',
+                $$type: 'CreatePool',
                 ticketPrice: 1n,
                 initialRounds: 1n,
                 startTime: 1724511710n,
                 endTime: 1735511710n,
+                sequence: 3600n,
+                jettonWallet: provider.address,
                 active: true,
             }
         );
@@ -69,25 +71,6 @@ describe('Lottery', () => {
         const getPool = await lottery.getCurrentPool();
         console.log('getPool', getPool);
         expect(getPool).toBe(1n);
-    });
-
-    it('should return current round is 1n', async () => {
-        const getRound = await lottery.getCurrentRound();
-        console.log('getRound', getRound);
-        expect(getRound?.roundId).toBe(1n);
-    });
-
-    it('should return current round is active', async () => {
-        const getRound = await lottery.getCurrentRound();
-        console.log('getRound', getRound);
-        expect(getRound?.active).toBe(true);
-    });
-
-    it('should return current round is not expired', async () => {
-        const getRound = await lottery.getCurrentRound();
-        console.log('getRound', getRound);
-        expect(getRound?.startTime).toBe(1724511710n);
-        expect(getRound?.endTime).toBe(1735511710n);
     });
 
     it('should return user balance is enough', async () => {
@@ -120,5 +103,12 @@ describe('Lottery', () => {
             to: lottery.address,
             success: false,
         });
+    });
+
+    it('should return user ticket', async () => {
+        const provider = await blockchain.treasury('wallet');
+        const ticket = await lottery.getUsersTicket();
+        console.log('ticket', ticket);
+        expect(ticket).toBe(1n);
     });
 });
