@@ -378,6 +378,9 @@ importers:
       typeorm:
         specifier: ^0.3.19
         version: 0.3.20(ioredis@5.4.1)(mysql2@3.11.0)(ts-node@10.9.1(@swc/core@1.7.14(@swc/helpers@0.5.5))(@types/node@20.11.24)(typescript@5.4.5))
+      uuid:
+        specifier: ^10.0.0
+        version: 10.0.0
       web3:
         specifier: ^4.6.0
         version: 4.11.1(typescript@5.4.5)(zod@3.23.8)
@@ -10594,6 +10597,10 @@ packages:
   utils-merge@1.0.1:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
+
+  uuid@10.0.0:
+    resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    hasBin: true
 
   uuid@3.4.0:
     resolution: {integrity: sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==}
@@ -24470,6 +24477,8 @@ snapshots:
       which-typed-array: 1.1.13
 
   utils-merge@1.0.1: {}
+
+  uuid@10.0.0: {}
 
   uuid@3.4.0: {}
 

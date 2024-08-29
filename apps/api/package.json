@@ -64,6 +64,7 @@
     "rxjs": "^7.8.1",
     "tonweb": "^0.0.66",
     "typeorm": "^0.3.19",
+    "uuid": "^10.0.0",
     "web3": "^4.6.0",
     "web3-providers-ws": "^4.0.8",
     "web3-validator": "^2.0.6",
