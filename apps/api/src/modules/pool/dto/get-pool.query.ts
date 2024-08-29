@@ -22,3 +22,19 @@ export class PoolQueryDto {
   @IsOptional()
   search?: string;
 }
+
+export enum UserPoolType {
+  JOINED = 'joined',
+  WINNER = 'winner',
+}
+
+export class UserPoolDto {
+  @ApiProperty({
+    default: UserPoolType.JOINED,
+    description: `value: ${UserPoolType.JOINED}|${UserPoolType.WINNER}`,
+    required: false,
+  })
+  @IsEnum(UserPoolType)
+  @IsOptional()
+  type?: UserPoolType;
+}

@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 import { QueryPaginationDto } from '@/shared/dto/pagination.query';
 
@@ -9,6 +9,7 @@ import { RoundService } from './round.service';
 
 @Controller('rounds')
 @ApiTags('rounds')
+@ApiBearerAuth()
 export class RoundController {
   constructor(private readonly roundService: RoundService) {}
 

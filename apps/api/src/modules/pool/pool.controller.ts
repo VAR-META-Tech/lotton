@@ -11,11 +11,14 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+import { GetUser } from '@/common/decorators/user.decorator';
+import { User } from '@/database/entities';
 import { QueryPaginationDto } from '@/shared/dto/pagination.query';
 
 import { AdminJwtGuard } from '../auth/guards/admin_jwt.guard';
+import { UserJwtGuard } from '../auth/guards/user_jwt.guard';
 import { CreatePoolDto } from './dto/create-pool.dto';
-import { PoolQueryDto } from './dto/get-pool.query';
+import { PoolQueryDto, UserPoolDto } from './dto/get-pool.query';
 import { UpdatePoolDto } from './dto/update-pool.dto';
 import { PoolService } from './pool.service';
 
@@ -43,6 +46,16 @@ export class PoolController {
     @Query() pagination: QueryPaginationDto,
   ) {
     return this.poolService.find(pagination, query);
+  }
+
+  @Get('joined')
+  @UseGuards(UserJwtGuard)
+  async findJoinedPools(
+    @GetUser('user') user: User,
+    @Query() query: UserPoolDto,
+    @Query() pagination: QueryPaginationDto,
+  ) {
+    return await this.poolService.findJoinedPools(user, query, pagination);
   }
 
   @Get(':id')
