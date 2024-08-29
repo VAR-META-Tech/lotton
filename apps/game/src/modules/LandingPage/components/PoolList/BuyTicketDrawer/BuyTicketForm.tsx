@@ -1,4 +1,4 @@
-import React, { FC, HTMLAttributes, useMemo, useState } from 'react';
+import React, { FC, HTMLAttributes, useMemo } from 'react';
 import Image from 'next/image';
 import { Icons } from '@/assets/icons';
 import { MAX_TICKET, MIN_TICKET } from '@/modules/LandingPage/utils/const';
@@ -144,7 +144,9 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, roundId, currency }) => {
             </HStack>
           </HStack>
           <HStack pos={'apart'}>
-            <span className="text-xs text-white">{`${currency?.symbol || ''} balance: ${prettyNumber(Number(balance || 0).toFixed(6))} TON`}</span>
+            <span className="text-xs text-white">{`${currency?.symbol || ''} balance: ${prettyNumber(
+              Number(balance || 0).toFixed(6)
+            )} TON`}</span>
 
             <span className="text-base text-gray-color">{`~ ${prettyNumber(0)} USD`}</span>
           </HStack>

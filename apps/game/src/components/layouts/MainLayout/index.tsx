@@ -5,7 +5,6 @@ import { useLoginByWalletMutation } from '@/apis/auth';
 import { FCC } from '@/types';
 import { useTonWallet } from '@tonconnect/ui-react';
 
-import { onMutateError } from '@/lib/common';
 import { useAuth } from '@/hooks/useAuth';
 import { VStack } from '@/components/ui/Utilities';
 

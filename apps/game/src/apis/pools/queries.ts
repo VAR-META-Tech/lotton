@@ -1,7 +1,14 @@
 import { createInfiniteQuery, createQuery } from 'react-query-kit';
 
-import { getAllPoolsRequest, getPoolDetailRequest } from './requests';
-import type { IGetPoolDetailData, IGetPoolDetailParams, IGetPoolsData, IGetPoolsParams } from './types';
+import { getAllPoolsRequest, getPoolDetailRequest, getPoolJoinedRequest } from './requests';
+import type {
+  IGetPoolDetailData,
+  IGetPoolDetailParams,
+  IGetPoolJoinedData,
+  IGetPoolJoinedParams,
+  IGetPoolsData,
+  IGetPoolsParams,
+} from './types';
 
 export const useGetAllPoolsQuery = createQuery<IGetPoolsData, IGetPoolsParams>({
   queryKey: ['/api/pools'],
@@ -19,6 +26,16 @@ export const useInfinityPools = createInfiniteQuery<IGetPoolsData, IGetPoolsPara
   getNextPageParam: (lastPage) => {
     if (lastPage.meta.currentPage === lastPage.meta.totalPages) return null;
     return lastPage.meta.currentPage + 1;
+  },
+  initialPageParam: 1,
+});
+
+export const useInfinityPoolJoinedQuery = createInfiniteQuery<IGetPoolJoinedData, IGetPoolJoinedParams>({
+  queryKey: ['infinite:/api/pools/joined'],
+  fetcher: (variables, { pageParam = 1 }) => getPoolJoinedRequest({ ...variables, page: pageParam }),
+  getNextPageParam: (lastPage) => {
+    if (lastPage?.meta?.currentPage === lastPage?.meta?.totalPages) return null;
+    return lastPage?.meta?.currentPage + 1;
   },
   initialPageParam: 1,
 });

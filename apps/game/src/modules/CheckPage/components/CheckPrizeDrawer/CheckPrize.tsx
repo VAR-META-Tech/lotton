@@ -15,7 +15,7 @@ const CheckPrize: FCC<Props> = ({ name, round, winCode, isOnlyOneTicket = true }
   return (
     <div className="space-y-2">
       <div className="container">
-        {!!isOnlyOneTicket && <TicketInfo name={name} activeRound={round} />}
+        {!!isOnlyOneTicket && <TicketInfo name={name} roundActiveNumber={round} />}
 
         <WinningNumber code={winCode} />
       </div>

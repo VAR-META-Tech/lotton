@@ -8,6 +8,7 @@ type Props = {
 
 export const DrawTime = ({ endTime }: Props) => {
   if (!endTime) return null;
+
   return (
     <motion.div
       key={endTime}
@@ -15,6 +16,6 @@ export const DrawTime = ({ endTime }: Props) => {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0.5 }}
       className="text-sm"
-    >{`Draw ${format(new Date(endTime), 'MMM dd, yyyy, HH:mm a')}`}</motion.div>
+    >{`Draw ${endTime && format(new Date(endTime), 'MMM dd, yyyy, HH:mm a')}`}</motion.div>
   );
 };

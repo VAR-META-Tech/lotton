@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useTonWallet } from '@tonconnect/ui-react';
 import { useGetBalanceQuery } from '@/apis/wallet';
 

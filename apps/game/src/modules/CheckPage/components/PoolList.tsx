@@ -1,29 +1,16 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useInfinityPools } from '@/apis/pools';
 import { useIntersection } from '@mantine/hooks';
 
 import { Show, VStack } from '@/components/ui/Utilities';
 
 import { PoolItem } from './PoolItem';
 import { SkeletonPool } from './SkeletonPool';
+import { useInfinityPoolJoined } from '@/hooks/useInfinityPoolJoined';
 
 export const PoolList = () => {
-  const {
-    data: poolData,
-    fetchNextPage,
-    hasNextPage,
-    isFetching: loadingPool,
-    isFetchingNextPage,
-  } = useInfinityPools({
-    variables: {
-      status: 'ongoing',
-      pageSizes: 10,
-      page: 1,
-    },
-  });
-  const poolList = poolData?.pages?.flatMap((z) => z.items) ?? [];
+  const { poolList, fetchNextPage, hasNextPage, loadingPool, isFetchingNextPage } = useInfinityPoolJoined();
 
   const { ref: rootLoadMore, entry } = useIntersection({
     threshold: 1,
@@ -36,8 +23,8 @@ export const PoolList = () => {
 
   return (
     <VStack spacing={56} align={'center'}>
-      {poolList.map((poolItem) => {
-        return <PoolItem key={poolItem.id} poolName={poolItem.name} poolId={poolItem.id} />;
+      {poolList?.map((poolItem, index) => {
+        return <PoolItem key={`${poolItem?.id}-${index}`} pool={poolItem} />;
       })}
 
       <Show when={loadingPool}>

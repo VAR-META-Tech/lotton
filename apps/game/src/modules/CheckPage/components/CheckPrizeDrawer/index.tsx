@@ -46,7 +46,7 @@ export const CheckPrizeDrawer: FCC<Props> = ({ children, ticketPools = [] }) => 
     if (step === STEP_VALUE.CHECK_PRIZE) {
       return (
         <VStack>
-          <CheckPrize name="TON Pool" round={1} winCode="1234" isOnlyOneTicket={ticketPools.length !== 1}></CheckPrize>
+          <CheckPrize name="TON Pool" round={1} winCode="1234" isOnlyOneTicket={ticketPools.length !== 1} />
 
           <HStack pos={'center'}>
             <Button
