@@ -9,10 +9,8 @@ export default class Pool implements Contract {
     return new Pool(address, { code, data });
   }
 
-  constructor(
-    readonly address: Address,
-    readonly init?: { code: Cell; data: Cell }
-  ) { }
+  // eslint-disable-next-line no-unused-vars
+  constructor(readonly address: Address, readonly init?: { code: Cell; data: Cell }) {}
 
   async sendDeploy(provider: ContractProvider, via: Sender) {
     await provider.internal(via, {
@@ -35,8 +33,6 @@ export default class Pool implements Contract {
         value: '0.05', // send 0.05 TON for gas
         body: messageBody,
       });
-
-
     } catch (error) {
       console.error(error);
     }

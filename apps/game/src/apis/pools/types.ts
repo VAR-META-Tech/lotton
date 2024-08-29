@@ -83,3 +83,55 @@ export interface IGetPoolDetailPoolPrize {
   matchNumber: number;
   allocation: number;
 }
+
+export interface IGetPoolJoinedParams {
+  type: string;
+  pageSizes: number;
+  page: number;
+}
+
+export interface IGetPoolJoinedResponse extends TResponse<IGetPoolJoinedData> {}
+
+export interface IGetPoolJoinedData {
+  items: IGetPoolJoinedItem[];
+  meta: IPagination;
+}
+
+export interface IGetPoolJoinedItem {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: any;
+  id: number;
+  poolIdOnChain: any;
+  name: string;
+  startTime: string;
+  endTime: string;
+  sequency: number;
+  totalRounds: number;
+  ticketPrice: string;
+  rounds: IGetPoolJoinedItemRound[];
+}
+
+export interface IGetPoolJoinedItemRound {
+  totalTicket: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: any;
+  id: number;
+  roundNumber: number;
+  startTime: string;
+  endTime: string;
+  winningHash: string | null;
+  ticket: IGetPoolJoinedItemTicket[];
+}
+
+export interface IGetPoolJoinedItemTicket {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: any;
+  id: number;
+  userWallet: string;
+  code: string;
+  winningCode?: string;
+  winningMatch?: number;
+}

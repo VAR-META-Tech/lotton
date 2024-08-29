@@ -41,7 +41,7 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
     }
 
     return false;
-  }, [roundActive?.endTime]);
+  }, [roundActive?.endTime, rounds]);
 
   return (
     <div {...props} className={cn('w-full rounded-xl overflow-hidden relative', className)}>
@@ -68,7 +68,6 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
 
         <PoolPrizePot
           currentRound={roundActiveNumber}
-          ticketPrice={Number(pool?.ticketPrice || 0)}
           poolId={poolId || 0}
           roundId={roundActive?.id || 0}
           currency={currency}

@@ -23,3 +23,11 @@ export interface ILoginByWalletTokens {
   refreshToken: string;
   expiresAt: number;
 }
+
+export interface IRefreshTokenResponse extends TResponse<IRefreshTokenData> {}
+
+export interface IRefreshTokenData {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
+}

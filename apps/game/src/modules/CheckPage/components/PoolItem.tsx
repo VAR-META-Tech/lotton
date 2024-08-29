@@ -1,25 +1,27 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
-import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
 import { Button } from '@/components/ui/button';
 import { HStack } from '@/components/ui/Utilities';
 
 import { ChangeRoundAction } from './ChangeRoundAction';
 import { DrawTime } from './DrawTime';
 import { TicketDetailDrawer } from './TicketDetailDrawer';
+import { IGetPoolJoinedItem } from '@/apis/pools';
+import BuyTicketDrawer from '@/modules/LandingPage/components/PoolList/BuyTicketDrawer';
 
 type Props = {
-  poolName: string;
-  poolId: number;
+  pool: IGetPoolJoinedItem;
 };
 
-export const PoolItem = ({ poolName, poolId }: Props) => {
+export const PoolItem = ({ pool }: Props) => {
   const [activeRound, setActiveRound] = useState(0);
-  const { rounds } = useGetPoolDetail({ poolId, isActive: true });
+  const rounds = pool?.rounds || [];
   const roundActive = rounds[activeRound];
-  const roundActiveNumber = roundActive
-    ? `${roundActive.roundNumber < 10 ? `0${roundActive.roundNumber}` : roundActive.roundNumber}`
+  const roundActiveNumber = roundActive?.roundNumber;
+
+  const roundActiveNumberLabel = roundActive
+    ? `${roundActiveNumber < 10 ? `0${roundActiveNumber}` : roundActiveNumber}`
     : '00';
 
   const handleChangeRoundActive = (upRound: boolean) => {
@@ -35,22 +37,24 @@ export const PoolItem = ({ poolName, poolId }: Props) => {
   return (
     <div className="shadow-lg border w-full max-w-lg grid grid-cols-6">
       <div className="bg-background-2 col-span-2 border flex items-center justify-center p-4">
-        <div className="font-semibold text-primary text-[1.625rem] text-center">{poolName}</div>
+        <div className="font-semibold text-primary text-[1.625rem] text-center">{pool?.name || ''}</div>
       </div>
 
       <div className="col-span-4 p-4 flex flex-col gap-4">
         <HStack pos={'apart'} spacing={16}>
-          <RoundNumber roundNumber={roundActiveNumber} />
+          <RoundNumber roundNumber={roundActiveNumberLabel} />
 
-          <ChangeRoundAction activeRound={activeRound} onClick={handleChangeRoundActive} poolId={poolId} />
+          <ChangeRoundAction activeRound={activeRound} onClick={handleChangeRoundActive} rounds={rounds} />
         </HStack>
 
-        <DrawTime endTime={roundActive?.endTime} />
+        <DrawTime endTime={roundActive?.endTime || ''} />
 
-        <TicketDetailDrawer name={poolName} activeRound={activeRound + 1}>
+        <TicketDetailDrawer pool={pool} roundActiveNumber={roundActiveNumber}>
           <Button className="mx-auto rounded-lg text-white">View your tickets</Button>
         </TicketDetailDrawer>
       </div>
+
+      <BuyTicketDrawer poolId={pool?.id} roundId={roundActive?.id} />
     </div>
   );
 };

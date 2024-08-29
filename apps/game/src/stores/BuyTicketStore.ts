@@ -3,6 +3,7 @@ import { create } from 'zustand';
 
 export interface IBuyTicketStore {
   poolId: number | undefined;
+  // eslint-disable-next-line no-unused-vars
   setPoolId: (data: number | undefined) => void;
   clear: () => void;
 }

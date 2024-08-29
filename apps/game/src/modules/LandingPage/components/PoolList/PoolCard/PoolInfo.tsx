@@ -56,7 +56,9 @@ const PoolInfo: FC<Props> = ({ isShow, setIsShow, poolPrizes, isEndRound = false
             <span className="text-white font-medium text-base">Prize Pot</span>
 
             <span>
-              <span className="text-2xl font-semibold text-primary">{`${prettyNumber(3953)} ${currency?.symbol || ''}`}</span>{' '}
+              <span className="text-2xl font-semibold text-primary">{`${prettyNumber(3953)} ${
+                currency?.symbol || ''
+              }`}</span>{' '}
               <span className="text-sm text-gray-color">~ {prettyNumber(Number(10000).toFixed(2))} USD</span>
             </span>
           </VStack>
@@ -86,7 +88,7 @@ const PoolInfo: FC<Props> = ({ isShow, setIsShow, poolPrizes, isEndRound = false
         </div>
       </VStack>
     );
-  }, [isEndRound, poolPrizes]);
+  }, [currency?.symbol, isEndRound, poolPrizes]);
 
   return (
     <div>

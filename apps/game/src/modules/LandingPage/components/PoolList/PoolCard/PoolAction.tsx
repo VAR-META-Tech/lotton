@@ -10,17 +10,14 @@ import BuyTicketDrawer from '../BuyTicketDrawer';
 import Link from 'next/link';
 import { ROUTES } from '@/lib/routes';
 import { useBuyTicketStore } from '@/stores/BuyTicketStore';
-import { IGetPoolDetailCurrency } from '@/apis/pools';
 
 interface Props {
   holdingTicket: number;
-  ticketPrice: number;
   poolId: number;
   roundId: number;
-  currency: IGetPoolDetailCurrency | undefined;
 }
 
-const PoolAction: FC<Props> = ({ holdingTicket, ticketPrice, poolId, roundId, currency }) => {
+const PoolAction: FC<Props> = ({ holdingTicket, poolId, roundId }) => {
   const { isLoggedIn, status } = useAuth();
   const setPoolId = useBuyTicketStore.use.setPoolId();
 
@@ -41,7 +38,7 @@ const PoolAction: FC<Props> = ({ holdingTicket, ticketPrice, poolId, roundId, cu
         </Button>
       </VStack>
     );
-  }, [holdingTicket, ticketPrice]);
+  }, [holdingTicket, poolId, setPoolId]);
 
   const renderComponent = useMemo(() => {
     if (status === 'waiting') return <Spinner className="w-8 h-8 text-white" />;
@@ -57,7 +54,7 @@ const PoolAction: FC<Props> = ({ holdingTicket, ticketPrice, poolId, roundId, cu
     <div>
       {renderComponent}
 
-      <BuyTicketDrawer ticketPrice={ticketPrice} poolId={poolId || 0} roundId={roundId} currency={currency} />
+      <BuyTicketDrawer poolId={poolId || 0} roundId={roundId} />
     </div>
   );
 };

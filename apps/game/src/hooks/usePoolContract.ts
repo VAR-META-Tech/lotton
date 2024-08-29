@@ -58,6 +58,5 @@ export function usePoolContract() {
 
       return await poolContract?.buyTicket(provider, sender, messageBody);
     },
-
   };
 }

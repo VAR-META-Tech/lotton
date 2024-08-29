@@ -1,4 +1,4 @@
-import { createInfiniteQuery, createQuery } from 'react-query-kit';
+import { createQuery } from 'react-query-kit';
 
 import { getBalanceRequest } from './requests';
 import type { IGetBalanceParams, IGetBalanceResponse } from './types';

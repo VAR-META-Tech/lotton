@@ -2,27 +2,32 @@ import * as React from 'react';
 import { Icons } from '@/assets/icons';
 import { FCC } from '@/types';
 
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 
 import BuyTicketForm from './BuyTicketForm';
 import BuyTicketNote from './BuyTicketNote';
 import { useBuyTicketStore } from '@/stores/BuyTicketStore';
-import { IGetPoolDetailCurrency } from '@/apis/pools';
+import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
 
 interface Props {
-  ticketPrice: number;
   poolId: number;
   roundId: number;
-  currency: IGetPoolDetailCurrency | undefined;
 }
 
-const BuyTicketDrawer: FCC<Props> = ({ children, ticketPrice, poolId, roundId, currency }) => {
+const BuyTicketDrawer: FCC<Props> = ({ children, poolId, roundId }) => {
   const currentPoolId = useBuyTicketStore.use.poolId();
   const setPoolId = useBuyTicketStore.use.setPoolId();
+
+  const { currency, pool } = useGetPoolDetail({
+    poolId: poolId || 0,
+    isActive: true,
+  });
 
   const handleClose = () => {
     setPoolId(undefined);
   };
+
+  const ticketPrice = Number(pool?.ticketPrice || 0);
 
   return (
     <Drawer open={currentPoolId === poolId} onClose={handleClose}>

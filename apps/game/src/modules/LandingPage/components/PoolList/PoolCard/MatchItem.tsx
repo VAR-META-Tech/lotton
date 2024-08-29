@@ -2,7 +2,6 @@ import React, { forwardRef, HTMLAttributes, memo, PropsWithChildren } from 'reac
 
 import { cn } from '@/lib/utils';
 import { VStack } from '@/components/ui/Utilities';
-import { FCC } from '@/types';
 
 interface Props extends PropsWithChildren, HTMLAttributes<HTMLDivElement> {
   title: string;

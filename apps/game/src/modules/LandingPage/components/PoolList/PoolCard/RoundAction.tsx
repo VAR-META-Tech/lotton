@@ -26,7 +26,7 @@ const RoundAction: FC<Props> = ({ minRound, maxRound, currentRound, setCurrentRo
 
       setCurrentRound((prev) => prev - 1);
     },
-    [currentRound, maxRound, minRound, setCurrentRound]
+    [maxRound, minRound, roundNumber, setCurrentRound]
   );
 
   return (

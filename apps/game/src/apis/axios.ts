@@ -4,10 +4,13 @@ import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 
 import { env } from '@/lib/const';
+import { refreshTokenRequest } from './auth';
 
 export const request = axios.create({
   baseURL: env.API_URL,
 });
+
+let isRefreshPending = false;
 
 const onRefreshToken = async () => {
   const store = useUserStore.getState();
@@ -15,16 +18,13 @@ const onRefreshToken = async () => {
 
   if (refreshToken) {
     try {
-      // TODO: REFRESH TOKEN
-      // const {
-      //   data: { accessToken, refreshToken: newRefreshToken },
-      // } = await refreshTokenRequest(refreshToken);
+      const { data } = await refreshTokenRequest(refreshToken);
+      console.log('🚀 ~ onRefreshToken ~ data:', data);
 
-      // store?.setAccessToken(accessToken);
-      // store?.setRefreshToken(newRefreshToken);
+      store?.setAccessToken(data?.accessToken);
+      store?.setRefreshToken(data?.refreshToken);
 
-      return '';
-      // eslint-disable-next-line no-unreachable
+      return data?.accessToken;
     } catch (e) {
       Router.replace('/');
       store?.logout();
@@ -46,13 +46,16 @@ const handleSuccess = (res: AxiosResponse) => {
 const handleError = async (error: any) => {
   const originalRequest = error.config!;
   const data = error?.response?.data as any;
-  const statusCode = error?.response?.status;
 
-  if (statusCode === 401 && !originalRequest?._retry) {
-    originalRequest._retry = true;
+  if (data?.meta?.message === 'Unauthorized' && data?.meta?.code === 401 && !isRefreshPending) {
+    isRefreshPending = true;
 
     const token = await onRefreshToken();
+
+    if (token) isRefreshPending = false;
+
     axios.defaults.headers.Authorization = `Bearer ${token}`;
+
     return request(originalRequest);
   }
 
