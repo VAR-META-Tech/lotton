@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { VStack } from '@/components/ui/Utilities';
 
 import NavigateTab from './components/NavigateTab';
+import { toast } from 'sonner';
 
 const MainLayout: FCC = ({ children }) => {
   const wallet = useTonWallet();
@@ -17,13 +18,16 @@ const MainLayout: FCC = ({ children }) => {
 
   const { mutate: loginByWallet } = useLoginByWalletMutation({
     onSuccess: (data) => {
+      toast.success('Connect wallet successful');
       setUserData({
         accessToken: data?.tokens?.accessToken,
         refreshToken: data?.tokens?.refreshToken,
         user: data?.user,
       });
     },
-    onError: onMutateError,
+    onError: () => {
+      toast.error('Connect wallet failed');
+    },
   });
 
   useEffect(() => {

@@ -22,7 +22,6 @@ interface Props {
 }
 
 const PoolPrizePot: FC<Props> = ({ ticketPrice, currentRound, isEndRound = false, poolId, roundId, currency }) => {
-
   const renderContent = useMemo(() => {
     if (!isEndRound) {
       return (
@@ -35,13 +34,19 @@ const PoolPrizePot: FC<Props> = ({ ticketPrice, currentRound, isEndRound = false
 
                   <HStack pos={'center'} spacing={8}>
                     <Image src={'/images/tokens/ton_symbol.webp'} width={30} height={30} alt="ton" />
-                    <span className="text-primary text-2xl font-semibold">{`${prettyNumber(2500)} ${currency?.symbol || ""}`}</span>
+                    <span className="text-primary text-2xl font-semibold">{`${prettyNumber(2500)} ${currency?.symbol || ''}`}</span>
                   </HStack>
 
                   <div className="text-xs text-gray-color text-center">{`~ ${prettyNumber(10000)} USD`}</div>
                 </div>
 
-                <PoolAction holdingTicket={0} ticketPrice={ticketPrice} poolId={poolId || 0} roundId={roundId} currency={currency} />
+                <PoolAction
+                  holdingTicket={0}
+                  ticketPrice={ticketPrice}
+                  poolId={poolId || 0}
+                  roundId={roundId}
+                  currency={currency}
+                />
               </VStack>
             </motion.div>
           </AnimatePresence>

@@ -6,7 +6,6 @@ import Pool from '@/contracts/pool';
 import { useEffect, useMemo, useState } from 'react';
 import { env } from '@/lib/const';
 import { useTonWallet } from '@tonconnect/ui-react';
-import { WalletContractV4 } from '@ton/ton';
 
 interface IBuyTicket {
   poolId: number;
@@ -24,13 +23,11 @@ export function usePoolContract() {
     if (!client) return;
 
     return client.provider(Address.parse(env.CONTRACT_ADDRESS));
-  }, [client])
+  }, [client]);
 
   const poolContract = useAsyncInitialize(async () => {
     if (!client) return;
-    const contract = new Pool(
-      Address.parse(env.CONTRACT_ADDRESS)
-    );
+    const contract = new Pool(Address.parse(env.CONTRACT_ADDRESS));
 
     return client.open(contract) as OpenedContract<Pool>;
   }, [client]);
@@ -52,22 +49,6 @@ export function usePoolContract() {
     buyTicket: async (data: IBuyTicket) => {
       if (!provider || !wallet) return;
 
-      // TODO: CHECK STATUS TRANSACTION
-      // const publicKey = wallet?.account?.publicKey;
-
-      // if (!publicKey) {
-      //   throw new Error('Public key is not available');
-      // }
-
-      // const walletContractV4 = WalletContractV4.create({
-      //   publicKey: Buffer.from(publicKey, 'hex'),
-      //   workchain: 0
-      // });
-
-      // const walletContract = client?.open(walletContractV4);
-      // const seqno = await walletContract?.getSeqno();
-      // console.log("seqno:", seqno);
-
       const messageBody = beginCell()
         .storeUint(3748203161, 32)
         .storeInt(data?.poolId, 257) //poolId
@@ -77,5 +58,6 @@ export function usePoolContract() {
 
       return await poolContract?.buyTicket(provider, sender, messageBody);
     },
+
   };
 }
