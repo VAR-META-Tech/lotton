@@ -347,14 +347,56 @@ export class PoolService {
     }
   }
 
+  async collectPrizes(
+    user: User,
+    id: number,
+    pagination: QueryPaginationDto,
+  ): Promise<FetchResult<Pool>> {
+    const queryBuilder = this.poolRepository
+      .createQueryBuilder('pool')
+      .leftJoin('pool.rounds', 'rounds')
+      .leftJoin('rounds.ticket', 'ticket')
+      .leftJoin('pool.currency', 'currency')
+      .where('ticket.userWallet = :userWallet', { userWallet: user.wallet })
+      .andWhere('pool.id = :poolId', { poolId: id })
+      .andWhere('ticket.winningMatch > 0')
+      .select([
+        'pool.id as poolId',
+        'pool.name as poolName',
+        'currency.name as currencyName',
+        'currency.symbol as currencySymbol',
+        'currency.decimals as currencyDecimals',
+        'currency.contractAddress as contractAddress',
+        'pool.sequency as sequency',
+        'pool.totalRounds as totalRounds',
+        'pool.ticketPrice as ticketPrice',
+        'ticket.winningMatch as winningMatch',
+        'ticket.id as ticketId',
+        '1+2 as winningPrize', // TODO: calculate ticket prize
+        'ticket.winningCode as winningCode',
+        'ticket.code as ticketCode',
+        'ticket.winningMatch as winningMatch',
+        'ticket.userWallet as userWallet',
+        'rounds.id as roundId',
+        'rounds.roundNumber as roundNumber',
+        'rounds.startTime as roundStartTime',
+        'rounds.endTime as roundEndTime',
+      ]);
+    return await paginateEntities<Pool>(
+      queryBuilder,
+      pagination,
+      FetchType.RAW,
+    );
+  }
   mapTicket(data: FetchResult<Pool>, rounds: any[]) {
     return {
       ...data,
       items: data.items.map((item) => ({
         ...item,
         rounds: item.rounds.map((round) => ({
-          totalTicket: rounds.find((item) => item.roundId == round.id)
-            .totalTicket,
+          totalTicket: Number(
+            rounds.find((item) => item.roundId == round.id)?.totalTicket,
+          ),
           ...round,
         })),
       })),

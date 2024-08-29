@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { GetUser } from '@/common/decorators/user.decorator';
 import { User } from '@/database/entities';
@@ -56,6 +56,20 @@ export class PoolController {
     @Query() pagination: QueryPaginationDto,
   ) {
     return await this.poolService.findJoinedPools(user, query, pagination);
+  }
+
+  @Get('collect-prize/:id')
+  @ApiOperation({
+    description: 'summary user claimed',
+    summary: 'User claimed pool',
+  })
+  @UseGuards(UserJwtGuard)
+  async collectPrizes(
+    @GetUser('user') user: User,
+    @Param('id') id: string,
+    @Query() pagination: QueryPaginationDto,
+  ) {
+    return await this.poolService.collectPrizes(user, +id, pagination);
   }
 
   @Get(':id')

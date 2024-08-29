@@ -12,7 +12,6 @@ import {
   UserTicket,
 } from '@/database/entities';
 
-import { ServicesModule } from '../services/services.module';
 import { ManagerService } from './manager.service';
 
 @Module({
@@ -27,7 +26,7 @@ import { ManagerService } from './manager.service';
       UserTicket,
       PoolRound,
     ]),
-    ServicesModule,
+    // ServicesModule,
   ],
   providers: [ManagerService],
   exports: [ManagerService],
