@@ -40,15 +40,9 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, isLoading = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
-    return (
-      <HStack spacing={8} className="w-full">
-        {!!isLoading && <Spinner />}
-
-        <Comp className={cn('w-full', buttonVariants({ variant, size, className }))} ref={ref} {...props} />
-      </HStack>
-    );
+    return <Comp className={cn('w-full', buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
   }
 );
 Button.displayName = 'Button';

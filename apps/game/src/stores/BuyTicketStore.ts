@@ -7,15 +7,13 @@ export interface IBuyTicketStore {
   clear: () => void;
 }
 
-const useBaseBuyTicketStore = create<IBuyTicketStore>()(
-  (set) => ({
-    poolId: undefined,
-    setPoolId: (data) => set(() => ({ poolId: data })),
-    clear: () =>
-      set(() => ({
-        poolId: undefined,
-      })),
-  }),
-);
+const useBaseBuyTicketStore = create<IBuyTicketStore>()((set) => ({
+  poolId: undefined,
+  setPoolId: (data) => set(() => ({ poolId: data })),
+  clear: () =>
+    set(() => ({
+      poolId: undefined,
+    })),
+}));
 
 export const useBuyTicketStore = createSelectorFunctions(useBaseBuyTicketStore);
