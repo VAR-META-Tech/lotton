@@ -7,6 +7,7 @@ import {
   Pool,
   PoolPrize,
   PoolRound,
+  Prizes,
   Token,
   TokenPrice,
   Transaction,
@@ -30,6 +31,7 @@ const entities = [
   PoolPrize,
   PoolRound,
   UserTicket,
+  Prizes,
 ];
 
 export default entities;

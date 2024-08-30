@@ -30,6 +30,9 @@ export class UserTicket extends BaseTime {
   @Column({ nullable: true })
   winningCode: string;
 
+  @Column({ default: false })
+  claimed: boolean;
+
   @Column({ nullable: true, zerofill: true })
   winningMatch: number;
 

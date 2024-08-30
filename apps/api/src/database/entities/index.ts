@@ -6,6 +6,7 @@ export * from './network_token.entity';
 export * from './pool.entity';
 export * from './pool_prize.entity';
 export * from './pool_round.entity';
+export * from './prizes.entity';
 export * from './token.entity';
 export * from './token_price.entity';
 export * from './transaction.entity';

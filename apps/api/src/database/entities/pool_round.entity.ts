@@ -20,6 +20,9 @@ export class PoolRound extends BaseTime {
   })
   pool: Pool;
 
+  @Column({ nullable: true })
+  roundIdOnChain: number;
+
   @Column()
   roundNumber: number;
 
