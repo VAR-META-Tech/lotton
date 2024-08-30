@@ -59,7 +59,7 @@ export class CrawlWorkerService {
       const latestBlockNumber = (await this.getContractState()).lastTransaction
         .lt;
 
-      // if (+currentBlockNumber >= +latestBlockNumber) return;
+      if (+currentBlockNumber >= +latestBlockNumber) return;
 
       const transactions = await this.getTransactions(
         latestBlockNumber,
