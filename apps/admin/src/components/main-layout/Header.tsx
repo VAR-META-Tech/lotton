@@ -29,7 +29,7 @@ const Header = () => {
           {open ? <CircleX /> : <Menu />}
         </Button>
 
-        <HStack spacing={4}>
+        <HStack spacing={4} className="md:flex hidden">
           <Show when={!!id || pathname.includes('create')}>
             <Button size={'sm'} variant="ghost" onClick={() => route.back()}>
               <ChevronLeft />
@@ -37,7 +37,7 @@ const Header = () => {
           </Show>
 
           {menuConfigs.map((menu, index) => (
-            <p key={index} className='capitalize text-2xl text-[#000000] hidden md:block'>
+            <p key={index} className='capitalize text-2xl text-[#000000]'>
               {pathname.includes(menu.link) && !!id ? (
                 `${menu.name.split(' ')[0]} detail`
               ) : pathname.includes(menu.link) && pathname.includes('create') ? (
