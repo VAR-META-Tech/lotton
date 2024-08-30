@@ -1,11 +1,11 @@
+import type { ContractProvider, DictionaryValue, TupleReader } from '@ton/core';
 import {
-  Dictionary,
-  DictionaryValue,
-  TupleReader,
-  beginCell,
   type Address,
+  beginCell,
   type Builder,
+  Dictionary,
   type Slice,
+  TupleBuilder,
 } from '@ton/core';
 
 export function loadTicketBoughtEvent(slice: Slice) {
@@ -280,13 +280,28 @@ function dictValueParserPool(): DictionaryValue<Pool> {
   };
 }
 
-export function loadTuplePool(source: TupleReader) {
-  const pools = Dictionary.loadDirect(
+function loadTuplePool(source: TupleReader) {
+  const _poolId = source.readBigNumber();
+  const _creator = source.readAddress();
+  const _rounds = Dictionary.loadDirect(
     Dictionary.Keys.BigInt(257),
-    dictValueParserPool(),
+    dictValueParserRoundConfig(),
     source.readCellOpt(),
-  ).values();
-  return { pools };
+  );
+  const _startTime = source.readBigNumber();
+  const _endTime = source.readBigNumber();
+  const _sequence = source.readBigNumber();
+  const _active = source.readBoolean();
+  return {
+    $$type: 'Pool' as const,
+    poolId: _poolId,
+    creator: _creator,
+    rounds: _rounds,
+    startTime: _startTime,
+    endTime: _endTime,
+    sequence: _sequence,
+    active: _active,
+  };
 }
 
 export function loadPoolCreatedEvent(slice: Slice) {
@@ -313,4 +328,24 @@ export function loadPoolCreatedEvent(slice: Slice) {
     sequence: _sequence,
     creator: _creator,
   };
+}
+
+export async function getCurrentPool(provider: ContractProvider) {
+  const builder = new TupleBuilder();
+  const source = (await provider.get('currentPool', builder.build())).stack;
+  const result = Dictionary.loadDirect(
+    Dictionary.Keys.BigInt(257),
+    dictValueParserPool(),
+    source.readCellOpt(),
+  );
+  return result;
+}
+
+export async function getPoolById(provider: ContractProvider, poolId: bigint) {
+  const builder = new TupleBuilder();
+  builder.writeNumber(Number(poolId));
+  const source = (await provider.get('poolById', builder.build())).stack;
+  const result_p = source.readTupleOpt();
+  const result = result_p ? loadTuplePool(result_p) : null;
+  return result;
 }

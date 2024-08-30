@@ -16,8 +16,8 @@ import type { Pool, PoolRound } from '@/database/entities';
 import { getLogger } from '@/utils/logger';
 
 import {
+  getCurrentPool,
   loadGetterTupleUserTicket,
-  loadTuplePool,
   storeBuyTicket,
   storeCreatePool,
   storeDrawWinningNumbers,
@@ -80,7 +80,6 @@ export class RoundPrizesService {
     // this.createPool();
     // this.getListPools();
     // this.buyTickets();
-    // this.getListPools();
     // this.setAdmin();
     const pools = await this.getPoolsAvailable();
     for (const pool of pools) {
@@ -200,13 +199,11 @@ export class RoundPrizesService {
   }
 
   async getListPools() {
-    const currentPool = (
-      await this.tonClient
-        .provider(Address.parse(this.contractAddress))
-        .get('currentPool', [])
-    ).stack;
-
-    const { pools } = loadTuplePool(currentPool);
+    const pools = (
+      await getCurrentPool(
+        this.tonClient.provider(Address.parse(this.contractAddress)),
+      )
+    ).values();
     console.log(pools);
     console.log('get pools ok');
   }

@@ -52,6 +52,6 @@ export class Pool extends BaseTime {
   @OneToMany(() => PoolPrize, (poolPrize) => poolPrize.pool)
   poolPrizes: PoolPrize[];
 
-  @OneToMany(() => PoolRound, (round) => round.pool)
+  @OneToMany(() => PoolRound, (round) => round.poolIdOnChain)
   rounds: PoolRound[];
 }

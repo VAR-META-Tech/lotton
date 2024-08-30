@@ -1,12 +1,6 @@
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Pool, UserTicket } from '.';
+import { UserTicket } from '.';
 import { BaseTime } from './base/time.entity';
 
 @Entity()
@@ -14,11 +8,13 @@ export class PoolRound extends BaseTime {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Pool, (pool) => pool.poolPrizes, {
-    onDelete: 'CASCADE',
-    cascade: true,
-  })
-  pool: Pool;
+  // @ManyToOne(() => Pool, (pool) => pool.poolPrizes, {
+  //   onDelete: 'CASCADE',
+  //   cascade: true,
+  // })
+  // pool: Pool;
+  @Column({ nullable: true })
+  poolIdOnChain: number;
 
   @Column({ nullable: true })
   roundIdOnChain: number;

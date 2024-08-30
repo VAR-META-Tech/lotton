@@ -45,6 +45,7 @@ export class PoolService {
       pool.currency = await this.tokenRepository.findOne({
         where: { id: +createPoolDto.currency },
       });
+      pool.poolIdOnChain = createPoolDto.poolIdOnChain;
       pool.sequency = createPoolDto.sequency;
       pool.totalRounds = createPoolDto.totalRounds;
       pool.startTime = createPoolDto.startTime;
@@ -55,19 +56,20 @@ export class PoolService {
 
       await this.poolRepository.save(pool);
 
-      let startTime = createPoolDto.startTime;
-      for (let i = 1; i <= createPoolDto.totalRounds; i++) {
-        const endTime = dayjs(startTime)
-          .add(createPoolDto.sequency, 'seconds')
-          .toDate();
-        const round = new PoolRound();
-        round.startTime = dayjs(startTime).toDate();
-        round.endTime = endTime;
-        round.pool = pool;
-        round.roundNumber = i;
-        await this.roundRepository.save(round);
-        startTime = endTime;
-      }
+      // Create rounds
+      // let startTime = createPoolDto.startTime;
+      // for (let i = 1; i <= createPoolDto.totalRounds; i++) {
+      //   const endTime = dayjs(startTime)
+      //     .add(createPoolDto.sequency, 'seconds')
+      //     .toDate();
+      //   const round = new PoolRound();
+      //   round.startTime = dayjs(startTime).toDate();
+      //   round.endTime = endTime;
+      //   round.pool = pool;
+      //   round.roundNumber = i;
+      //   await this.roundRepository.save(round);
+      //   startTime = endTime;
+      // }
       const poolPrizes = createPoolDto.poolPrizes.map((poolDto) => {
         const poolPrize = new PoolPrize();
         poolPrize.pool = pool;
@@ -84,122 +86,122 @@ export class PoolService {
   }
 
   async update(poolId: number, updatePoolDto: UpdatePoolDto) {
-    const poolExist = await this.findOne(poolId);
-    if (!poolExist) throw Causes.NOT_FOUND('Pool');
+    // const poolExist = await this.findOne(poolId);
+    // if (!poolExist) throw Causes.NOT_FOUND('Pool');
 
-    if (dayjs(poolExist.startTime) > dayjs()) {
-      const pool = await this.newPoolForUpdate({
-        ...updatePoolDto,
-        startTime: updatePoolDto?.startTime ?? poolExist.startTime,
-        sequency: updatePoolDto?.sequency ?? poolExist.sequency,
-        totalRounds: updatePoolDto?.totalRounds ?? poolExist.totalRounds,
-      });
-      await this.poolRepository.update(poolId, pool);
+    // if (dayjs(poolExist.startTime) > dayjs()) {
+    //   const pool = await this.newPoolForUpdate({
+    //     ...updatePoolDto,
+    //     startTime: updatePoolDto?.startTime ?? poolExist.startTime,
+    //     sequency: updatePoolDto?.sequency ?? poolExist.sequency,
+    //     totalRounds: updatePoolDto?.totalRounds ?? poolExist.totalRounds,
+    //   });
+    //   await this.poolRepository.update(poolId, pool);
 
-      const numChangeRound = poolExist.totalRounds - updatePoolDto.totalRounds;
-      const isChangeStartTime = poolExist.startTime !== updatePoolDto.startTime;
+    //   const numChangeRound = poolExist.totalRounds - updatePoolDto.totalRounds;
+    //   const isChangeStartTime = poolExist.startTime !== updatePoolDto.startTime;
 
-      if (Math.abs(numChangeRound) > 0 || isChangeStartTime) {
-        await this.poolRoundService.deleteRoundsFromTime(
-          poolId,
-          poolExist.startTime,
-        );
+    //   if (Math.abs(numChangeRound) > 0 || isChangeStartTime) {
+    //     await this.poolRoundService.deleteRoundsFromTime(
+    //       poolId,
+    //       poolExist.startTime,
+    //     );
 
-        let startTime = updatePoolDto.startTime;
-        for (let i = 1; i <= updatePoolDto.totalRounds; i++) {
-          const endTime = dayjs(startTime)
-            .add(updatePoolDto.sequency, 'days')
-            .toDate();
-          const round = new PoolRound();
-          round.startTime = dayjs(startTime).toDate();
-          round.endTime = endTime;
-          round.pool = poolExist;
-          round.roundNumber = i;
-          await this.poolRoundService.create(round);
-          startTime = endTime;
-        }
+    //     let startTime = updatePoolDto.startTime;
+    //     for (let i = 1; i <= updatePoolDto.totalRounds; i++) {
+    //       const endTime = dayjs(startTime)
+    //         .add(updatePoolDto.sequency, 'days')
+    //         .toDate();
+    //       const round = new PoolRound();
+    //       round.startTime = dayjs(startTime).toDate();
+    //       round.endTime = endTime;
+    //       round.pool = poolExist;
+    //       round.roundNumber = i;
+    //       await this.poolRoundService.create(round);
+    //       startTime = endTime;
+    //     }
 
-        const prizes: Partial<PoolPrize>[] = [];
-        for (const prize of updatePoolDto.poolPrizes) {
-          prizes.push({
-            allocation: prize.allocation,
-            pool: poolExist,
-            matchNumber: prize.matchNumber,
-          });
-        }
-        await this.poolPrizesRepository
-          .createQueryBuilder()
-          .insert()
-          .into(PoolPrize)
-          .values(prizes)
-          .orUpdate(['allocation'], ['poolId', 'matchNumber'])
-          .execute();
-      }
-    } else {
-      if (poolExist.name !== updatePoolDto.name)
-        throw new BadRequestException('Name cannot be changed');
-      if (poolExist.currency.id !== updatePoolDto.currency)
-        throw new BadRequestException('Currency cannot be changed');
-      if (
-        dayjs(poolExist.startTime).toISOString() !==
-        dayjs(updatePoolDto.startTime).toISOString()
-      )
-        throw new BadRequestException('Start time cannot be changed');
-      if (poolExist.sequency !== updatePoolDto.sequency)
-        throw new BadRequestException('Sequency cannot be changed');
-      if (Number(poolExist.ticketPrice) !== Number(updatePoolDto.ticketPrice))
-        throw new BadRequestException('Ticket price cannot be changed');
+    //     const prizes: Partial<PoolPrize>[] = [];
+    //     for (const prize of updatePoolDto.poolPrizes) {
+    //       prizes.push({
+    //         allocation: prize.allocation,
+    //         pool: poolExist,
+    //         matchNumber: prize.matchNumber,
+    //       });
+    //     }
+    //     await this.poolPrizesRepository
+    //       .createQueryBuilder()
+    //       .insert()
+    //       .into(PoolPrize)
+    //       .values(prizes)
+    //       .orUpdate(['allocation'], ['poolId', 'matchNumber'])
+    //       .execute();
+    //   }
+    // } else {
+    //   if (poolExist.name !== updatePoolDto.name)
+    //     throw new BadRequestException('Name cannot be changed');
+    //   if (poolExist.currency.id !== updatePoolDto.currency)
+    //     throw new BadRequestException('Currency cannot be changed');
+    //   if (
+    //     dayjs(poolExist.startTime).toISOString() !==
+    //     dayjs(updatePoolDto.startTime).toISOString()
+    //   )
+    //     throw new BadRequestException('Start time cannot be changed');
+    //   if (poolExist.sequency !== updatePoolDto.sequency)
+    //     throw new BadRequestException('Sequency cannot be changed');
+    //   if (Number(poolExist.ticketPrice) !== Number(updatePoolDto.ticketPrice))
+    //     throw new BadRequestException('Ticket price cannot be changed');
 
-      if (!this.checkPoolPrizes(poolExist.poolPrizes, updatePoolDto.poolPrizes))
-        throw new BadRequestException('Pool prizes cannot be changed');
+    //   if (!this.checkPoolPrizes(poolExist.poolPrizes, updatePoolDto.poolPrizes))
+    //     throw new BadRequestException('Pool prizes cannot be changed');
 
-      const countRoundOnGoing = await this.poolRoundService.countOnGoing(
-        poolId,
-      );
+    //   const countRoundOnGoing = await this.poolRoundService.countOnGoing(
+    //     poolId,
+    //   );
 
-      if (updatePoolDto.totalRounds > poolExist.totalRounds) {
-        // Add new
-        let startTime = poolExist.endTime;
-        for (
-          let i = 1;
-          i <= updatePoolDto.totalRounds - poolExist.totalRounds;
-          i++
-        ) {
-          const endTime = dayjs(startTime)
-            .add(updatePoolDto.sequency, 'days')
-            .toDate();
-          const round = new PoolRound();
-          round.startTime = dayjs(startTime).toDate();
-          round.endTime = endTime;
-          round.pool = poolExist;
-          round.roundNumber = poolExist.totalRounds + i;
-          await this.poolRoundService.create(round);
-          startTime = endTime;
-        }
-      }
+    //   if (updatePoolDto.totalRounds > poolExist.totalRounds) {
+    //     // Add new
+    //     let startTime = poolExist.endTime;
+    //     for (
+    //       let i = 1;
+    //       i <= updatePoolDto.totalRounds - poolExist.totalRounds;
+    //       i++
+    //     ) {
+    //       const endTime = dayjs(startTime)
+    //         .add(updatePoolDto.sequency, 'days')
+    //         .toDate();
+    //       const round = new PoolRound();
+    //       round.startTime = dayjs(startTime).toDate();
+    //       round.endTime = endTime;
+    //       round.pool = poolExist;
+    //       round.roundNumber = poolExist.totalRounds + i;
+    //       await this.poolRoundService.create(round);
+    //       startTime = endTime;
+    //     }
+    //   }
 
-      if (updatePoolDto.totalRounds < poolExist.totalRounds) {
-        // Remove some
-        if (countRoundOnGoing <= updatePoolDto.totalRounds) {
-          await this.poolRoundService.deleteRoundGreaterRoundNumber(
-            poolId,
-            updatePoolDto.totalRounds + 1,
-          );
-        } else if (countRoundOnGoing > updatePoolDto.totalRounds) {
-          throw new BadRequestException(
-            'Total number of rounds cannot be changed to less than number of on-going rounds',
-          );
-        }
-      }
+    //   if (updatePoolDto.totalRounds < poolExist.totalRounds) {
+    //     // Remove some
+    //     if (countRoundOnGoing <= updatePoolDto.totalRounds) {
+    //       await this.poolRoundService.deleteRoundGreaterRoundNumber(
+    //         poolId,
+    //         updatePoolDto.totalRounds + 1,
+    //       );
+    //     } else if (countRoundOnGoing > updatePoolDto.totalRounds) {
+    //       throw new BadRequestException(
+    //         'Total number of rounds cannot be changed to less than number of on-going rounds',
+    //       );
+    //     }
+    //   }
 
-      const pool = await this.newPoolForUpdate({
-        ...updatePoolDto,
-        startTime: updatePoolDto?.startTime ?? poolExist.startTime,
-        sequency: updatePoolDto?.sequency ?? poolExist.sequency,
-        totalRounds: updatePoolDto?.totalRounds ?? poolExist.totalRounds,
-      });
-      await this.poolRepository.update(poolId, pool);
-    }
+    //   const pool = await this.newPoolForUpdate({
+    //     ...updatePoolDto,
+    //     startTime: updatePoolDto?.startTime ?? poolExist.startTime,
+    //     sequency: updatePoolDto?.sequency ?? poolExist.sequency,
+    //     totalRounds: updatePoolDto?.totalRounds ?? poolExist.totalRounds,
+    //   });
+    //   await this.poolRepository.update(poolId, pool);
+    // }
 
     return true;
   }

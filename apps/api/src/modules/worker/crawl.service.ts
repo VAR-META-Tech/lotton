@@ -2,18 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Transaction } from '@ton/core';
-import { Address, Cell, Slice } from '@ton/core';
+import { Address, TupleBuilder } from '@ton/core';
 import { TonClient } from '@ton/ton';
+import dayjs from 'dayjs';
 import TonWeb from 'tonweb';
 import { Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
-import { Pool, PoolRound, Prizes, Token } from '@/database/entities';
+import type { Pool, Token } from '@/database/entities';
+import { PoolRound } from '@/database/entities';
+import { Prizes } from '@/database/entities';
 import { UserTicket } from '@/database/entities';
 import { Transaction as TransactionDB } from '@/database/entities';
 import { LatestBlock } from '@/database/entities';
 
 import {
+  getCurrentPool,
+  getPoolById,
   loadBuyTicket,
   loadPoolCreatedEvent,
   loadTicketBoughtEvent,
@@ -45,11 +50,10 @@ export class CrawlWorkerService {
       }),
     });
 
-    this.gameContractAddress = this.configService.get(
-      'contract.gameContractAddress',
-      {
+    this.gameContractAddress = Address.parse(
+      this.configService.get('contract.gameContractAddress', {
         infer: true,
-      },
+      }),
     );
   }
 
@@ -77,9 +81,9 @@ export class CrawlWorkerService {
           const op = body.loadUint(32);
 
           switch (op) {
-            // case 2004140043:
-            //   this.createPoolEvent(tx);
-            //   break;
+            case 2004140043:
+              this.createPoolEvent(tx);
+              break;
             case 3748203161:
               this.buyTicketsEvent(tx);
               break;
@@ -246,8 +250,54 @@ export class CrawlWorkerService {
     const originalBody = outMsgs?.body.beginParse();
     const body = originalBody.clone();
     const payload = loadPoolCreatedEvent(originalBody);
+    const poolIdOnChain = payload.poolId;
+
+    const pools = await this.getPools();
+    const getPool = pools.find((p) => p.poolId === poolIdOnChain);
+    if (!getPool) return;
+    const rounds = getPool.rounds.values();
+
+    await this.poolRoundRepository
+      .createQueryBuilder()
+      .insert()
+      .into(PoolRound)
+      .values(
+        rounds.map((round) => ({
+          poolIdOnChain: Number(round.poolId),
+          roundIdOnChain: Number(round.roundId),
+          roundNumber: Number(round.roundId),
+          startTime: dayjs.unix(Number(round.startTime)).toISOString(),
+          endTime: dayjs.unix(Number(round.endTime)).toISOString(),
+        })),
+      )
+      .orUpdate(
+        ['roundNumber', 'startTime', 'endTime'],
+        ['poolIdOnChain', 'roundIdOnChain'],
+      )
+      .execute();
 
     return { payload, body };
+  }
+
+  async getPools() {
+    const pools = (
+      await getCurrentPool(this.tonClient.provider(this.gameContractAddress))
+    ).values();
+
+    return pools;
+  }
+
+  async getPoolIdOnChange(poolId: number) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(BigInt(poolId));
+
+    const currentPool = await getPoolById(
+      this.tonClient.provider(this.gameContractAddress),
+      BigInt(poolId),
+    );
+
+    // const result = currentPool.readTupleOpt();
+    // return result ? loadTuplePool(result) : null;
   }
 
   async updateBlockLt(lt: string) {
