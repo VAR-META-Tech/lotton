@@ -18,7 +18,7 @@ import { QueryPaginationDto } from '@/shared/dto/pagination.query';
 import { AdminJwtGuard } from '../auth/guards/admin_jwt.guard';
 import { UserJwtGuard } from '../auth/guards/user_jwt.guard';
 import { CreatePoolDto } from './dto/create-pool.dto';
-import { PoolQueryDto, UserPoolDto } from './dto/get-pool.query';
+import { ClaimDto, PoolQueryDto, UserPoolDto } from './dto/get-pool.query';
 import { UpdatePoolDto } from './dto/update-pool.dto';
 import { PoolService } from './pool.service';
 
@@ -58,7 +58,7 @@ export class PoolController {
     return await this.poolService.findJoinedPools(user, query, pagination);
   }
 
-  @Get('collect-prize/:id')
+  @Get('collect-prize')
   @ApiOperation({
     description: 'summary user claimed',
     summary: 'User claimed pool',
@@ -66,10 +66,23 @@ export class PoolController {
   @UseGuards(UserJwtGuard)
   async collectPrizes(
     @GetUser('user') user: User,
-    @Param('id') id: string,
+    @Query() claimDto: ClaimDto,
     @Query() pagination: QueryPaginationDto,
   ) {
-    return await this.poolService.collectPrizes(user, +id, pagination);
+    return await this.poolService.collectPrizes(user, claimDto, pagination);
+  }
+
+  @Get('claim/signature')
+  @ApiOperation({
+    description: `
+    const encode = Buffer.from(signature, 'base64');
+    const signatureCell = beginCell().storeBuffer(encode).endCell();
+    TODO:// send signatureCell to SC`,
+    summary: 'User claimed pool signature',
+  })
+  @UseGuards(UserJwtGuard)
+  async claim(@GetUser('user') user: User, @Query() claimDto: ClaimDto) {
+    return await this.poolService.claim(user, claimDto);
   }
 
   @Get(':id')

@@ -1,11 +1,16 @@
 import { BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { mnemonicToWalletKey, sign } from '@ton/crypto';
+import { Address, beginCell } from '@ton/ton';
 import dayjs from 'dayjs';
+import type { SelectQueryBuilder } from 'typeorm';
 import { Repository } from 'typeorm';
 
 import { Causes } from '@/common/exceptions/causes';
+import type { StellaConfig } from '@/configs';
 import type { User } from '@/database/entities';
-import { Pool, PoolPrize, PoolRound, Token } from '@/database/entities';
+import { Pool, PoolPrize, PoolRound, Prizes, Token } from '@/database/entities';
 import type { QueryPaginationDto } from '@/shared/dto/pagination.query';
 import { PoolRoundStatusEnum } from '@/shared/enums';
 import type { FetchResult } from '@/utils/paginate';
@@ -13,6 +18,7 @@ import { FetchType, paginateEntities } from '@/utils/paginate';
 
 import { PoolRoundService } from '../poolRound/poolRound.service';
 import type { CreatePoolDto, PoolPrizes } from './dto/create-pool.dto';
+import type { ClaimDto } from './dto/get-pool.query';
 import {
   type PoolQueryDto,
   type UserPoolDto,
@@ -30,6 +36,7 @@ export class PoolService {
     @InjectRepository(PoolPrize)
     private readonly poolPrizesRepository: Repository<PoolPrize>,
     private readonly poolRoundService: PoolRoundService,
+    private readonly configService: ConfigService<StellaConfig>,
   ) {}
   async create(createPoolDto: CreatePoolDto) {
     try {
@@ -349,16 +356,18 @@ export class PoolService {
 
   async collectPrizes(
     user: User,
-    id: number,
+    claimDto: ClaimDto,
     pagination: QueryPaginationDto,
   ): Promise<FetchResult<Pool>> {
+    const { poolId, roundId } = claimDto;
     const queryBuilder = this.poolRepository
       .createQueryBuilder('pool')
       .leftJoin('pool.rounds', 'rounds')
       .leftJoin('rounds.ticket', 'ticket')
       .leftJoin('pool.currency', 'currency')
       .where('ticket.userWallet = :userWallet', { userWallet: user.wallet })
-      .andWhere('pool.id = :poolId', { poolId: id })
+      .andWhere('pool.id = :poolId', { poolId: poolId })
+      .andWhere('rounds.id = :roundId', { roundId: roundId })
       .andWhere('ticket.winningMatch > 0')
       .select([
         'pool.id as poolId',
@@ -388,17 +397,141 @@ export class PoolService {
       FetchType.RAW,
     );
   }
+
+  async claim(user: User, claimDto: ClaimDto) {
+    const { poolId, roundId } = claimDto;
+
+    const builder = await this.poolRepository
+      .createQueryBuilder('pool')
+      .leftJoin('pool.rounds', 'rounds')
+      .leftJoin('rounds.ticket', 'ticket')
+      .andWhere('pool.id = :poolId', { poolId: poolId })
+      .andWhere('rounds.id = :roundId', { roundId: roundId })
+      .andWhere(
+        'winningMatch IS NOT NULL AND ticket.winningMatch >= :winningMatch',
+        { winningMatch: 1 },
+      );
+
+    const allWinners = await this.countTicketWinning(builder);
+
+    const userWinning = await this.getUserTicketWinning(builder, user.wallet);
+
+    const allocation = await this.poolPrizesRepository
+      .createQueryBuilder()
+      .where('poolId = :poolId', { poolId: poolId })
+      .getMany();
+
+    const prizes = await this.getPrizes(poolId);
+
+    const prizesToClaim = this.calculateUserWinningPrize(
+      userWinning,
+      allocation,
+      prizes,
+      allWinners,
+    );
+
+    const signatureData = beginCell()
+      .storeAddress(Address.parse(user.wallet))
+      .storeCoins(prizesToClaim)
+      .endCell();
+    const keyPair = await mnemonicToWalletKey(
+      this.configService
+        .get('contract.adminWalletPhrase', { infer: true })
+        .split(''),
+    );
+    const signature = sign(signatureData.hash(), keyPair.secretKey).toString(
+      'base64',
+    );
+
+    return { signature };
+  }
+
+  async getUserTicketWinning(
+    builder: SelectQueryBuilder<Pool>,
+    wallet: string,
+  ) {
+    return await builder
+      .clone()
+      .andWhere('ticket.claimed = :claimed', { claimed: false })
+      .andWhere('ticket.userWallet = :userWallet', { userWallet: wallet })
+      .select([
+        'ticket.winningMatch as winningMatch',
+        'ticket.id as ticketId',
+        'ticket.winningCode as winningCode',
+        'ticket.code as ticketCode',
+      ])
+      .getRawMany();
+  }
+
+  async countTicketWinning(builder: SelectQueryBuilder<Pool>) {
+    return await builder
+      .clone()
+      .select([
+        'COUNT(ticket.id) as totalTickets',
+        'ticket.winningMatch as winningMatch',
+      ])
+      .groupBy('ticket.winningMatch')
+      .getRawMany();
+  }
+
+  async getPrizes(poolId: number) {
+    return await this.poolRepository
+      .createQueryBuilder('pool')
+      .leftJoin('pool.rounds', 'rounds')
+      .leftJoin(
+        Prizes,
+        'prizes',
+        'pool.poolIdOnChain = prizes.poolIdOnChain AND rounds.roundIdOnChain = prizes.roundIdOnChain',
+      )
+      .select([
+        'prizes.poolIdOnChain as poolIdOnChain',
+        'prizes.roundIdOnChain as roundIdOnChain',
+        'prizes.totalPrizes as totalPrizes',
+        'prizes.claimedPrizes as claimedPrizes',
+      ])
+      .where('poolId = :poolId', { poolId: poolId })
+      .getRawOne();
+  }
+
+  calculateUserWinningPrize(
+    userWinning,
+    allocation: Array<{
+      matchNumber: number;
+      allocation: number;
+    }>,
+    prizes: { totalPrizes: number },
+    allWinners: Array<{
+      totalTickets: number;
+      winningMatch: number;
+    }>,
+  ) {
+    return userWinning.reduce((acc, ticket) => {
+      const allocationPercent =
+        allocation.find((a) => a.matchNumber == ticket.winningMatch)
+          ?.allocation ?? 0;
+      const prizeForMatch = prizes.totalPrizes * (allocationPercent / 100);
+      const winningPrize =
+        prizeForMatch /
+          allWinners.find((a) => a.winningMatch == ticket.winningMatch)
+            ?.totalTickets ?? 0;
+
+      return acc + winningPrize;
+    }, 0);
+  }
+
   mapTicket(data: FetchResult<Pool>, rounds: any[]) {
     return {
       ...data,
       items: data.items.map((item) => ({
         ...item,
-        rounds: item.rounds.map((round) => ({
-          totalTicket: Number(
-            rounds.find((item) => item.roundId == round.id)?.totalTicket,
-          ),
-          ...round,
-        })),
+        rounds: item.rounds
+          .map((round) => ({
+            totalTicket: Number(
+              rounds.find((item) => item.roundId == round.id)?.totalTicket,
+            ),
+            ...round,
+          }))
+          .sort((a, b) => a.roundNumber - b.roundNumber),
       })),
     };
   }

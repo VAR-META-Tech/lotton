@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 import { PoolRoundStatusEnum } from '@/shared/enums';
 
@@ -37,4 +44,24 @@ export class UserPoolDto {
   @IsEnum(UserPoolType)
   @IsOptional()
   type?: UserPoolType;
+}
+
+export class ClaimDto {
+  @ApiProperty({
+    description: 'Pool id',
+    required: false,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  poolId: number;
+
+  @ApiProperty({
+    description: 'Pool id',
+    required: false,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  roundId: number;
 }

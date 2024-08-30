@@ -19,7 +19,7 @@ export class Pool extends BaseTime {
   @Column({ nullable: true })
   poolIdOnChain: number;
 
-  @Column({ length: 100, nullable: true })
+  @Column({ length: 255, nullable: true })
   name: string;
 
   @ManyToOne(() => Token)
