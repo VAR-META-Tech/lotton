@@ -215,7 +215,6 @@ export const PoolDetail = () => {
                   className="max-h-[2.125rem] bg-[#ECEEF1] border-[#8B8B94] rounded-sm"
                   placeholder="Select currency"
                   disabled={!isEdit || isStart}
-                  defaultValue={methods.getValues('currency')}
                 />
               </div>
 
