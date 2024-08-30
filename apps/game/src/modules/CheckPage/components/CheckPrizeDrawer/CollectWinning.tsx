@@ -7,6 +7,7 @@ import CollectTotal from './CollectTotal';
 import { useGetClaimSignatureMutation } from '@/apis/pools/mutations';
 import { usePoolContract } from '@/hooks/usePoolContract';
 import { useAuth } from '@/hooks/useAuth';
+import { env } from '@/lib/const';
 
 interface Props {
   poolId: number;
@@ -34,7 +35,7 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
   }, [items]);
 
   const feeValue = useMemo(() => {
-    return Number(totalRewardValue || 0) * 0.1;
+    return (Number(totalRewardValue || 0) * Number(env.CLAIM_FEE)) / 100;
   }, [totalRewardValue]);
 
   const totalValue = useMemo(() => {
@@ -46,7 +47,7 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
       claimPrize({
         poolId: poolId,
         roundId: roundId,
-        amount: totalValue || 0,
+        amount: totalValue * Math.pow(10, 9) || 0,
         receiver: user?.wallet || '',
         signature: data.signature,
       });
@@ -76,7 +77,7 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
         totalValue={totalValue}
         tokenSymbol={items[0]?.currencySymbol}
         usdValue={100000}
-        feeUsdValue={100000}
+        feeUsdValue={0}
         totalUsdValue={10000}
       />
 

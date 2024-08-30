@@ -1,7 +1,7 @@
 import { useTonClient } from './useTonClient';
 import { useAsyncInitialize } from './useAsyncInitialize';
 import { useTonConnect } from './useTonConnect';
-import { Address, beginCell, Cell, OpenedContract } from '@ton/core';
+import { Address, beginCell, OpenedContract } from '@ton/core';
 import Pool from '@/contracts/pool';
 import { useMemo } from 'react';
 import { env } from '@/lib/const';
@@ -61,7 +61,7 @@ export function usePoolContract() {
       .storeUint(1449747896, 32)
       .storeInt(data.poolId, 257)
       .storeInt(data.roundId, 257)
-      .storeCoins(data.amount * Math.pow(10, 9))
+      .storeCoins(data.amount)
       .storeAddress(Address.parse(data.receiver))
       .storeRef(signatureCell)
       .endCell();
