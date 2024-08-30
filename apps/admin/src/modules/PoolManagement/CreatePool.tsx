@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetTokens } from '@/apis/pool';
 import { useCreatePool } from '@/apis/pool/mutations';
@@ -17,6 +17,8 @@ import { HStack, VStack } from '@/components/ui/Utilities';
 
 import { poolSchema, PoolSchema } from './components/types';
 import { ROUTES } from '@/lib/routes';
+import { useCounterContract } from '@/hooks/useCounterContract';
+import { Address } from '@ton/core';
 
 export const SEQUENCY_OPTIONS = [
   { label: '1 day', value: '1' },
@@ -31,6 +33,8 @@ export const SEQUENCY_OPTIONS = [
 
 export const CreatePool = () => {
   const route = useRouter();
+  const { createPool, getLastTx } = useCounterContract();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const methods = useForm<PoolSchema>({
     resolver: zodResolver(poolSchema),
@@ -49,12 +53,51 @@ export const CreatePool = () => {
   const { mutate: createPoolMutate, isPending: isPendingCreate } = useCreatePool();
   const queryClient = useQueryClient();
 
-  const handleSubmit = (values: PoolSchema) => {
+  // const testLastTx = async () => {
+  //   try {
+  //     const result = await getLastTx();
+  
+  //     console.log({ result: result?.[0] });
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }
+  
+  const handleSubmit = async (values: PoolSchema) => {
+    setLoading(true);
+    const lastTx = await getLastTx();
+    const lastTxHash = lastTx?.[0].hash().toString('base64');
+    
+    await createPool({
+      jettonWallet: Address.parse(
+        '0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP',
+      ),
+      ticketPrice: BigInt(Number(values.ticketPrice)),
+      initialRounds: BigInt(Number(values.totalRounds)),
+      startTime: BigInt(new Date(values.startTime).getTime() / 1000),
+      endTime: BigInt(new Date(values.endTime).getTime() / 1000),
+      sequence: BigInt(Number(values.sequency) * 86400),
+      active: true,
+    })
+
+    let newLastTxHash = lastTxHash;
+    while (newLastTxHash === lastTxHash) {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      const updatedLastTx = await getLastTx();
+      // const isAbortedTx = updatedLastTx?.[0]?.description?.aborted;
+
+      // if (isAbortedTx) {
+      //   toast.error('Something went wrong!');
+      //   return;
+      // }
+      newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
+    }
+
     createPoolMutate(
       {
         name: values.name,
         currency: Number(values.currency),
-        sequency: Number(values.sequency),
+        sequency: Number(values.sequency) * 86400,
         totalRounds: Number(values.totalRounds),
         startTime: new Date(values.startTime).toISOString(),
         ticketPrice: Number(values.ticketPrice),
@@ -79,11 +122,13 @@ export const CreatePool = () => {
       },
       {
         onSuccess: () => {
+          setLoading(false)
           queryClient.invalidateQueries({ queryKey: ['/pools'] });
           route.push(ROUTES.POOL);
           toast.success('Create new pool successfully!');
         },
         onError: (error) => {
+          setLoading(false)
           toast.error(`${error.message}`);
         },
       }
@@ -111,6 +156,7 @@ export const CreatePool = () => {
   
   return (
     <VStack className="mx-10 mb-24 bg-white rounded-sm min-h-[12.5rem] px-24 py-12">
+      {/* <Button onClick={testLastTx}>Test get last TX</Button> */}
       <div>
         <FormWrapper methods={methods} onSubmit={handleSubmit}>
           <VStack>
@@ -280,7 +326,7 @@ export const CreatePool = () => {
                 Cancel
               </Button>
 
-              <Button type="submit" loading={isPendingCreate} variant="default" className="min-w-28 min-h-8 rounded-sm">
+              <Button type="submit" loading={isPendingCreate || loading} variant="default" className="min-w-28 min-h-8 rounded-sm">
                 Create
               </Button>
             </HStack>
