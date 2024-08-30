@@ -456,9 +456,16 @@ export class PoolService {
         allWinners,
       );
 
+      const token = await this.poolRepository
+        .createQueryBuilder('pool')
+        .leftJoin('pool.currency', 'currency')
+        .where('pool.id = :poolId', { poolId })
+        .select(['currency.decimals as decimals'])
+        .getRawOne();
+
       const signatureData = beginCell()
         .storeAddress(Address.parse(user.wallet))
-        .storeCoins(prizesToClaim)
+        .storeCoins(prizesToClaim * 10 ** (token.decimals ?? 0))
         .endCell();
       const keyPair = await mnemonicToWalletKey(
         this.configService
