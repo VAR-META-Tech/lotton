@@ -15,10 +15,12 @@ import { useUserStore } from '@/stores';
 const FormLogin = () => {
   const router = useRouter();
   const setAccessToken = useUserStore.use.setAccessToken();
+  const setRefreshToken = useUserStore.use.setRefreshToken();
 
   const { mutate: loginCredential, isPending } = useSignInWithGoogleMutation({
     onSuccess: ({ data: { tokens } }) => {
       setAccessToken(tokens.accessToken);
+      setRefreshToken(tokens.refreshToken);
       router.replace(ROUTES.POOL);
       toast.success('Login successfully!');
     },
