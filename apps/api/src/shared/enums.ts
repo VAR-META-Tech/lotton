@@ -10,6 +10,11 @@ export enum PoolRoundStatusEnum {
   DELETE = 'deleted',
 }
 
+export enum PoolStatusEnum {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
+
 export enum AdminStatusEnum {
   ACTIVE = 'active',
   INACTIVE = 'inactive',

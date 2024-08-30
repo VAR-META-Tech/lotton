@@ -6,6 +6,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+import { PoolStatusEnum } from '@/shared/enums';
+
 import { Token } from '.';
 import { BaseTime } from './base/time.entity';
 import { PoolPrize } from './pool_prize.entity';
@@ -36,6 +38,13 @@ export class Pool extends BaseTime {
 
   @Column()
   totalRounds: number;
+
+  @Column({
+    type: 'enum',
+    enum: PoolStatusEnum,
+    default: PoolStatusEnum.INACTIVE,
+  })
+  status: PoolStatusEnum;
 
   @Column({ type: 'decimal' })
   ticketPrice: number;

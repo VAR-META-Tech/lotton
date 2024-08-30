@@ -12,7 +12,7 @@ import type { StellaConfig } from '@/configs';
 import type { User } from '@/database/entities';
 import { Pool, PoolPrize, PoolRound, Prizes, Token } from '@/database/entities';
 import type { QueryPaginationDto } from '@/shared/dto/pagination.query';
-import { PoolRoundStatusEnum } from '@/shared/enums';
+import { PoolRoundStatusEnum, PoolStatusEnum } from '@/shared/enums';
 import type { FetchResult } from '@/utils/paginate';
 import { FetchType, paginateEntities } from '@/utils/paginate';
 
@@ -207,7 +207,9 @@ export class PoolService {
   async find(pagination: QueryPaginationDto, query: PoolQueryDto) {
     try {
       const { status, search } = query;
-      const queryBuilder = this.poolRepository.createQueryBuilder('pool');
+      const queryBuilder = this.poolRepository
+        .createQueryBuilder('pool')
+        .where('status = :status', { status: PoolStatusEnum.ACTIVE });
 
       if (search) {
         queryBuilder.andWhere('pool.name LIKE :search ', {
@@ -359,157 +361,177 @@ export class PoolService {
     claimDto: ClaimDto,
     pagination: QueryPaginationDto,
   ): Promise<FetchResult<Pool>> {
-    const { poolId, roundId } = claimDto;
-    const queryBuilder = this.poolRepository
-      .createQueryBuilder('pool')
-      .leftJoin('pool.rounds', 'rounds')
-      .leftJoin('rounds.ticket', 'ticket')
-      .leftJoin('pool.currency', 'currency')
-      .where('ticket.userWallet = :userWallet', { userWallet: user.wallet })
-      .andWhere('pool.id = :poolId', { poolId: poolId })
-      .andWhere('rounds.id = :roundId', { roundId: roundId })
-      .andWhere('ticket.winningMatch > 0')
-      .select([
-        'pool.id as poolId',
-        'pool.name as poolName',
-        'currency.name as currencyName',
-        'currency.symbol as currencySymbol',
-        'currency.decimals as currencyDecimals',
-        'currency.contractAddress as contractAddress',
-        'pool.sequency as sequency',
-        'pool.totalRounds as totalRounds',
-        'pool.ticketPrice as ticketPrice',
-        'ticket.winningMatch as winningMatch',
-        'ticket.id as ticketId',
-        '(SELECT (totalPrizes*(SELECT allocation from pool_prize where poolId = pool.id and winningMatch = ticket.winningMatch limit 1)/100)/(SELECT COUNT(user_ticket.id) FROM user_ticket where roundId = rounds.id and user_ticket.winningMatch = ticket.winningMatch group by user_ticket.winningMatch) from prizes where pool.poolIdOnChain = prizes.poolIdOnChain) as winningPrize',
-        'ticket.winningCode as winningCode',
-        'ticket.code as ticketCode',
-        'ticket.winningMatch as winningMatch',
-        'ticket.userWallet as userWallet',
-        'rounds.id as roundId',
-        'rounds.roundNumber as roundNumber',
-        'rounds.startTime as roundStartTime',
-        'rounds.endTime as roundEndTime',
-      ]);
-    return await paginateEntities<Pool>(
-      queryBuilder,
-      pagination,
-      FetchType.RAW,
-    );
+    try {
+      const { poolId, roundId } = claimDto;
+      const queryBuilder = this.poolRepository
+        .createQueryBuilder('pool')
+        .leftJoin('pool.rounds', 'rounds')
+        .leftJoin('rounds.ticket', 'ticket')
+        .leftJoin('pool.currency', 'currency')
+        .where('ticket.userWallet = :userWallet', { userWallet: user.wallet })
+        .andWhere('pool.id = :poolId', { poolId: poolId })
+        .andWhere('rounds.id = :roundId', { roundId: roundId })
+        .andWhere('ticket.winningMatch >= :winningMatch', { winningMatch: 1 })
+        .select([
+          'pool.id as poolId',
+          'pool.name as poolName',
+          'currency.name as currencyName',
+          'currency.symbol as currencySymbol',
+          'currency.decimals as currencyDecimals',
+          'currency.contractAddress as contractAddress',
+          'pool.sequency as sequency',
+          'pool.totalRounds as totalRounds',
+          'pool.ticketPrice as ticketPrice',
+          'ticket.winningMatch as winningMatch',
+          'ticket.id as ticketId',
+          '(SELECT (totalPrizes*(SELECT allocation from pool_prize where poolId = pool.id and winningMatch = ticket.winningMatch limit 1)/100)/(SELECT COUNT(user_ticket.id) FROM user_ticket where roundId = rounds.id and user_ticket.winningMatch = ticket.winningMatch group by user_ticket.winningMatch limit 1) from prizes where pool.poolIdOnChain = prizes.poolIdOnChain limit 1) as winningPrize',
+          'ticket.winningCode as winningCode',
+          'ticket.code as ticketCode',
+          'ticket.winningMatch as winningMatch',
+          'ticket.userWallet as userWallet',
+          'rounds.id as roundId',
+          'rounds.roundNumber as roundNumber',
+          'rounds.startTime as roundStartTime',
+          'rounds.endTime as roundEndTime',
+        ]);
+      return await paginateEntities<Pool>(
+        queryBuilder,
+        pagination,
+        FetchType.RAW,
+      );
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   async claim(user: User, claimDto: ClaimDto) {
-    const { poolId, roundId } = claimDto;
+    try {
+      const { poolId, roundId } = claimDto;
 
-    const roundExits = await this.poolRepository
-      .createQueryBuilder('pool')
-      .leftJoinAndSelect('pool.rounds', 'rounds')
-      .andWhere('pool.id = :poolId', { poolId })
-      .andWhere('rounds.id = :roundId', { roundId })
-      .select(['pool.id as poolId', 'rounds.endTime as roundEndTime'])
-      .getRawOne();
-    if (!roundExits) {
-      throw new BadRequestException('Round does not exist');
-    }
+      const roundExits = await this.poolRepository
+        .createQueryBuilder('pool')
+        .leftJoinAndSelect('pool.rounds', 'rounds')
+        .andWhere('pool.id = :poolId', { poolId })
+        .andWhere('rounds.id = :roundId', { roundId })
+        .select(['pool.id as poolId', 'rounds.endTime as roundEndTime'])
+        .getRawOne();
+      if (!roundExits) {
+        throw new BadRequestException('Round does not exist');
+      }
 
-    if (new Date(roundExits.roundEndTime) > new Date()) {
-      throw new BadRequestException('Round is running or not started');
-    }
+      if (new Date(roundExits.roundEndTime) > new Date()) {
+        throw new BadRequestException('Round is running or not started');
+      }
 
-    const builder = await this.poolRepository
-      .createQueryBuilder('pool')
-      .leftJoin('pool.rounds', 'rounds')
-      .leftJoin('rounds.ticket', 'ticket')
-      .andWhere('pool.id = :poolId', { poolId: poolId })
-      .andWhere('rounds.id = :roundId', { roundId: roundId })
-      .andWhere(
-        'winningMatch IS NOT NULL AND ticket.winningMatch >= :winningMatch',
-        { winningMatch: 1 },
+      const builder = await this.poolRepository
+        .createQueryBuilder('pool')
+        .leftJoin('pool.rounds', 'rounds')
+        .leftJoin('rounds.ticket', 'ticket')
+        .andWhere('pool.id = :poolId', { poolId: poolId })
+        .andWhere('rounds.id = :roundId', { roundId: roundId })
+        .andWhere(
+          'winningMatch IS NOT NULL AND ticket.winningMatch >= :winningMatch',
+          { winningMatch: 1 },
+        );
+
+      const allWinners = await this.countTicketWinning(builder);
+
+      const userWinning = await this.getUserTicketWinning(builder, user.wallet);
+
+      if (userWinning.length === 0) {
+        throw new BadRequestException('User has no winning tickets');
+      }
+
+      const allocation = await this.poolPrizesRepository
+        .createQueryBuilder()
+        .where('poolId = :poolId', { poolId: poolId })
+        .getMany();
+
+      const prizes = await this.getPrizes(poolId);
+
+      const prizesToClaim = this.calculateUserWinningPrize(
+        userWinning,
+        allocation,
+        prizes,
+        allWinners,
       );
 
-    const allWinners = await this.countTicketWinning(builder);
+      const signatureData = beginCell()
+        .storeAddress(Address.parse(user.wallet))
+        .storeCoins(prizesToClaim)
+        .endCell();
+      const keyPair = await mnemonicToWalletKey(
+        this.configService
+          .get('contract.adminWalletPhrase', { infer: true })
+          .split(''),
+      );
+      const signature = sign(signatureData.hash(), keyPair.secretKey).toString(
+        'base64',
+      );
 
-    const userWinning = await this.getUserTicketWinning(builder, user.wallet);
-
-    if (userWinning.length === 0) {
-      throw new BadRequestException('User has no winning tickets');
+      return { signature };
+    } catch (error) {
+      throw new BadRequestException(error);
     }
-
-    const allocation = await this.poolPrizesRepository
-      .createQueryBuilder()
-      .where('poolId = :poolId', { poolId: poolId })
-      .getMany();
-
-    const prizes = await this.getPrizes(poolId);
-
-    const prizesToClaim = this.calculateUserWinningPrize(
-      userWinning,
-      allocation,
-      prizes,
-      allWinners,
-    );
-
-    const signatureData = beginCell()
-      .storeAddress(Address.parse(user.wallet))
-      .storeCoins(prizesToClaim)
-      .endCell();
-    const keyPair = await mnemonicToWalletKey(
-      this.configService
-        .get('contract.adminWalletPhrase', { infer: true })
-        .split(''),
-    );
-    const signature = sign(signatureData.hash(), keyPair.secretKey).toString(
-      'base64',
-    );
-
-    return { signature };
   }
 
   async getUserTicketWinning(
     builder: SelectQueryBuilder<Pool>,
     wallet: string,
   ) {
-    return await builder
-      .clone()
-      .andWhere('ticket.claimed = :claimed', { claimed: false })
-      .andWhere('ticket.userWallet = :userWallet', { userWallet: wallet })
-      .select([
-        'ticket.winningMatch as winningMatch',
-        'ticket.id as ticketId',
-        'ticket.winningCode as winningCode',
-        'ticket.code as ticketCode',
-      ])
-      .getRawMany();
+    try {
+      return await builder
+        .clone()
+        .andWhere('ticket.claimed = :claimed', { claimed: false })
+        .andWhere('ticket.userWallet = :userWallet', { userWallet: wallet })
+        .select([
+          'ticket.winningMatch as winningMatch',
+          'ticket.id as ticketId',
+          'ticket.winningCode as winningCode',
+          'ticket.code as ticketCode',
+        ])
+        .getRawMany();
+    } catch (error) {
+      throw error;
+    }
   }
 
   async countTicketWinning(builder: SelectQueryBuilder<Pool>) {
-    return await builder
-      .clone()
-      .select([
-        'COUNT(ticket.id) as totalTickets',
-        'ticket.winningMatch as winningMatch',
-      ])
-      .groupBy('ticket.winningMatch')
-      .getRawMany();
+    try {
+      return await builder
+        .clone()
+        .select([
+          'COUNT(ticket.id) as totalTickets',
+          'ticket.winningMatch as winningMatch',
+        ])
+        .groupBy('ticket.winningMatch')
+        .getRawMany();
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getPrizes(poolId: number) {
-    return await this.poolRepository
-      .createQueryBuilder('pool')
-      .leftJoin('pool.rounds', 'rounds')
-      .leftJoin(
-        Prizes,
-        'prizes',
-        'pool.poolIdOnChain = prizes.poolIdOnChain AND rounds.roundIdOnChain = prizes.roundIdOnChain',
-      )
-      .select([
-        'prizes.poolIdOnChain as poolIdOnChain',
-        'prizes.roundIdOnChain as roundIdOnChain',
-        'prizes.totalPrizes as totalPrizes',
-        'prizes.claimedPrizes as claimedPrizes',
-      ])
-      .where('poolId = :poolId', { poolId: poolId })
-      .getRawOne();
+    try {
+      return await this.poolRepository
+        .createQueryBuilder('pool')
+        .leftJoin('pool.rounds', 'rounds')
+        .leftJoin(
+          Prizes,
+          'prizes',
+          'pool.poolIdOnChain = prizes.poolIdOnChain AND rounds.roundIdOnChain = prizes.roundIdOnChain',
+        )
+        .select([
+          'prizes.poolIdOnChain as poolIdOnChain',
+          'prizes.roundIdOnChain as roundIdOnChain',
+          'prizes.totalPrizes as totalPrizes',
+          'prizes.claimedPrizes as claimedPrizes',
+        ])
+        .where('poolId = :poolId', { poolId: poolId })
+        .getRawOne();
+    } catch (error) {
+      throw error;
+    }
   }
 
   calculateUserWinningPrize(
