@@ -2,6 +2,8 @@ import { Toaster } from 'sonner';
 
 import '@/styles/globals.css';
 
+import 'buffer';
+
 import { type Metadata, type Viewport } from 'next';
 import clsx from 'clsx';
 

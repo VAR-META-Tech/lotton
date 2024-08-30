@@ -49,6 +49,7 @@
     "auto-zustand-selectors-hook": "^2.0.5",
     "axios": "^1.7.4",
     "bignumber.js": "^9.1.2",
+    "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "1.0.0",
