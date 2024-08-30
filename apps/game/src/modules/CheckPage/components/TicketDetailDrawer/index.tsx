@@ -24,7 +24,7 @@ export const TicketDetailDrawer: FCC<Props> = ({ children, pool, roundActiveNumb
     const round = pool?.rounds?.find((round) => {
       return round?.roundNumber === roundActiveNumber;
     });
-    console.log('🚀 ~ roundActiveInfo ~ round:', round);
+
     return round;
   }, [roundActiveNumber, pool?.rounds]);
 

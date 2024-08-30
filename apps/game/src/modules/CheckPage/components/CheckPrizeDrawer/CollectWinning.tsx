@@ -1,21 +1,84 @@
 import { Button } from '@/components/ui/button';
 import { HStack, VStack } from '@/components/ui/Utilities';
-import React from 'react';
+import { useGetPoolsCollectPrize } from '@/hooks/useGetPoolsCollectPrize';
+import React, { FC, useMemo } from 'react';
+import CollectItem from './CollectItem';
+import CollectTotal from './CollectTotal';
+import { useGetClaimSignatureMutation } from '@/apis/pools/mutations';
+import { usePoolContract } from '@/hooks/usePoolContract';
+import { useAuth } from '@/hooks/useAuth';
 
-const CollectWinning = () => {
+interface Props {
+  poolId: number;
+  roundId: number;
+}
+
+const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
+  const { items } = useGetPoolsCollectPrize(999999999999999, poolId, roundId);
+  const { claimPrize } = usePoolContract();
+  const { user } = useAuth();
+
   const handleClaim = () => {
-    console.log('claim');
+    getClaimSignature({
+      poolId,
+      roundId,
+    });
   };
+
+  const totalRewardValue = useMemo(() => {
+    const total = items?.reduce((acc, item) => {
+      return acc + Number(item?.winningPrize);
+    }, 0);
+
+    return total;
+  }, [items]);
+
+  const feeValue = useMemo(() => {
+    return Number(totalRewardValue || 0) * 0.1;
+  }, [totalRewardValue]);
+
+  const totalValue = useMemo(() => {
+    return Number(totalRewardValue || 0) - Number(feeValue || 0);
+  }, [totalRewardValue, feeValue]);
+
+  const { mutate: getClaimSignature } = useGetClaimSignatureMutation({
+    onSuccess: (data) => {
+      claimPrize({
+        poolId: poolId,
+        roundId: roundId,
+        amount: totalValue || 0,
+        receiver: user?.wallet || '',
+        signature: data.signature,
+      });
+    },
+  });
 
   return (
     <VStack className="container">
       <VStack>
-        <CollectItem />
-        <CollectItem />
-        <CollectItem />
+        {items?.map((item, index) => {
+          return (
+            <CollectItem
+              key={`${item?.poolId}-${index}`}
+              code={item?.ticketCode}
+              value={Number(item?.winningPrize)}
+              roundNumber={item?.roundNumber}
+              tokenSymbol={item?.currencySymbol}
+              usdValue={100000}
+            />
+          );
+        })}
       </VStack>
 
-      <CollectTotal />
+      <CollectTotal
+        rewardValue={totalRewardValue}
+        feeValue={feeValue}
+        totalValue={totalValue}
+        tokenSymbol={items[0]?.currencySymbol}
+        usdValue={100000}
+        feeUsdValue={100000}
+        totalUsdValue={10000}
+      />
 
       <HStack pos={'center'}>
         <Button onClick={handleClaim} size={'lg'} className="rounded-lg w-fit bg-primary text-white">
@@ -27,35 +90,3 @@ const CollectWinning = () => {
 };
 
 export default CollectWinning;
-
-const CollectItem = () => {
-  return (
-    <VStack>
-      <HStack pos={'apart'}>
-        <span>Round 1</span>
-
-        <span>Ticket: b2ad</span>
-      </HStack>
-
-      <HStack pos={'apart'}>
-        <span className="text-primary text-2xl">10.500000 NOT</span>
-
-        <span className="text-gray-color text-sm">~ 10.500000 USD</span>
-      </HStack>
-    </VStack>
-  );
-};
-
-const CollectTotal = () => {
-  return (
-    <VStack className="border-t border-t-gray-color">
-      <span>Total Unclaimed Rewards</span>
-
-      <HStack pos={'apart'} className="font-bold">
-        <span className="text-primary text-2xl">10.500000 NOT</span>
-
-        <span className="text-gray-color text-sm">~ 10.500000 USD</span>
-      </HStack>
-    </VStack>
-  );
-};

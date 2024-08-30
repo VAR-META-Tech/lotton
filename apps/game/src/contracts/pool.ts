@@ -32,4 +32,15 @@ export default class Pool implements Contract {
       console.error(error);
     }
   }
+
+  async claimPrize(provider: ContractProvider, via: Sender, messageBody?: Maybe<string | Cell>) {
+    try {
+      await provider.internal(via, {
+        value: '0.05', // send 0.05 TON for gas
+        body: messageBody,
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
 }

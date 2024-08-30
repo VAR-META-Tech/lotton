@@ -11,7 +11,7 @@ export const CheckWinner = () => {
     <VStack spacing={16} align={'center'}>
       <Title title="Are you a winner?" />
 
-      <CheckPrizeDrawer ticketPools={[]}>
+      <CheckPrizeDrawer>
         <Button size={'lg'} className="rounded-lg w-fit bg-gradient-to-r from-primary to-[#ED9BD6] text-white">
           CHECK NOW
         </Button>

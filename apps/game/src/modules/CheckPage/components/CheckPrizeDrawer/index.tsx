@@ -5,67 +5,76 @@ import { Icons } from '@/assets/icons';
 
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { FCC } from '@/types';
-import { Button } from '@/components/ui/button';
-import CheckPrize from './CheckPrize';
-import { STEP_VALUE } from '../../utils/const';
-import { HStack, VStack } from '@/components/ui/Utilities';
+import { VStack } from '@/components/ui/Utilities';
 import CollectWinning from './CollectWinning';
+import { useWinPools } from '@/hooks/useWinPools';
+import PrizeItem from './PrizeItem';
 
-type TicketPool = {};
+interface IClaimStepProps {
+  poolId: number | null;
+  roundId: number | null;
+}
 
-type Props = {
-  ticketPools: TicketPool[];
-};
-
-export const CheckPrizeDrawer: FCC<Props> = ({ children, ticketPools = [] }) => {
-  const [step, setStep] = useState(STEP_VALUE.CHECK_PRIZE);
+export const CheckPrizeDrawer: FCC = ({ children }) => {
+  const { poolList } = useWinPools();
+  const [claimStep, setClaimStep] = useState<IClaimStepProps>({
+    poolId: null,
+    roundId: null,
+  });
 
   const titleDraw = useMemo(() => {
-    if (ticketPools.length === 0) return 'Check Prizes';
+    if (poolList.length === 0) return 'Check Prizes';
 
-    if (ticketPools.length === 1) return 'TON Pool - Round 1';
+    if (poolList.length === 1 && poolList[0]?.rounds?.length === 1) {
+      return `${poolList[0]?.name} - Round ${poolList[0]?.rounds[0]?.roundNumber}`;
+    }
 
     return 'Check Prizes';
-  }, [ticketPools.length]);
+  }, [poolList]);
 
   const renderTitle = useCallback(() => {
-    if (step === STEP_VALUE.CHECK_PRIZE) {
+    if (!claimStep?.poolId && !claimStep?.roundId) {
       return titleDraw;
     }
 
     return 'Collect Winning';
-  }, [step, titleDraw]);
+  }, [claimStep, titleDraw]);
 
-  const handleChangeStep = useCallback(() => {
-    if (step === STEP_VALUE.CLAIM) return;
+  const handleChangeStep = useCallback(
+    (poolId: number, roundId: number) => {
+      if (!!claimStep?.poolId && !!claimStep?.roundId) return;
 
-    setStep(STEP_VALUE.CLAIM);
-  }, [step]);
+      setClaimStep({
+        poolId,
+        roundId,
+      });
+    },
+    [claimStep?.poolId, claimStep?.roundId]
+  );
 
   const renderContent = useCallback(() => {
-    if (step === STEP_VALUE.CHECK_PRIZE) {
+    if (!claimStep?.poolId && !claimStep?.roundId) {
       return (
-        <VStack>
-          <CheckPrize name="TON Pool" round={1} winCode="1234" isOnlyOneTicket={ticketPools.length !== 1} />
-
-          <HStack pos={'center'}>
-            <Button
-              onClick={() => handleChangeStep()}
-              size={'lg'}
-              className="rounded-lg w-fit bg-gradient-to-r from-primary to-[#ED9BD6] text-white"
-            >
-              Collect Prizes
-            </Button>
-          </HStack>
+        <VStack spacing={40}>
+          {poolList?.map((pool) => {
+            return pool?.rounds?.map((round, index) => (
+              <PrizeItem
+                key={`${pool?.id}-${round?.id}-${index}`}
+                pool={pool}
+                round={round}
+                handleChangeStep={() => handleChangeStep(pool?.id, round?.id)}
+              />
+            ));
+          })}
         </VStack>
       );
     }
 
-    return <CollectWinning />;
-  }, [handleChangeStep, step, ticketPools.length]);
+    return <CollectWinning poolId={claimStep?.poolId || 0} roundId={claimStep?.roundId || 0} />;
+  }, [claimStep?.poolId, claimStep?.roundId, handleChangeStep, poolList]);
 
   return (
-    <Drawer onOpenChange={() => setStep(STEP_VALUE.CHECK_PRIZE)}>
+    <Drawer onOpenChange={() => setClaimStep({ poolId: null, roundId: null })}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent>
         <div className="w-full">
