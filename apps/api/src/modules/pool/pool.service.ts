@@ -43,7 +43,7 @@ export class PoolService {
       pool.startTime = createPoolDto.startTime;
       pool.ticketPrice = createPoolDto.ticketPrice;
       pool.endTime = dayjs(createPoolDto.startTime)
-        .add(createPoolDto.sequency * createPoolDto.totalRounds, 'days')
+        .add(createPoolDto.sequency * createPoolDto.totalRounds, 'seconds')
         .toDate();
 
       await this.poolRepository.save(pool);
@@ -51,7 +51,7 @@ export class PoolService {
       let startTime = createPoolDto.startTime;
       for (let i = 1; i <= createPoolDto.totalRounds; i++) {
         const endTime = dayjs(startTime)
-          .add(createPoolDto.sequency, 'days')
+          .add(createPoolDto.sequency, 'seconds')
           .toDate();
         const round = new PoolRound();
         round.startTime = dayjs(startTime).toDate();
