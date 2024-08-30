@@ -5,13 +5,12 @@ import { MAX_TICKET, MIN_TICKET } from '@/modules/LandingPage/utils/const';
 import { FCC } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { prettyNumber } from '@/lib/common';
+import { onMutateError, prettyNumber } from '@/lib/common';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { HStack, VStack } from '@/components/ui/Utilities';
 import { usePoolContract } from '@/hooks/usePoolContract';
 import { useWallet } from '@/hooks/useWallet';
-import { useBuyTicketStore } from '@/stores/BuyTicketStore';
 import { useForm } from 'react-hook-form';
 import { buyTicketSchema, BuyTicketType } from '@/modules/LandingPage/types/schema';
 import { IGetPoolDetailCurrency } from '@/apis/pools';
@@ -21,11 +20,11 @@ interface Props {
   ticketPrice: number;
   roundId: number;
   currency: IGetPoolDetailCurrency | undefined;
+  poolIdOnChain: number;
 }
 
-const BuyTicketForm: FC<Props> = ({ ticketPrice, roundId, currency }) => {
-  const poolId = useBuyTicketStore.use.poolId();
-  const { currentRound, buyTicket } = usePoolContract();
+const BuyTicketForm: FC<Props> = ({ ticketPrice, roundId, currency, poolIdOnChain }) => {
+  const { buyTicket } = usePoolContract();
   const { balance } = useWallet();
 
   const form = useForm<BuyTicketType>({
@@ -77,15 +76,13 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, roundId, currency }) => {
         return;
       }
 
-      if (!currentRound) return;
-
       buyTicket({
-        poolId: poolId || 0,
+        poolId: poolIdOnChain || 0,
         quantity: amount,
-        roundId: currentRound,
+        roundId: roundId,
       });
     } catch (error) {
-      console.error(error);
+      onMutateError(error);
     }
   };
 

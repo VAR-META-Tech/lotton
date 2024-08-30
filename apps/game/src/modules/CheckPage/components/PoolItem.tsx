@@ -54,7 +54,7 @@ export const PoolItem = ({ pool }: Props) => {
         </TicketDetailDrawer>
       </div>
 
-      <BuyTicketDrawer poolId={pool?.id} roundId={roundActive?.id} />
+      <BuyTicketDrawer poolId={pool?.id} roundId={roundActive?.id} poolIdOnChain={pool?.poolIdOnChain} />
     </div>
   );
 };

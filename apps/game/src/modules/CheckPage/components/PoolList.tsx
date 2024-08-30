@@ -23,9 +23,13 @@ export const PoolList = () => {
 
   return (
     <VStack spacing={56} align={'center'}>
-      {poolList?.map((poolItem, index) => {
-        return <PoolItem key={`${poolItem?.id}-${index}`} pool={poolItem} />;
-      })}
+      {!!poolList?.length && (
+        <VStack className="min-h-[calc(100vh-6.25rem)]">
+          {poolList?.map((poolItem, index) => {
+            return <PoolItem key={`${poolItem?.id}-${index}`} pool={poolItem} />;
+          })}
+        </VStack>
+      )}
 
       <Show when={loadingPool}>
         <SkeletonPool />

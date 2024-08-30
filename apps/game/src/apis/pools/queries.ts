@@ -39,3 +39,8 @@ export const useInfinityPoolJoinedQuery = createInfiniteQuery<IGetPoolJoinedData
   },
   initialPageParam: 1,
 });
+
+export const usePoolJoinedQuery = createQuery<IGetPoolJoinedData, IGetPoolJoinedParams>({
+  queryKey: ['/api/pools/joined'],
+  fetcher: getPoolJoinedRequest,
+});
