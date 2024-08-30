@@ -83,7 +83,7 @@ export class RoundPrizesService {
     // this.setAdmin();
     const pools = await this.getPoolsAvailable();
     for (const pool of pools) {
-      const rounds = await this.getRoundsAvailable(pool.id);
+      const rounds = await this.getRoundsAvailable(pool.poolIdOnChain);
       for (const round of rounds) {
         await this.drawWinningNumbers(pool.id, round.id);
       }
@@ -209,7 +209,7 @@ export class RoundPrizesService {
   }
 
   async drawWinningNumbers(poolId: number, roundId: number) {
-    const { contract, wallet: adminWallet, keyPair } = await this.makeWallet();
+    const { contract, keyPair } = await this.makeWallet();
     // Create a transfer
     // await adminWallet.send(contractProvider, messageDraw);
     console.log('start');
@@ -256,7 +256,7 @@ export class RoundPrizesService {
   async getRoundsAvailable(poolId: number) {
     return this.poolRoundRepository
       .createQueryBuilder()
-      .where('poolId = :poolId', { poolId })
+      .where('poolIdOnChain = :poolId', { poolId })
       .andWhere('startTime < NOW()')
       .andWhere('NOW() > endTime')
       .andWhere('winningCode IS NULL')
