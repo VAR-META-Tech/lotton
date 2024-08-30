@@ -10,6 +10,7 @@ import { CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import PoolCard from './PoolCard';
 import PoolCardSkeleton from './PoolCardSkeleton';
 import PaginationSkeleton from './PoolCardSkeleton/PaginationSkeleton';
+import Empty from '@/components/Empty';
 
 const PoolList = () => {
   const [isShow, setIsShow] = useState(false);
@@ -25,6 +26,10 @@ const PoolList = () => {
           <PaginationSkeleton />
         </div>
       );
+    }
+
+    if (!pools?.length) {
+      return <Empty />;
     }
 
     return (

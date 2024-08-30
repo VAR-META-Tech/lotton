@@ -72,6 +72,8 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
           roundId={roundActive?.id || 0}
           currency={currency}
           isEndRound={isEndRound}
+          poolIdOnChain={pool?.poolIdOnChain || 0}
+          winCode={roundActive?.winningCode || '    '}
         />
       </div>
 
