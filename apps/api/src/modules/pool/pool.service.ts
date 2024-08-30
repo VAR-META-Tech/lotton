@@ -85,7 +85,7 @@ export class PoolService {
     }
   }
 
-  async update(poolId: number, updatePoolDto: UpdatePoolDto) {
+  async update(_poolId: number, _updatePoolDto: UpdatePoolDto) {
     // const poolExist = await this.findOne(poolId);
     // if (!poolExist) throw Causes.NOT_FOUND('Pool');
 
@@ -536,7 +536,7 @@ export class PoolService {
           'prizes.totalPrizes as totalPrizes',
           'prizes.claimedPrizes as claimedPrizes',
         ])
-        .where('poolId = :poolId', { poolId: poolId })
+        .where('pool.id = :poolId', { poolId: poolId })
         .getRawOne();
     } catch (error) {
       throw error;
