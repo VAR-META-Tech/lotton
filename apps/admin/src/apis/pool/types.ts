@@ -33,7 +33,7 @@ export interface IGetPoolsResponse {
   meta: IMeta;
 }
 
-export interface IGetPoolsListResponse extends TResponse {}
+export interface IGetPoolsListResponse extends TResponse<IGetPoolsResponse> { }
 
 export interface Currency {
   createdAt: string;
@@ -86,7 +86,7 @@ export interface IGetPoolDetail {
   poolPrizes: PoolPrize[];
 }
 
-export interface IGetPoolDetailResponse extends TResponse {}
+export interface IGetPoolDetailResponse extends TResponse<IGetPoolDetail> { }
 
 export interface IGetRoundsParams {
   search?: string;
@@ -114,7 +114,7 @@ export interface IGetRoundsResponse {
   meta: IMeta;
 }
 
-export interface IGetRoundsListResponse extends TResponse {}
+export interface IGetRoundsListResponse extends TResponse<IGetRoundsResponse> { }
 
 export interface ICurrencyResCreate {
   createdAt: string;
@@ -179,4 +179,4 @@ export interface IGetTokensResponse {
   meta: IMeta;
 }
 
-export interface IGetTokenListResponse extends TResponse {}
+export interface IGetTokenListResponse extends TResponse<IGetTokensResponse> { }
