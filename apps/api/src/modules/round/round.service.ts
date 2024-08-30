@@ -23,7 +23,7 @@ export class RoundService {
       const queryBuilder = this.roundRepository.createQueryBuilder('poolRound');
 
       if (search) {
-        queryBuilder.andWhere('poolRound.winningHash LIKE :search ', {
+        queryBuilder.andWhere('poolRound.winningCode LIKE :search ', {
           search: `%${search}%`,
         });
       }
@@ -68,12 +68,12 @@ export class RoundService {
           'poolRound.roundNumber as roundNumber',
           'poolRound.startTime as startTime',
           'poolRound.endTime as endTime',
-          'poolRound.winningHash as winningHash',
+          'poolRound.winningCode as winningCode',
           'poolRound.createdAt as createdAt',
           'poolRound.updatedAt as updatedAt',
           '"COUNT(ticket.id)" * 1 as totalTickets',
           '"COUNT(user.id)" * 1 as totalUsers',
-          'reverse(substring(reverse(poolRound.winningHash), 1, 4)) AS winningCode',
+          'reverse(substring(reverse(poolRound.winningCode), 1, 4)) AS winningCode',
           '"COUNT(ticket.id)" * pool.ticketPrice as currentPrizes',
           '"0" * 1 as previousPrizes', // TODO : calculate previous prizes
         ])

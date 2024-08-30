@@ -72,7 +72,7 @@ export interface IGetPoolDetailRound {
   roundNumber: number;
   startTime: string;
   endTime: string;
-  winningHash: any;
+  winningCode: any;
 }
 
 export interface IGetPoolDetailPoolPrize {
@@ -121,7 +121,7 @@ export interface IGetPoolJoinedItemRound {
   roundNumber: number;
   startTime: string;
   endTime: string;
-  winningHash: string | null;
+  winningCode: string | null;
   ticket: IGetPoolJoinedItemTicket[];
 }
 

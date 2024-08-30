@@ -40,22 +40,22 @@ export class WinnerTicketService {
         const roundEnds = await manager
           .createQueryBuilder(PoolRound, 'poolRound')
           .where('poolRound.endTime <= NOW()')
-          .andWhere('poolRound.winningHash IS NULL')
+          .andWhere('poolRound.winningCode IS NULL')
           .getMany();
 
         const latestBlock = await this.tokenService.getLatestBlock();
         await Promise.all(
           roundEnds.map(async (roundEnd) => {
-            roundEnd.winningHash = `${latestBlock}`;
+            roundEnd.winningCode = `${latestBlock}`;
             await manager.save(PoolRound, roundEnd);
             const userTickets = await manager
               .createQueryBuilder(UserTicket, 'userTicket')
               .where('userTicket.roundId = :roundId', { roundId: roundEnd.id })
               .getMany();
 
-            const winningCode = roundEnd.winningHash.substring(
-              roundEnd.winningHash.length - 4,
-              roundEnd.winningHash.length,
+            const winningCode = roundEnd.winningCode.substring(
+              roundEnd.winningCode.length - 4,
+              roundEnd.winningCode.length,
             );
 
             if (userTickets.length > 0) {

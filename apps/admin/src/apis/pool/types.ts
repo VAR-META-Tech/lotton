@@ -1,4 +1,4 @@
-import { TResponse } from "@/types";
+import { TResponse } from '@/types';
 
 export interface IMeta {
   itemCount: number;
@@ -24,7 +24,7 @@ export interface IPoolItem {
   startTime: string;
   endTime: string;
   sequency: number;
-  totalRounds: number
+  totalRounds: number;
   ticketPrice: string;
 }
 
@@ -33,7 +33,7 @@ export interface IGetPoolsResponse {
   meta: IMeta;
 }
 
-export interface IGetPoolsListResponse extends TResponse<IGetPoolsResponse> { }
+export interface IGetPoolsListResponse extends TResponse {}
 
 export interface Currency {
   createdAt: string;
@@ -48,7 +48,7 @@ export interface Currency {
   abi: string;
   beginningBlock: string;
   isActive: boolean;
-};
+}
 
 export interface Round {
   createdAt: string;
@@ -58,8 +58,8 @@ export interface Round {
   roundNumber: number;
   startTime: string;
   endTime: string;
-  winningHash: string | null;
-};
+  winningCode: string | null;
+}
 
 export interface PoolPrize {
   createdAt: string;
@@ -68,7 +68,7 @@ export interface PoolPrize {
   id: number;
   matchNumber: number;
   allocation: number;
-};
+}
 
 export interface IGetPoolDetail {
   createdAt: string;
@@ -84,9 +84,9 @@ export interface IGetPoolDetail {
   currency: Currency;
   rounds: Round[];
   poolPrizes: PoolPrize[];
-};
+}
 
-export interface IGetPoolDetailResponse extends TResponse<IGetPoolDetail> { }
+export interface IGetPoolDetailResponse extends TResponse {}
 
 export interface IGetRoundsParams {
   search?: string;
@@ -103,10 +103,10 @@ export interface IRoundItem {
   roundNumber: number;
   startTime: string;
   endTime: string;
-  winningHash: string | null;
-  prizePool: number,
-  symbol: string,
-  poolName: string,
+  winningCode: string | null;
+  prizePool: number;
+  symbol: string;
+  poolName: string;
 }
 
 export interface IGetRoundsResponse {
@@ -114,8 +114,7 @@ export interface IGetRoundsResponse {
   meta: IMeta;
 }
 
-
-export interface IGetRoundsListResponse extends TResponse<IGetRoundsResponse> { }
+export interface IGetRoundsListResponse extends TResponse {}
 
 export interface ICurrencyResCreate {
   createdAt: string;
@@ -175,10 +174,9 @@ export interface ITokenItem {
   isActive: boolean;
 }
 
-
 export interface IGetTokensResponse {
   items: ITokenItem[];
   meta: IMeta;
 }
 
-export interface IGetTokenListResponse extends TResponse<IGetTokensResponse> { }
+export interface IGetTokenListResponse extends TResponse {}

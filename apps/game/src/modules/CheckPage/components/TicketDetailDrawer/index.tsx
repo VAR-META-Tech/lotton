@@ -57,7 +57,7 @@ export const TicketDetailDrawer: FCC<Props> = ({ children, pool, roundActiveNumb
             <div className="container">
               <TicketInfo name={pool?.name || ''} roundActiveNumber={roundActiveNumber} />
 
-              <YourTickets winCode={roundActiveInfo?.winningHash || '    '} roundInfo={roundActiveInfo} />
+              <YourTickets winCode={roundActiveInfo?.winningCode || '    '} roundInfo={roundActiveInfo} />
 
               {!isEndRound && (
                 <HStack pos={'center'}>
