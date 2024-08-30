@@ -33,7 +33,7 @@ export class UserTicket extends BaseTime {
   @Column({ default: false })
   claimed: boolean;
 
-  @Column({ nullable: true, zerofill: true })
+  @Column({ nullable: true })
   winningMatch: number;
 
   @ManyToOne(() => Transaction, (round) => round.id, {

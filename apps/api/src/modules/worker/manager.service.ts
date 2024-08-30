@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import cron from 'node-cron';
 import { Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
 import {
   LatestBlock,
+  Pool,
   PoolRound,
   Token,
   Transaction,
@@ -13,6 +15,7 @@ import {
 } from '@/database/entities';
 
 import { CrawlWorkerService } from './crawl.service';
+import { RoundPrizesService } from './round_prizes.service';
 
 @Injectable()
 export class ManagerService {
@@ -28,8 +31,13 @@ export class ManagerService {
     private readonly userTicketRepository: Repository<UserTicket>,
     @InjectRepository(PoolRound)
     private readonly poolRoundRepository: Repository<PoolRound>,
+    @InjectRepository(Pool)
+    private readonly poolRepository: Repository<Pool>,
   ) {
     this.init();
+    cron.schedule('*/10 * * * *', async () => {
+      this.syncData();
+    });
   }
 
   async init() {
@@ -45,6 +53,15 @@ export class ManagerService {
       await this.wait(5000); // 5 seconds
     }
   }
+
+  async syncData() {
+    await new RoundPrizesService(
+      this.poolRepository,
+      this.poolRoundRepository,
+      this.configService,
+    );
+  }
+
   wait(timeout: number) {
     return new Promise((resolve) => setTimeout(resolve, timeout));
   }

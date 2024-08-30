@@ -12,7 +12,6 @@ import {
 } from 'class-validator';
 
 import { IsDate } from '@/common/decorators/is_date.decorator';
-import { IsFeatured } from '@/common/decorators/is_featured.decorator';
 import { IsGreaterThan } from '@/common/decorators/is_greater_than.decorator';
 import { SumValueArray } from '@/common/decorators/sum_value.decorator';
 
@@ -65,7 +64,7 @@ export class CreatePoolDto {
     example: new Date(),
   })
   @IsDate()
-  @IsFeatured()
+  // @IsFeatured()
   @IsNotEmpty()
   startTime: Date;
 
