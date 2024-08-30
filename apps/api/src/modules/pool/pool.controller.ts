@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { GetUser } from '@/common/decorators/user.decorator';
 import { User } from '@/database/entities';
@@ -23,13 +23,13 @@ import { UpdatePoolDto } from './dto/update-pool.dto';
 import { PoolService } from './pool.service';
 
 @Controller('pools')
-@ApiBearerAuth()
+// @ApiBearerAuth()
 @ApiTags('pools')
 export class PoolController {
   constructor(private readonly poolService: PoolService) {}
 
   @Post()
-  @UseGuards(AdminJwtGuard)
+  // @UseGuards(AdminJwtGuard)
   async create(@Body() createPoolDto: CreatePoolDto) {
     return await this.poolService.create(createPoolDto);
   }
