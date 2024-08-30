@@ -137,3 +137,48 @@ export interface IGetPoolJoinedItemTicket {
   winningCode?: string;
   winningMatch?: number;
 }
+
+export interface IGetPoolCollectPrizeParams {
+  poolId: number;
+  roundId: number;
+  pageSizes: number;
+  page: number;
+}
+export interface IGetPoolCollectPrizeResponse extends TResponse<IGetPoolCollectPrizeData> {}
+export interface IGetPoolCollectPrizeData {
+  items: IGetPoolCollectPrizeItem[];
+  meta: IPagination;
+}
+
+export interface IGetPoolCollectPrizeItem {
+  poolId: number;
+  poolName: string;
+  currencyName: string;
+  currencySymbol: string;
+  currencyDecimals: number;
+  contractAddress: string;
+  sequency: number;
+  totalRounds: number;
+  ticketPrice: string;
+  winningMatch: number;
+  ticketId: number;
+  winningPrize: string;
+  winningCode: string;
+  ticketCode: string;
+  userWallet: string;
+  roundId: number;
+  roundNumber: number;
+  roundStartTime: string;
+  roundEndTime: string;
+}
+
+export interface IGetClaimSignatureParams {
+  poolId: number;
+  roundId: number;
+}
+
+export interface IGetClaimSignatureResponse extends TResponse<IGetClaimSignatureData> {}
+
+export interface IGetClaimSignatureData {
+  signature: string;
+}

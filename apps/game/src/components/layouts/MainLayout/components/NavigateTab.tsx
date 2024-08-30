@@ -34,7 +34,7 @@ const NavigateTab = () => {
 
           return (
             <Link key={tab?.name} href={tab?.href} className="col-span-1 h-full">
-              <VStack key={tab?.name} className="h-full justify-center items-center">
+              <VStack spacing={4} key={tab?.name} className="h-full justify-center items-center">
                 <Icon
                   className={cn('stroke-gray-color', {
                     'stroke-primary': isActive,

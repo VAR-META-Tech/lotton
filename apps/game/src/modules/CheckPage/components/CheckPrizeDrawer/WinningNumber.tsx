@@ -27,7 +27,7 @@ const WinningNumber: FC<IWinningNumberProps> = ({ code = '    ', titleClassName,
 export default WinningNumber;
 
 const CodeItem = ({ code }: { code: string }) => (
-  <div className="inline-flex text-[1.625rem] items-center justify-center text-center font-bold w-[2.1875rem] aspect-square rounded-full bg-gradient-to-r from-primary to-[#ED9BD6]">
+  <div className="inline-flex text-[1.625rem] items-center justify-center text-center font-bold w-10 h-10 rounded-full bg-gradient-to-r from-primary to-[#ED9BD6]">
     {code}
   </div>
 );

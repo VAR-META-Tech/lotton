@@ -19,7 +19,6 @@ const onRefreshToken = async () => {
   if (refreshToken) {
     try {
       const { data } = await refreshTokenRequest(refreshToken);
-      console.log('🚀 ~ onRefreshToken ~ data:', data);
 
       store?.setAccessToken(data?.accessToken);
       store?.setRefreshToken(data?.refreshToken);

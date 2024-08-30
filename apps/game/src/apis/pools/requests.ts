@@ -1,5 +1,9 @@
 import { request } from '../axios';
 import type {
+  IGetClaimSignatureData,
+  IGetClaimSignatureParams,
+  IGetPoolCollectPrizeData,
+  IGetPoolCollectPrizeParams,
   IGetPoolDetailData,
   IGetPoolDetailParams,
   IGetPoolJoinedData,
@@ -31,6 +35,28 @@ export const getPoolDetailRequest = async (params: IGetPoolDetailParams): Promis
 export const getPoolJoinedRequest = async (params: IGetPoolJoinedParams): Promise<IGetPoolJoinedData> => {
   const { data } = await request({
     url: `/api/pools/joined`,
+    method: 'GET',
+    params,
+  });
+
+  return data;
+};
+
+export const getPoolCollectPrizeRequest = async (
+  params: IGetPoolCollectPrizeParams
+): Promise<IGetPoolCollectPrizeData> => {
+  const { data } = await request({
+    url: '/api/pools/collect-prize',
+    method: 'GET',
+    params,
+  });
+
+  return data;
+};
+
+export const getClaimSignatureRequest = async (params: IGetClaimSignatureParams): Promise<IGetClaimSignatureData> => {
+  const { data } = await request({
+    url: '/api/pools/claim/signature',
     method: 'GET',
     params,
   });

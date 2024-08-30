@@ -1,7 +1,9 @@
 import { createInfiniteQuery, createQuery } from 'react-query-kit';
 
-import { getAllPoolsRequest, getPoolDetailRequest, getPoolJoinedRequest } from './requests';
+import { getAllPoolsRequest, getPoolCollectPrizeRequest, getPoolDetailRequest, getPoolJoinedRequest } from './requests';
 import type {
+  IGetPoolCollectPrizeData,
+  IGetPoolCollectPrizeParams,
   IGetPoolDetailData,
   IGetPoolDetailParams,
   IGetPoolJoinedData,
@@ -43,4 +45,9 @@ export const useInfinityPoolJoinedQuery = createInfiniteQuery<IGetPoolJoinedData
 export const usePoolJoinedQuery = createQuery<IGetPoolJoinedData, IGetPoolJoinedParams>({
   queryKey: ['/api/pools/joined'],
   fetcher: getPoolJoinedRequest,
+});
+
+export const useGetPoolsCollectPrizeQuery = createQuery<IGetPoolCollectPrizeData, IGetPoolCollectPrizeParams>({
+  queryKey: ['/api/pools/collect-prize'],
+  fetcher: getPoolCollectPrizeRequest,
 });
