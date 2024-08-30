@@ -1,7 +1,8 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 import { BaseTime } from './base/time.entity';
 
+@Index('prize', ['poolIdOnChain', 'roundIdOnChain'], { unique: true })
 @Entity()
 export class Prizes extends BaseTime {
   @PrimaryGeneratedColumn()
@@ -13,9 +14,9 @@ export class Prizes extends BaseTime {
   @Column({ type: 'integer' })
   roundIdOnChain: number;
 
-  @Column({ type: 'decimal', nullable: true, zerofill: true })
+  @Column({ type: 'decimal', nullable: true })
   totalPrizes: number;
 
-  @Column({ type: 'decimal', nullable: true, zerofill: true })
+  @Column({ type: 'decimal', nullable: true })
   claimedPrizes: number;
 }

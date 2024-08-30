@@ -8,7 +8,7 @@ import TonWeb from 'tonweb';
 import { Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
-import type { PoolRound, Token } from '@/database/entities';
+import { Pool, PoolRound, Prizes, Token } from '@/database/entities';
 import { UserTicket } from '@/database/entities';
 import { Transaction as TransactionDB } from '@/database/entities';
 import { LatestBlock } from '@/database/entities';
@@ -33,6 +33,8 @@ export class CrawlWorkerService {
     private readonly tokenRepository: Repository<Token>,
     private readonly userTicketRepository: Repository<UserTicket>,
     private readonly poolRoundRepository: Repository<PoolRound>,
+    private readonly poolRepository: Repository<Pool>,
+    private readonly prizesRepository: Repository<Prizes>,
   ) {
     this.tonClient = new TonClient({
       endpoint: this.configService.get('contract.rpcEndpoint', {
@@ -129,6 +131,22 @@ export class CrawlWorkerService {
       winningMatch: this.calculatorMatch(ticket.code, tickets?.[0] ?? ''),
     }));
     await this.userTicketRepository.save(userTicketsUpdate);
+
+    // Sum total prizes
+    const totalTickets = await this.getTotalTicketOfRound(
+      roundExist.roundIdOnChain,
+    );
+    const poolExist = await this.getPool(Number(payloadOutMsg.poolId));
+    const totalPrizes = totalTickets * Number(poolExist.ticketPrice);
+
+    // Set prize for round
+    const roundPrize: Partial<Prizes> = {
+      poolIdOnChain: Number(payloadOutMsg.poolId),
+      roundIdOnChain: Number(payloadOutMsg.roundId),
+      totalPrizes,
+      id: null,
+    };
+    await this.setPrizesRound(roundPrize);
   }
 
   async buyTicketsEvent(tx: Transaction) {
@@ -258,10 +276,34 @@ export class CrawlWorkerService {
 
   async getTransactions(fromLt: string, toLt: string) {
     return this.tonClient.getTransactions(this.gameContractAddress, {
-      // lt: fromLt,
-      // to_lt: toLt,
+      lt: fromLt,
+      to_lt: toLt,
       limit: 100,
     });
+  }
+
+  getTotalTicketOfRound(roundIdOnChain: number) {
+    return this.userTicketRepository.countBy({
+      round: {
+        roundIdOnChain,
+      },
+    });
+  }
+
+  getPool(poolIdOnChain) {
+    return this.poolRepository.findOneBy({
+      poolIdOnChain,
+    });
+  }
+
+  setPrizesRound(roundPrize: Partial<Prizes>) {
+    return this.prizesRepository
+      .createQueryBuilder()
+      .insert()
+      .into(Prizes)
+      .values(roundPrize)
+      .orUpdate(['totalPrizes'], ['poolIdOnChain', 'roundIdOnChain'])
+      .execute();
   }
 
   wait(timeout: number) {

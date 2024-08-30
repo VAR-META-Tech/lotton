@@ -9,6 +9,7 @@ import {
   LatestBlock,
   Pool,
   PoolRound,
+  Prizes,
   Token,
   Transaction,
   UserTicket,
@@ -33,6 +34,8 @@ export class ManagerService {
     private readonly poolRoundRepository: Repository<PoolRound>,
     @InjectRepository(Pool)
     private readonly poolRepository: Repository<Pool>,
+    @InjectRepository(Prizes)
+    private readonly prizesRepository: Repository<Prizes>,
   ) {
     this.init();
     cron.schedule('* * * * *', async () => {
@@ -49,6 +52,8 @@ export class ManagerService {
         this.tokenRepository,
         this.userTicketRepository,
         this.poolRoundRepository,
+        this.poolRepository,
+        this.prizesRepository,
       ).doCrawlJob();
       await this.wait(10000); // 10 seconds
     }
