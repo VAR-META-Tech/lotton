@@ -5,6 +5,8 @@ const signatureMessage =
   process.env.NEXT_PUBLIC_SIGNATURE_MESSAGE ??
   'Welcome. By signing this message you are verifying your digital identity. This is completely secure and does not cost anything!';
 
+export const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? 'EQDlsQl0LNXrX1zKaVYjBkgV0jEyQPKFYxa3J30XELEiTra6'
+
 export const env = {
   isProduction,
   APP_URL: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',

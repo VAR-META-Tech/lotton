@@ -41,7 +41,7 @@ export const poolSchema = z.object({
   totalRounds: poolNumberValidation('Total Rounds'),
   upcomingRound: z.string().optional(),
   startTime: z.date({ required_error: validationMessages.required('Start time') }),
-  endTime: z.date().optional(),
+  endTime: z.date({ required_error: validationMessages.required('End time') }),
   ticketPrice: poolNumberValidation('Ticket Price'),
   match1: poolNumberValidation('Match 1'),
   match2: poolNumberValidation('Match 2'),
