@@ -381,7 +381,7 @@ export class PoolService {
         'pool.ticketPrice as ticketPrice',
         'ticket.winningMatch as winningMatch',
         'ticket.id as ticketId',
-        '1+2 as winningPrize', // TODO: calculate ticket prize
+        '(SELECT (totalPrizes*(SELECT allocation from pool_prize where poolId = pool.id and winningMatch = ticket.winningMatch limit 1)/100)/(SELECT COUNT(user_ticket.id) FROM user_ticket where roundId = rounds.id and user_ticket.winningMatch = ticket.winningMatch group by user_ticket.winningMatch) from prizes where pool.poolIdOnChain = prizes.poolIdOnChain) as winningPrize',
         'ticket.winningCode as winningCode',
         'ticket.code as ticketCode',
         'ticket.winningMatch as winningMatch',
@@ -401,6 +401,21 @@ export class PoolService {
   async claim(user: User, claimDto: ClaimDto) {
     const { poolId, roundId } = claimDto;
 
+    const roundExits = await this.poolRepository
+      .createQueryBuilder('pool')
+      .leftJoinAndSelect('pool.rounds', 'rounds')
+      .andWhere('pool.id = :poolId', { poolId })
+      .andWhere('rounds.id = :roundId', { roundId })
+      .select(['pool.id as poolId', 'rounds.endTime as roundEndTime'])
+      .getRawOne();
+    if (!roundExits) {
+      throw new BadRequestException('Round does not exist');
+    }
+
+    if (new Date(roundExits.roundEndTime) > new Date()) {
+      throw new BadRequestException('Round is running or not started');
+    }
+
     const builder = await this.poolRepository
       .createQueryBuilder('pool')
       .leftJoin('pool.rounds', 'rounds')
@@ -415,6 +430,10 @@ export class PoolService {
     const allWinners = await this.countTicketWinning(builder);
 
     const userWinning = await this.getUserTicketWinning(builder, user.wallet);
+
+    if (userWinning.length === 0) {
+      throw new BadRequestException('User has no winning tickets');
+    }
 
     const allocation = await this.poolPrizesRepository
       .createQueryBuilder()
@@ -494,7 +513,9 @@ export class PoolService {
   }
 
   calculateUserWinningPrize(
-    userWinning,
+    userWinning: Array<{
+      winningMatch: number;
+    }>,
     allocation: Array<{
       matchNumber: number;
       allocation: number;

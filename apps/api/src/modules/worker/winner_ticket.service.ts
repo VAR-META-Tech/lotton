@@ -5,7 +5,8 @@ import type { DataSource } from 'typeorm';
 import { PoolRound, UserTicket } from '@/database/entities';
 import { getLogger } from '@/utils/logger';
 import { checkTicketWinner } from '@/utils/winer_code';
-import { CrawlTokenService } from './crawl_token.service';
+
+import type { CrawlTokenService } from './crawl_token.service';
 
 const logger = getLogger('WinnerTicketService');
 
