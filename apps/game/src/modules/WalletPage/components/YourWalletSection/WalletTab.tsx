@@ -12,13 +12,14 @@ import { Input } from '@/components/ui/input';
 import { VStack } from '@/components/ui/Utilities';
 
 import BalanceItem from './BalanceItem';
+import { useWallet } from '@/hooks/useWallet';
 
 const WalletTab = () => {
   const [copied, copy] = useCopy();
   const { user } = useAuth();
   const [tonConnectUI] = useTonConnectUI();
   const { logout } = useAuth();
-
+  const { balance } = useWallet();
   const handleDisconnectWallet = async () => {
     logout();
     await tonConnectUI.disconnect();
@@ -48,8 +49,8 @@ const WalletTab = () => {
         <span className="text-base font-bold">Your assets</span>
 
         <VStack spacing={12}>
-          <BalanceItem title="TON balance" value={prettyNumber(10000)} />
-          <BalanceItem title="NOT balance" value={prettyNumber(20000)} />
+          <BalanceItem title="TON balance" value={prettyNumber(Number(balance || 0).toFixed(6))} />
+          {/* <BalanceItem title="NOT balance" value={prettyNumber(20000)} /> */}
         </VStack>
       </VStack>
 
