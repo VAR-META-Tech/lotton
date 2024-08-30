@@ -12,6 +12,7 @@ export const env = {
   API_URL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001',
   USE_TESTNET: process.env.NEXT_PUBLIC_USE_TESTNET ?? 'false',
   CONTRACT_ADDRESS: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? '',
+  CLAIM_FEE: process.env.NEXT_PUBLIC_CLAIM_FEE ?? '0',
   signatureMessage,
 };
 
