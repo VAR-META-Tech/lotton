@@ -35,7 +35,7 @@ export class ManagerService {
     private readonly poolRepository: Repository<Pool>,
   ) {
     this.init();
-    cron.schedule('*/10 * * * *', async () => {
+    cron.schedule('* * * * *', async () => {
       this.syncData();
     });
   }
@@ -50,7 +50,7 @@ export class ManagerService {
         this.userTicketRepository,
         this.poolRoundRepository,
       ).doCrawlJob();
-      await this.wait(5000); // 5 seconds
+      await this.wait(10000); // 10 seconds
     }
   }
 

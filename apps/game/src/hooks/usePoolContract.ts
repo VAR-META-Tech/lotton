@@ -1,7 +1,7 @@
 import { useTonClient } from './useTonClient';
 import { useAsyncInitialize } from './useAsyncInitialize';
 import { useTonConnect } from './useTonConnect';
-import { Address, beginCell, OpenedContract } from '@ton/core';
+import { Address, beginCell, Cell, OpenedContract } from '@ton/core';
 import Pool from '@/contracts/pool';
 import { useMemo } from 'react';
 import { env } from '@/lib/const';

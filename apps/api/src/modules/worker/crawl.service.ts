@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Transaction } from '@ton/core';
-import { Address } from '@ton/core';
+import { Address, Cell, Slice } from '@ton/core';
 import { TonClient } from '@ton/ton';
 import TonWeb from 'tonweb';
 import { Repository } from 'typeorm';
@@ -57,7 +57,7 @@ export class CrawlWorkerService {
       const latestBlockNumber = (await this.getContractState()).lastTransaction
         .lt;
 
-      if (+currentBlockNumber >= +latestBlockNumber) return;
+      // if (+currentBlockNumber >= +latestBlockNumber) return;
 
       const transactions = await this.getTransactions(
         latestBlockNumber,
@@ -73,6 +73,7 @@ export class CrawlWorkerService {
           const originalBody = inMsg?.body.beginParse();
           const body = originalBody.clone();
           const op = body.loadUint(32);
+
           switch (op) {
             // case 2004140043:
             //   this.createPoolEvent(tx);
@@ -116,7 +117,7 @@ export class CrawlWorkerService {
     roundExist.winningCode = tickets?.[0];
     await this.poolRoundRepository.save(roundExist);
 
-    // Set winning code for user ticket
+    // // Set winning code for user ticket
     const userTicketsExist = await this.userTicketRepository.findBy({
       round: {
         id: roundExist.id,
@@ -257,8 +258,8 @@ export class CrawlWorkerService {
 
   async getTransactions(fromLt: string, toLt: string) {
     return this.tonClient.getTransactions(this.gameContractAddress, {
-      lt: fromLt,
-      to_lt: toLt,
+      // lt: fromLt,
+      // to_lt: toLt,
       limit: 100,
     });
   }
