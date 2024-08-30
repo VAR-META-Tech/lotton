@@ -43,13 +43,11 @@ const Sidebar = () => {
   const open = useAppStore.use.openSideBar();
   const pathname = usePathname();
   const router = useRouter();
-  const setAccessToken = useUserStore.use.setAccessToken();
-  const setUser = useUserStore.use.setUser();
+  const store = useUserStore.getState();
 
   const handleLogout = () => {
     router.replace(ROUTES.LOGIN);
-    setAccessToken('');
-    setUser({} as IUser);
+    store.logout();
     toast.success('Logout successfully!');
   };
 

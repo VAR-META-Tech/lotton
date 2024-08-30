@@ -17,43 +17,53 @@ interface Props {
   poolId: number;
   roundId: number;
   currency: IGetPoolDetailCurrency | undefined;
+  poolIdOnChain: number;
+  winCode: string;
 }
 
-const PoolPrizePot: FC<Props> = ({ currentRound, isEndRound = false, poolId, roundId, currency }) => {
-  const renderContent = useMemo(() => {
-    if (!isEndRound) {
-      return (
-        <div className="p-5 border-y border-y-navigate-tab min-h-[12.875rem]">
-          <AnimatePresence mode="wait">
-            <motion.div key={currentRound} {...slideAnimation}>
-              <VStack align={'center'}>
-                <div className="text-white">
-                  <div className="text-center">Prize Pot</div>
+const PoolPrizePot: FC<Props> = ({
+  currentRound,
+  isEndRound = false,
+  poolId,
+  roundId,
+  currency,
+  poolIdOnChain,
+  winCode,
+}) => {
+  const prizePot = useMemo(() => {
+    return (
+      <div className="p-5 border-y border-y-navigate-tab min-h-[12.875rem]">
+        <AnimatePresence mode="wait">
+          <motion.div key={currentRound} {...slideAnimation}>
+            <VStack align={'center'}>
+              <div className="text-white">
+                <div className="text-center">Prize Pot</div>
 
-                  <HStack pos={'center'} spacing={8}>
-                    <Image src={'/images/tokens/ton_symbol.webp'} width={30} height={30} alt="ton" />
-                    <span className="text-primary text-2xl font-semibold">{`${prettyNumber(2500)} ${
-                      currency?.symbol || ''
-                    }`}</span>
-                  </HStack>
+                <HStack pos={'center'} spacing={8}>
+                  <Image src={'/images/tokens/ton_symbol.webp'} width={30} height={30} alt="ton" />
+                  <span className="text-primary text-2xl font-semibold">{`${prettyNumber(2500)} ${
+                    currency?.symbol || ''
+                  }`}</span>
+                </HStack>
 
-                  <div className="text-xs text-gray-color text-center">{`~ ${prettyNumber(10000)} USD`}</div>
-                </div>
+                <div className="text-xs text-gray-color text-center">{`~ ${prettyNumber(10000)} USD`}</div>
+              </div>
 
-                <PoolAction holdingTicket={0} poolId={poolId || 0} roundId={roundId} />
-              </VStack>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      );
-    }
+              <PoolAction holdingTicket={0} poolId={poolId || 0} roundId={roundId} poolIdOnChain={poolIdOnChain} />
+            </VStack>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    );
+  }, [currency?.symbol, currentRound, poolId, poolIdOnChain, roundId]);
 
+  const prizePotWinningNumber = useMemo(() => {
     return (
       <VStack className="min-h-[11.375rem] border-t border-t-navigate-tab">
         <AnimatePresence mode="wait">
           <motion.div key={currentRound} {...slideAnimation} className="flex-1 flex flex-col">
             <VStack spacing={0} justify={'between'} className="flex-1">
-              <WinningNumber code="b2a5" titleClassName="mx-auto" spacing={12} className="py-2" />
+              <WinningNumber code={winCode} titleClassName="mx-auto" spacing={12} className="py-2" />
 
               <div className="border-y border-y-navigate-tab py-4">
                 <UserTicketCount />
@@ -63,7 +73,15 @@ const PoolPrizePot: FC<Props> = ({ currentRound, isEndRound = false, poolId, rou
         </AnimatePresence>
       </VStack>
     );
-  }, [currency?.symbol, currentRound, isEndRound, poolId, roundId]);
+  }, [currentRound, winCode]);
+
+  const renderContent = useMemo(() => {
+    if (!isEndRound) {
+      return prizePot;
+    }
+
+    return prizePotWinningNumber;
+  }, [isEndRound, prizePot, prizePotWinningNumber]);
 
   return <>{renderContent}</>;
 };

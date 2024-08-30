@@ -38,6 +38,7 @@ export interface IGetPoolDetailData {
   updatedAt: string;
   deletedAt: any;
   id: number;
+  poolIdOnChain: number;
   name: string;
   startTime: string;
   endTime: string;
@@ -67,12 +68,13 @@ export interface IGetPoolDetailCurrency {
 export interface IGetPoolDetailRound {
   createdAt: string;
   updatedAt: string;
-  deletedAt: any;
+  deletedAt: string | null;
   id: number;
+  roundIdOnChain: number;
   roundNumber: number;
   startTime: string;
   endTime: string;
-  winningCode: any;
+  winningCode: string;
 }
 
 export interface IGetPoolDetailPoolPrize {

@@ -28,6 +28,7 @@ const PoolRound: FC<Props> = ({ currentRound, date, isEndRound = false }) => {
               </div>
 
               <div className="text-xs">{!!date && `Draw ${format(new Date(date), 'MMM dd, yyyy, HH:mm a')}`}</div>
+
               {!!isEndRound && (
                 <Link href={'#'} target="_blank" className="text-xs text-primary flex gap-2 items-center">
                   <span>Winning Ticket Block</span>
