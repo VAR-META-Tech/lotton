@@ -135,22 +135,6 @@ export class CrawlWorkerService {
         winningMatch: this.calculatorMatch(ticket.code, tickets?.[0] ?? ''),
       }));
       await this.userTicketRepository.save(userTicketsUpdate);
-
-      // Sum total prizes
-      const totalTickets = await this.getTotalTicketOfRound(
-        roundExist.roundIdOnChain,
-      );
-      const poolExist = await this.getPool(Number(payloadOutMsg.poolId));
-      const totalPrizes = totalTickets * Number(poolExist.ticketPrice);
-
-      // Set prize for round
-      const roundPrize: Partial<Prizes> = {
-        poolIdOnChain: Number(payloadOutMsg.poolId),
-        roundIdOnChain: Number(payloadOutMsg.roundId),
-        totalPrizes,
-        id: null,
-      };
-      await this.setPrizesRound(roundPrize);
     } catch (error) {
       Logger.error(error);
     }
@@ -223,6 +207,22 @@ export class CrawlWorkerService {
         )
         .orUpdate(['roundId'], ['transactionId', 'userWallet', 'code'])
         .execute();
+
+      // Sum total prizes
+      const totalTickets = await this.getTotalTicketOfRound(
+        roundExist.roundIdOnChain,
+      );
+      const poolExist = await this.getPool(Number(payloadOutMsg.poolId));
+      const totalPrizes = totalTickets * Number(poolExist.ticketPrice);
+
+      // Set prize for round
+      const roundPrize: Partial<Prizes> = {
+        poolIdOnChain: Number(payloadOutMsg.poolId),
+        roundIdOnChain: Number(payloadOutMsg.roundId),
+        totalPrizes,
+        id: null,
+      };
+      await this.setPrizesRound(roundPrize);
     } catch (error) {
       console.log(error);
     }
