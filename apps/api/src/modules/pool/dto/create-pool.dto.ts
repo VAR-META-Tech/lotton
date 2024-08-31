@@ -11,7 +11,6 @@ import {
   Min,
 } from 'class-validator';
 
-import { IsDate } from '@/common/decorators/is_date.decorator';
 import { IsGreaterThan } from '@/common/decorators/is_greater_than.decorator';
 import { SumValueArray } from '@/common/decorators/sum_value.decorator';
 
@@ -68,12 +67,12 @@ export class CreatePoolDto {
   @ApiProperty({
     required: true,
     description: 'start time',
-    example: new Date(),
+    example: new Date().valueOf(),
   })
-  @IsDate()
+  // @IsDate()
   // @IsFeatured()
   @IsNotEmpty()
-  startTime: Date;
+  startTime: number;
 
   @ApiProperty({ required: true, description: 'sequency days', example: 30 })
   @IsNumber()

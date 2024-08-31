@@ -55,7 +55,7 @@ export class ManagerService {
         this.poolRepository,
         this.prizesRepository,
       ).doCrawlJob();
-      await this.wait(10000); // 10 seconds
+      await this.wait(15000); // 15 seconds
     }
   }
 

@@ -28,10 +28,10 @@ export class Pool extends BaseTime {
   currency: Token;
 
   @Column()
-  startTime: Date;
+  startTime: number;
 
   @Column()
-  endTime: Date;
+  endTime: number;
 
   @Column()
   sequency: number;

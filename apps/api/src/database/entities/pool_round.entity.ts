@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -10,6 +11,7 @@ import { Pool, UserTicket } from '.';
 import { BaseTime } from './base/time.entity';
 
 @Entity()
+@Index('pr', ['roundIdOnChain'])
 export class PoolRound extends BaseTime {
   @PrimaryGeneratedColumn()
   id: number;
@@ -21,20 +23,17 @@ export class PoolRound extends BaseTime {
   })
   pool: Pool;
 
-  @Column({ nullable: true })
-  poolIdOnChain: number;
-
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   roundIdOnChain: number;
 
-  @Column()
+  @Column({ unique: true })
   roundNumber: number;
 
   @Column()
-  startTime: Date;
+  startTime: number;
 
   @Column()
-  endTime: Date;
+  endTime: number;
 
   @Column({ nullable: true })
   winningCode: string;

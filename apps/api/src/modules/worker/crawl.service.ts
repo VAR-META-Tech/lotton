@@ -4,7 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import type { Transaction } from '@ton/core';
 import { Address } from '@ton/core';
 import { TonClient } from '@ton/ton';
-import dayjs from 'dayjs';
 import TonWeb from 'tonweb';
 import { Repository } from 'typeorm';
 
@@ -63,12 +62,11 @@ export class CrawlWorkerService {
       const currentBlockNumber = (await this.getCurrentBloc()).blockNumber;
       const latestBlockNumber = (await this.getContractState()).lastTransaction
         .lt;
-
       if (+currentBlockNumber >= +latestBlockNumber) return;
 
       const transactions = await this.getTransactions(
         latestBlockNumber,
-        (currentBlockNumber + 1).toString(),
+        currentBlockNumber.toString(),
       );
 
       for (const tx of transactions) {
@@ -83,13 +81,13 @@ export class CrawlWorkerService {
 
           switch (op) {
             case 2004140043:
-              this.createPoolEvent(tx);
+              await this.createPoolEvent(tx);
               break;
             case 3748203161:
-              this.buyTicketsEvent(tx);
+              await this.buyTicketsEvent(tx);
               break;
             case 3591482628:
-              this.drawWinningNumber(tx);
+              await this.drawWinningNumber(tx);
               break;
 
             default:
@@ -260,12 +258,11 @@ export class CrawlWorkerService {
       const pools = await this.getPools();
       const getPool = pools.find((p) => p.poolId === poolIdOnChain);
       if (!getPool) return;
-      const rounds = getPool.rounds.values();
 
-      const poolOffChain = await this.poolRepository.findOneBy({
-        poolIdOnChain: Number(poolIdOnChain),
-      });
+      const poolOffChain = await this.getPool(poolIdOnChain);
       if (!poolOffChain) return;
+
+      const rounds = getPool.rounds.values();
 
       await this.poolRoundRepository
         .createQueryBuilder()
@@ -273,17 +270,17 @@ export class CrawlWorkerService {
         .into(PoolRound)
         .values(
           rounds.map((round) => ({
-            poolIdOnChain: Number(round.poolId),
-            roundIdOnChain: Number(round.roundId),
+            id: null,
             pool: poolOffChain,
+            roundIdOnChain: Number(round.roundId),
             roundNumber: Number(round.roundId),
-            startTime: dayjs.unix(Number(round.startTime)).toISOString(),
-            endTime: dayjs.unix(Number(round.endTime)).toISOString(),
+            startTime: Number(round.startTime),
+            endTime: Number(round.endTime),
           })),
         )
         .orUpdate(
-          ['roundNumber', 'startTime', 'endTime'],
-          ['poolIdOnChain', 'roundIdOnChain'],
+          ['roundNumber', 'startTime', 'endTime', 'poolId'],
+          ['roundIdOnChain'],
         )
         .execute();
     } catch (error) {

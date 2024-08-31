@@ -247,8 +247,8 @@ export class RoundPrizesService {
     return (
       this.poolRepository
         .createQueryBuilder()
-        .where('startTime < NOW()')
-        // .andWhere('endTime > NOW()')
+        .where('startTime < UNIX_TIMESTAMP(NOW())')
+        // .andWhere('endTime > UNIX_TIMESTAMP(NOW())')
         .getMany()
     );
   }
@@ -256,9 +256,9 @@ export class RoundPrizesService {
   async getRoundsAvailable(poolId: number) {
     return this.poolRoundRepository
       .createQueryBuilder()
-      .where('poolIdOnChain = :poolId', { poolId })
-      .andWhere('startTime < NOW()')
-      .andWhere('NOW() > endTime')
+      .where('poolId = :poolId', { poolId })
+      .andWhere('startTime < UNIX_TIMESTAMP(NOW())')
+      .andWhere('UNIX_TIMESTAMP(NOW()) > endTime')
       .andWhere('winningCode IS NULL')
       .getMany();
   }
