@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Transaction } from '@ton/core';
-import { Address, TupleBuilder } from '@ton/core';
+import { Address } from '@ton/core';
 import { TonClient } from '@ton/ton';
 import dayjs from 'dayjs';
 import TonWeb from 'tonweb';
@@ -10,15 +10,16 @@ import { Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
 import type { Pool, Token } from '@/database/entities';
-import { PoolRound } from '@/database/entities';
-import { Prizes } from '@/database/entities';
-import { UserTicket } from '@/database/entities';
-import { Transaction as TransactionDB } from '@/database/entities';
-import { LatestBlock } from '@/database/entities';
+import {
+  LatestBlock,
+  PoolRound,
+  Prizes,
+  Transaction as TransactionDB,
+  UserTicket,
+} from '@/database/entities';
 
 import {
   getCurrentPool,
-  getPoolById,
   loadBuyTicket,
   loadPoolCreatedEvent,
   loadTicketBoughtEvent,
@@ -104,53 +105,57 @@ export class CrawlWorkerService {
   }
 
   async drawWinningNumber(tx: Transaction) {
-    const outMsgsList = tx.outMessages
-      .values()
-      .filter((msg) => msg.info.type === 'external-out');
-    const outMsgsFirst = outMsgsList[0];
-    const originalOutMsgBody = outMsgsFirst?.body.beginParse();
-    const payloadOutMsg = loadWinningNumbersDrawnEvent(originalOutMsgBody);
+    try {
+      const outMsgsList = tx.outMessages
+        .values()
+        .filter((msg) => msg.info.type === 'external-out');
+      const outMsgsFirst = outMsgsList[0];
+      const originalOutMsgBody = outMsgsFirst?.body.beginParse();
+      const payloadOutMsg = loadWinningNumbersDrawnEvent(originalOutMsgBody);
 
-    const tickets = this.splitTickets(
-      payloadOutMsg.winningNumber.toString(),
-      1,
-    );
+      const tickets = this.splitTickets(
+        payloadOutMsg.winningNumber.toString(),
+        1,
+      );
 
-    // Set draw winning code for round
-    const roundExist = await this.poolRoundRepository.findOneBy({
-      roundIdOnChain: Number(payloadOutMsg.roundId),
-    });
-    roundExist.winningCode = tickets?.[0];
-    await this.poolRoundRepository.save(roundExist);
+      // Set draw winning code for round
+      const roundExist = await this.poolRoundRepository.findOneBy({
+        roundIdOnChain: Number(payloadOutMsg.roundId),
+      });
+      roundExist.winningCode = tickets?.[0];
+      await this.poolRoundRepository.save(roundExist);
 
-    // // Set winning code for user ticket
-    const userTicketsExist = await this.userTicketRepository.findBy({
-      round: {
-        id: roundExist.id,
-      },
-    });
-    const userTicketsUpdate = userTicketsExist.map((ticket) => ({
-      ...ticket,
-      winningCode: tickets?.[0],
-      winningMatch: this.calculatorMatch(ticket.code, tickets?.[0] ?? ''),
-    }));
-    await this.userTicketRepository.save(userTicketsUpdate);
+      // // Set winning code for user ticket
+      const userTicketsExist = await this.userTicketRepository.findBy({
+        round: {
+          id: roundExist.id,
+        },
+      });
+      const userTicketsUpdate = userTicketsExist.map((ticket) => ({
+        ...ticket,
+        winningCode: tickets?.[0],
+        winningMatch: this.calculatorMatch(ticket.code, tickets?.[0] ?? ''),
+      }));
+      await this.userTicketRepository.save(userTicketsUpdate);
 
-    // Sum total prizes
-    const totalTickets = await this.getTotalTicketOfRound(
-      roundExist.roundIdOnChain,
-    );
-    const poolExist = await this.getPool(Number(payloadOutMsg.poolId));
-    const totalPrizes = totalTickets * Number(poolExist.ticketPrice);
+      // Sum total prizes
+      const totalTickets = await this.getTotalTicketOfRound(
+        roundExist.roundIdOnChain,
+      );
+      const poolExist = await this.getPool(Number(payloadOutMsg.poolId));
+      const totalPrizes = totalTickets * Number(poolExist.ticketPrice);
 
-    // Set prize for round
-    const roundPrize: Partial<Prizes> = {
-      poolIdOnChain: Number(payloadOutMsg.poolId),
-      roundIdOnChain: Number(payloadOutMsg.roundId),
-      totalPrizes,
-      id: null,
-    };
-    await this.setPrizesRound(roundPrize);
+      // Set prize for round
+      const roundPrize: Partial<Prizes> = {
+        poolIdOnChain: Number(payloadOutMsg.poolId),
+        roundIdOnChain: Number(payloadOutMsg.roundId),
+        totalPrizes,
+        id: null,
+      };
+      await this.setPrizesRound(roundPrize);
+    } catch (error) {
+      Logger.error(error);
+    }
   }
 
   async buyTicketsEvent(tx: Transaction) {
@@ -246,64 +251,81 @@ export class CrawlWorkerService {
   }
 
   async createPoolEvent(tx: Transaction) {
-    const outMsgs = tx.outMessages.values()[0];
-    const originalBody = outMsgs?.body.beginParse();
-    const body = originalBody.clone();
-    const payload = loadPoolCreatedEvent(originalBody);
-    const poolIdOnChain = payload.poolId;
+    try {
+      const outMsgs = tx.outMessages.values()[0];
+      const originalBody = outMsgs?.body.beginParse();
+      const payload = loadPoolCreatedEvent(originalBody);
+      const poolIdOnChain = payload.poolId;
 
-    const pools = await this.getPools();
-    const getPool = pools.find((p) => p.poolId === poolIdOnChain);
-    if (!getPool) return;
-    const rounds = getPool.rounds.values();
+      const pools = await this.getPools();
+      const getPool = pools.find((p) => p.poolId === poolIdOnChain);
+      if (!getPool) return;
+      const rounds = getPool.rounds.values();
 
-    await this.poolRoundRepository
-      .createQueryBuilder()
-      .insert()
-      .into(PoolRound)
-      .values(
-        rounds.map((round) => ({
-          poolIdOnChain: Number(round.poolId),
-          roundIdOnChain: Number(round.roundId),
-          roundNumber: Number(round.roundId),
-          startTime: dayjs.unix(Number(round.startTime)).toISOString(),
-          endTime: dayjs.unix(Number(round.endTime)).toISOString(),
-        })),
-      )
-      .orUpdate(
-        ['roundNumber', 'startTime', 'endTime'],
-        ['poolIdOnChain', 'roundIdOnChain'],
-      )
-      .execute();
+      const poolOffChain = await this.poolRepository.findOneBy({
+        poolIdOnChain: Number(poolIdOnChain),
+      });
+      if (!poolOffChain) return;
 
-    return { payload, body };
+      await this.poolRoundRepository
+        .createQueryBuilder()
+        .insert()
+        .into(PoolRound)
+        .values(
+          rounds.map((round) => ({
+            poolIdOnChain: Number(round.poolId),
+            roundIdOnChain: Number(round.roundId),
+            pool: poolOffChain,
+            roundNumber: Number(round.roundId),
+            startTime: dayjs.unix(Number(round.startTime)).toISOString(),
+            endTime: dayjs.unix(Number(round.endTime)).toISOString(),
+          })),
+        )
+        .orUpdate(
+          ['roundNumber', 'startTime', 'endTime'],
+          ['poolIdOnChain', 'roundIdOnChain'],
+        )
+        .execute();
+    } catch (error) {
+      Logger.error(error);
+    }
   }
 
   async getPools() {
-    const pools = (
-      await getCurrentPool(this.tonClient.provider(this.gameContractAddress))
-    ).values();
+    try {
+      const pools = (
+        await getCurrentPool(this.tonClient.provider(this.gameContractAddress))
+      ).values();
 
-    return pools;
+      return pools;
+    } catch (error) {
+      Logger.error(error);
+      throw error;
+    }
   }
 
-  async getPoolIdOnChange(poolId: number) {
-    const builder = new TupleBuilder();
-    builder.writeNumber(BigInt(poolId));
+  // async getPoolIdOnChange(poolId: number) {
+  //   const builder = new TupleBuilder();
+  //   builder.writeNumber(BigInt(poolId));
 
-    const currentPool = await getPoolById(
-      this.tonClient.provider(this.gameContractAddress),
-      BigInt(poolId),
-    );
+  //   const currentPool = await getPoolById(
+  //     this.tonClient.provider(this.gameContractAddress),
+  //     BigInt(poolId),
+  //   );
 
-    // const result = currentPool.readTupleOpt();
-    // return result ? loadTuplePool(result) : null;
-  }
+  //   const result = currentPool.readTupleOpt();
+  //   return result ? loadTuplePool(result) : null;
+  // }
 
   async updateBlockLt(lt: string) {
-    const currentBlock = await this.getCurrentBloc();
-    currentBlock.blockNumber = +lt;
-    return await this.latestBlockRepository.save(currentBlock);
+    try {
+      const currentBlock = await this.getCurrentBloc();
+      currentBlock.blockNumber = +lt;
+      return await this.latestBlockRepository.save(currentBlock);
+    } catch (error) {
+      Logger.error(error);
+      throw error;
+    }
   }
 
   async getCurrentBloc() {
@@ -318,10 +340,15 @@ export class CrawlWorkerService {
   }
 
   async getContractState() {
-    const contractState = await this.tonClient.getContractState(
-      this.gameContractAddress,
-    );
-    return contractState;
+    try {
+      const contractState = await this.tonClient.getContractState(
+        this.gameContractAddress,
+      );
+      return contractState;
+    } catch (error) {
+      Logger.error(error);
+      throw error;
+    }
   }
 
   async getTransactions(fromLt: string, toLt: string) {

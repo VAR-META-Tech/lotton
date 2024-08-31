@@ -17,7 +17,11 @@ export class PoolRound extends BaseTime {
   @ManyToOne(() => Pool, (pool) => pool.rounds, {
     onDelete: 'CASCADE',
     cascade: true,
+    nullable: true,
   })
+  pool: Pool;
+
+  @Column({ nullable: true })
   poolIdOnChain: number;
 
   @Column({ nullable: true })

@@ -28,7 +28,7 @@ export class RoundService {
         });
       }
       if (poolId) {
-        queryBuilder.andWhere('poolRound.poolIdOnChain = :poolId', { poolId });
+        queryBuilder.andWhere('poolRound.poolId = :poolId', { poolId });
       }
       if (status && status == PoolRoundStatusEnum.UPCOMING) {
         queryBuilder.andWhere('poolRound.startTime > NOW()');
