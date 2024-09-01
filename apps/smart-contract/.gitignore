@@ -1,8 +1,7 @@
 node_modules
 temp
-build
-!build/Lottery/*.ts
 dist
+!build
 .DS_Store
 
 # VS Code
