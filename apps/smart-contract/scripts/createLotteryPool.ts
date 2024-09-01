@@ -1,12 +1,13 @@
 import { Address, beginCell, toNano } from '@ton/core';
 import { Lottery } from '../wrappers/Lottery';
 import { NetworkProvider, sleep } from '@ton/blueprint';
+import { mnemonicToWalletKey, sign } from '@ton/crypto';
 
 export async function run(provider: NetworkProvider, args: string[]) {
     const ui = provider.ui();
 
     // const address = Address.parse(args.length > 0 ? args[0] : await ui.input('Lottery address'));
-    const address = Address.parse('EQDwUdPrCfsUurCsD1kxxk5UFS-kUWXzhhLTkqj3y3ZXmJHq');
+    const address = Address.parse('EQAwO2CucgqsCctKFFqVPAgY48iLO96xjOJxZgcuha5UgSmE');
 
     if (!(await provider.isContractDeployed(address))) {
         ui.write(`Error: Contract at address ${address} is not deployed!`);
@@ -49,7 +50,7 @@ export async function run(provider: NetworkProvider, args: string[]) {
     let poolId = 1n;
     console.log('pools', pools);
     while (poolId) {
-        ui.setActionPrompt(`Attempt ${attempt}`);
+        ui.setActionPrompt(`Attempt ${attempt}: `);
         let pool = await lottery.getPoolById(poolId);
         console.log('pool', pool);
         let round = await lottery.getRoundById(1n, 1n);
@@ -93,20 +94,55 @@ export async function run(provider: NetworkProvider, args: string[]) {
             console.log('Waiting for winner...');
             await sleep(20000);
             let result = await lottery.getResultByPool(round?.poolId);
-
-            // let claim = await lottery.send(
-            //     provider.sender(), {
-            //         value: toNano('0.05'),
-            //     },
-            //     {
-            //         $$type: 'Claim',
-            //         poolId: 1n,
-            //         roundId: 1n,
-            //         amount: 1n,
-            //         signature: beginCell().storeBuffer().endCell()
-            //     }
-            // )
             console.log('result', result);
+            //get the signature from mock server
+            let airDropAmount: bigint = 1000000000n;
+            const signatureData = beginCell()
+                .storeInt(1, 32)
+                .storeInt(1, 32)
+                .storeAddress(provider.sender().address!!)
+                .storeCoins(airDropAmount)
+                .endCell();
+            let WALLET_MNEMONIC='surround basket park setup state favorite relax document ecology into huge bring business crunch walnut arm frog rain label start fade near earn segment'
+
+            const keyPair = await mnemonicToWalletKey(WALLET_MNEMONIC.split(" "));
+            const signature = sign(signatureData.hash(), keyPair.secretKey);
+            let signatureCell = beginCell().storeBuffer(signature).asSlice();
+            let publicKeyBigInt = BigInt(`0x${keyPair.publicKey.toString('hex')}`);
+            console.log('publicKeyBigInt', publicKeyBigInt);
+            await lottery.send(
+                provider.sender(), {
+                    value: toNano('0.06'),
+                },
+                {
+                    $$type: 'SetPublicKey',
+                    publicKey: publicKeyBigInt
+                }
+            );
+
+            await sleep(20000);
+
+            console.log('Claiming the prize...');
+            let claim = await lottery.send(
+                provider.sender(), {
+                    value: toNano('0.07'),
+                },
+                {
+                    $$type: 'Claim',
+                    poolId: 1n,
+                    roundId: 1n,
+                    amount: airDropAmount,
+                    receiver: provider.sender().address!!,
+                    signature: signatureCell
+                }
+            )
+            await sleep(20000);
+            console.log('claim', claim);
+
+            let userClaim = await lottery.getClaimData(1n, 1n);
+            console.log('userClaim', userClaim);
+            let isClaimed = await lottery.getIsClaim(1n, 1n, provider.sender().address!!);
+            console.log('isClaimed', isClaimed);
         }
     }
 
