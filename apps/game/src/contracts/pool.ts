@@ -9,15 +9,16 @@ export default class Pool implements Contract {
     return new Pool(address, { code, data });
   }
 
-  // eslint-disable-next-line no-unused-vars
   constructor(
+    // eslint-disable-next-line no-unused-vars
     readonly address: Address,
+    // eslint-disable-next-line no-unused-vars
     readonly init?: { code: Cell; data: Cell }
   ) {}
 
   async sendDeploy(provider: ContractProvider, via: Sender) {
     await provider.internal(via, {
-      value: '0.01', // send 0.01 TON to contract for rent
+      value: '0.05', // send 0.05 TON to contract for rent
       bounce: false,
     });
   }

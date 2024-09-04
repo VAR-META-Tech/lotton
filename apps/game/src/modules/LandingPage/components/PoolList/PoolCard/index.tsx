@@ -33,7 +33,7 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
   const isEndRound = useMemo(() => {
     if (!rounds) return false;
 
-    const roundEndtime = new Date(roundActive?.endTime);
+    const roundEndtime = new Date(roundActive?.endTime * 1000);
     const now = new Date();
 
     if (now > roundEndtime) {
@@ -73,6 +73,7 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
           currency={currency}
           isEndRound={isEndRound}
           poolIdOnChain={pool?.poolIdOnChain || 0}
+          roundIdOnChain={roundActive?.roundIdOnChain}
           winCode={roundActive?.winningCode || '    '}
         />
       </div>

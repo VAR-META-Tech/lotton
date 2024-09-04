@@ -57,7 +57,14 @@ const HowToWin = () => {
           </div>
 
           <div className="w-4/5 relative h-48 mx-auto">
-            <Image src="/images/how_to_win.webp" alt="how-to-win" fill priority quality={100} />
+            <Image
+              src="/images/how_to_win.webp"
+              alt="how-to-win"
+              fill
+              priority
+              quality={100}
+              className="object-contain"
+            />
           </div>
         </AccordionContent>
       </AccordionItem>

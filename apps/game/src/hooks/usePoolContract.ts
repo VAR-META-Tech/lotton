@@ -69,8 +69,15 @@ export function usePoolContract() {
     return await poolContract?.claimPrize(provider, sender, messageBody);
   };
 
+  const getLastTx = () => {
+    return client?.getTransactions(Address.parse(env.CONTRACT_ADDRESS), {
+      limit: 1,
+    });
+  };
+
   return {
     address: poolContract?.address.toString(),
+    getLastTx,
     buyTicket,
     claimPrize,
   };

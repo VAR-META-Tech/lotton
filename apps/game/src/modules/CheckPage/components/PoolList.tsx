@@ -35,6 +35,7 @@ export const PoolList = () => {
         <SkeletonPool />
         <SkeletonPool />
       </Show>
+
       {!!poolList?.length && <div ref={rootLoadMore} />}
     </VStack>
   );

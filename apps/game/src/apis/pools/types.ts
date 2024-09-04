@@ -72,8 +72,8 @@ export interface IGetPoolDetailRound {
   id: number;
   roundIdOnChain: number;
   roundNumber: number;
-  startTime: string;
-  endTime: string;
+  startTime: number;
+  endTime: number;
   winningCode: string;
 }
 
@@ -115,15 +115,16 @@ export interface IGetPoolJoinedItem {
 }
 
 export interface IGetPoolJoinedItemRound {
-  totalTicket: string;
+  totalTicket: number;
   createdAt: string;
   updatedAt: string;
-  deletedAt: any;
+  deletedAt: string | null;
   id: number;
+  roundIdOnChain: number;
   roundNumber: number;
-  startTime: string;
-  endTime: string;
-  winningCode: string | null;
+  startTime: number;
+  endTime: number;
+  winningCode: string;
   ticket: IGetPoolJoinedItemTicket[];
 }
 

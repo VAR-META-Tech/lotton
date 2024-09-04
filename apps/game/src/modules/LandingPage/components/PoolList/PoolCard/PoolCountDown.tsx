@@ -1,7 +1,7 @@
 import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 
 interface Props {
-  date: string | undefined;
+  date: number;
 }
 
 interface TimeLeft {
@@ -22,7 +22,7 @@ const PoolCountDown: FC<Props> = ({ date }) => {
   const calculateTimeLeft = useCallback((): TimeLeft => {
     if (!date) return getDefaultTimeLeft();
 
-    const targetDate = new Date(date).getTime();
+    const targetDate = new Date(date * 1000).getTime();
     const now = Date.now();
 
     if (isNaN(targetDate)) return getDefaultTimeLeft();

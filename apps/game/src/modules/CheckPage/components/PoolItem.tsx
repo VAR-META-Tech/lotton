@@ -47,14 +47,19 @@ export const PoolItem = ({ pool }: Props) => {
           <ChangeRoundAction activeRound={activeRound} onClick={handleChangeRoundActive} rounds={rounds} />
         </HStack>
 
-        <DrawTime endTime={roundActive?.endTime || ''} />
+        <DrawTime endTime={roundActive?.endTime} />
 
         <TicketDetailDrawer pool={pool} roundActiveNumber={roundActiveNumber}>
           <Button className="mx-auto rounded-lg text-white">View your tickets</Button>
         </TicketDetailDrawer>
       </div>
 
-      <BuyTicketDrawer poolId={pool?.id} roundId={roundActive?.id} poolIdOnChain={pool?.poolIdOnChain} />
+      <BuyTicketDrawer
+        poolId={pool?.id}
+        roundId={roundActive?.id}
+        roundIdOnChain={roundActive?.roundIdOnChain}
+        poolIdOnChain={pool?.poolIdOnChain}
+      />
     </div>
   );
 };
