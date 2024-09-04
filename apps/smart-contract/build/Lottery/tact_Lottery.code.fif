@@ -1,0 +1,2619 @@
+PROGRAM{
+  DECLPROC __tact_verify_address
+  DECLPROC __tact_load_address
+  DECLPROC __tact_store_address
+  DECLPROC __tact_my_balance
+  DECLPROC __tact_not_null
+  DECLPROC __tact_context_get
+  DECLPROC __tact_context_get_sender
+  DECLPROC __tact_prepare_random
+  DECLPROC __tact_store_bool
+  DECLPROC __tact_dict_set_int_int
+  DECLPROC __tact_dict_get_int_int
+  DECLPROC __tact_dict_get_uint_uint
+  DECLPROC __tact_dict_set_int_cell
+  DECLPROC __tact_dict_get_int_cell
+  DECLPROC __tact_dict_set_slice_int
+  DECLPROC __tact_dict_get_slice_int
+  DECLPROC __tact_dict_set_slice_cell
+  DECLPROC __tact_dict_get_slice_cell
+  DECLPROC __tact_slice_eq_bits
+  DECLPROC __tact_slice_neq
+  DECLPROC __tact_string_builder_start
+  DECLPROC __tact_string_builder_start_string
+  DECLPROC __tact_string_builder_end
+  DECLPROC __tact_string_builder_end_slice
+  DECLPROC __tact_string_builder_append
+  DECLPROC __tact_int_to_string
+  DECLPROC $Deploy$_load
+  DECLPROC $DeployOk$_store
+  DECLPROC $DeployOk$_store_cell
+  DECLPROC $Pool$_store
+  DECLPROC $Pool$_store_cell
+  DECLPROC $Pool$_load
+  DECLPROC $Pool$_as_optional
+  DECLPROC $Pool$_load_opt
+  DECLPROC $RoundConfig$_store
+  DECLPROC $RoundConfig$_store_cell
+  DECLPROC $RoundConfig$_load
+  DECLPROC $RoundConfig$_as_optional
+  DECLPROC $RoundConfig$_load_opt
+  DECLPROC $TicketPayoutResponse$_store
+  DECLPROC $TicketPayoutResponse$_store_cell
+  DECLPROC $TicketPayoutResponse$_load
+  DECLPROC $TicketPayoutResponse$_as_optional
+  DECLPROC $TicketPayoutResponse$_load_opt
+  DECLPROC $UserTicket$_store
+  DECLPROC $UserTicket$_store_cell
+  DECLPROC $UserTicket$_load
+  DECLPROC $UserTicket$_as_optional
+  DECLPROC $UserTicket$_load_opt
+  DECLPROC $RoundTicket$_store
+  DECLPROC $RoundTicket$_store_cell
+  DECLPROC $RoundTicket$_load
+  DECLPROC $RoundTicket$_as_optional
+  DECLPROC $RoundTicket$_load_opt
+  DECLPROC $ClaimInfo$_store
+  DECLPROC $ClaimInfo$_store_cell
+  DECLPROC $ClaimInfo$_load
+  DECLPROC $ClaimInfo$_as_optional
+  DECLPROC $ClaimInfo$_load_opt
+  DECLPROC $UserClaim$_store
+  DECLPROC $UserClaim$_store_cell
+  DECLPROC $UserClaim$_load
+  DECLPROC $UserClaim$_as_optional
+  DECLPROC $UserClaim$_load_opt
+  DECLPROC $Result$_store
+  DECLPROC $Result$_store_cell
+  DECLPROC $Result$_load
+  DECLPROC $Result$_as_optional
+  DECLPROC $Result$_load_opt
+  DECLPROC $CreatePool$_load
+  DECLPROC $Claim$_load
+  DECLPROC $WinningNumbersDrawnEvent$_store
+  DECLPROC $WinningNumbersDrawnEvent$_store_cell
+  DECLPROC $BuyTicket$_load
+  DECLPROC $DrawWinningNumbers$_load
+  DECLPROC $SetAdmin$_load
+  DECLPROC $SetPublicKey$_load
+  DECLPROC $PoolCreatedEvent$_store
+  DECLPROC $PoolCreatedEvent$_store_cell
+  DECLPROC $TicketBoughtEvent$_store
+  DECLPROC $TicketBoughtEvent$_store_cell
+  DECLPROC $ClaimedEvent$_store
+  DECLPROC $ClaimedEvent$_store_cell
+  DECLPROC $Lottery$_store
+  DECLPROC $Lottery$_load
+  DECLPROC $StateInit$_not_null
+  DECLPROC $Context$_get_value
+  DECLPROC $Pool$_get_rounds
+  DECLPROC $Pool$_not_null
+  DECLPROC $Pool$_to_tuple
+  DECLPROC $Pool$_to_opt_tuple
+  DECLPROC $Pool$_to_opt_external
+  DECLPROC $RoundConfig$_not_null
+  DECLPROC $RoundConfig$_to_tuple
+  DECLPROC $RoundConfig$_to_opt_tuple
+  DECLPROC $RoundConfig$_to_opt_external
+  DECLPROC $TicketPayoutResponse$_not_null
+  DECLPROC $TicketPayoutResponse$_to_tuple
+  DECLPROC $TicketPayoutResponse$_to_opt_tuple
+  DECLPROC $TicketPayoutResponse$_to_opt_external
+  DECLPROC $UserTicket$_get_users
+  DECLPROC $UserTicket$_not_null
+  DECLPROC $UserTicket$_to_external
+  DECLPROC $RoundTicket$_get_rounds
+  DECLPROC $RoundTicket$_not_null
+  DECLPROC $ClaimInfo$_get_info
+  DECLPROC $ClaimInfo$_not_null
+  DECLPROC $UserClaim$_get_user
+  DECLPROC $UserClaim$_not_null
+  DECLPROC $UserClaim$_to_tuple
+  DECLPROC $UserClaim$_to_opt_tuple
+  DECLPROC $UserClaim$_to_opt_external
+  DECLPROC $Result$_get_rounds
+  DECLPROC $Result$_not_null
+  DECLPROC $Result$_to_tuple
+  DECLPROC $Result$_to_opt_tuple
+  DECLPROC $Result$_to_opt_external
+  DECLPROC $Lottery$_contract_init
+  DECLPROC $Lottery$_contract_load
+  DECLPROC $Lottery$_contract_store
+  DECLPROC $global_random
+  DECLPROC $global_send
+  DECLPROC $global_emit
+  DECLPROC $Lottery$_fun_isAdmin
+  DECLPROC $Lottery$_fun_requireOwnerOrAdmin
+  DECLPROC $Lottery$_fun_setAdmin
+  DECLPROC $Pool$_constructor_poolId_creator_rounds_startTime_endTime_sequence_active_prizes
+  DECLPROC $RoundTicket$_constructor_rounds
+  DECLPROC $RoundConfig$_constructor_roundId_poolId_ticketPrice_startTime_endTime_active
+  DECLPROC $UserTicket$_constructor_users
+  DECLPROC $PoolCreatedEvent$_constructor_poolId_ticketPrice_initialRounds_startTime_endTime_active_sequence_rounds_creator_prizes
+  DECLPROC $Lottery$_fun_verifyPoolPrizes
+  DECLPROC $Lottery$_fun_createPool
+  DECLPROC $Lottery$_fun_asciiToChar
+  DECLPROC $RandomTicketResponse$_constructor_ASCIINumber_ticket
+  DECLPROC $Lottery$_fun_generateRandomASCIIString
+  DECLPROC $Ticket$_constructor_ticket_ticketNumber_owner
+  DECLPROC $TicketPayoutResponse$_constructor_ticket
+  DECLPROC $Lottery$_fun_createTicket
+  DECLPROC $SendParameters$_constructor_to_value_mode
+  DECLPROC $TicketBoughtEvent$_constructor_roundId_poolId_quantity_buyer_tickets
+  DECLPROC $Lottery$_fun_buyTicket
+  DECLPROC $Result$_constructor_rounds
+  DECLPROC $WinningNumbersDrawnEvent$_constructor_poolId_roundId_winningNumber
+  DECLPROC $Lottery$_fun_roundById
+  DECLPROC $Lottery$_fun_drawWinningNumbers
+  DECLPROC $Lottery$_fun_getMessageHash
+  DECLPROC $UserClaim$_constructor_user
+  DECLPROC $ClaimInfo$_constructor_info
+  DECLPROC $ClaimedEvent$_constructor_poolId_roundId_amount_receiver
+  DECLPROC $Lottery$_fun_isClaim
+  DECLPROC $Lottery$_fun_claimPrize
+  DECLPROC $Lottery$_fun_admins
+  DECLPROC $Lottery$_fun_currentPool
+  DECLPROC $Lottery$_fun_poolById
+  DECLPROC $Lottery$_fun_usersTicket
+  DECLPROC $Lottery$_fun_userTicketByAddress
+  DECLPROC $Lottery$_fun_resultByRound
+  DECLPROC $Lottery$_fun_resultByPool
+  DECLPROC $Lottery$_fun_publicKey
+  DECLPROC $Lottery$_fun_claimData
+  DECLPROC $SendParameters$_constructor_bounce_to_value_mode_body_code_data
+  DECLPROC $Lottery$_fun_forward
+  DECLPROC $Lottery$_fun_notify
+  DECLPROC $Lottery$_fun_owner
+  DECLPROC $DeployOk$_constructor_queryId
+  DECLPROC $Lottery$_internal_binary_CreatePool
+  DECLPROC $Lottery$_internal_binary_BuyTicket
+  DECLPROC $Lottery$_internal_binary_DrawWinningNumbers
+  DECLPROC $Lottery$_internal_binary_SetAdmin
+  DECLPROC $Lottery$_internal_binary_Claim
+  DECLPROC $Lottery$_internal_binary_SetPublicKey
+  DECLPROC $Lottery$_internal_binary_Deploy
+  100637 DECLMETHOD %admins
+  122448 DECLMETHOD %isAdmin
+  76907 DECLMETHOD %currentPool
+  122632 DECLMETHOD %poolById
+  70847 DECLMETHOD %usersTicket
+  101588 DECLMETHOD %userTicketByAddress
+  120186 DECLMETHOD %roundById
+  74053 DECLMETHOD %resultByRound
+  110335 DECLMETHOD %resultByPool
+  86520 DECLMETHOD %publicKey
+  122213 DECLMETHOD %claimData
+  88594 DECLMETHOD %isClaim
+  83229 DECLMETHOD %owner
+  115390 DECLMETHOD lazy_deployment_completed
+  DECLPROC $Lottery$_contract_router_internal
+  DECLPROC recv_internal
+  DECLGLOBVAR __tact_context
+  DECLGLOBVAR __tact_context_sender
+  DECLGLOBVAR __tact_context_sys
+  DECLGLOBVAR __tact_randomized
+  __tact_verify_address PROCINLINE:<{
+    DUP
+    SBITS
+    267 PUSHINT
+    EQUAL
+    136 THROWIFNOT
+    DUP
+    11 PLDU
+    DUP
+    1279 PUSHINT
+    EQUAL
+    137 THROWIF
+    10 PUSHPOW2
+    EQUAL
+    136 THROWIFNOT
+  }>
+  __tact_load_address PROCINLINE:<{
+    LDMSGADDR
+    SWAP
+    __tact_verify_address INLINECALLDICT
+  }>
+  __tact_store_address PROCINLINE:<{
+    __tact_verify_address INLINECALLDICT
+    STSLICER
+  }>
+  __tact_my_balance PROCINLINE:<{
+    BALANCE
+    FIRST
+  }>
+  __tact_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+  }>
+  __tact_context_get PROCINLINE:<{
+    __tact_context GETGLOB
+    4 UNTUPLE
+  }>
+  __tact_context_get_sender PROCINLINE:<{
+    __tact_context_sender GETGLOB
+  }>
+  __tact_prepare_random PROCINLINE:<{
+    __tact_randomized GETGLOB
+    ISNULL
+    IF:<{
+      LTIME
+      ADDRAND
+      TRUE
+      __tact_randomized SETGLOB
+    }>
+  }>
+  __tact_store_bool PROCINLINE:<{
+    SWAP
+    1 STI
+  }>
+  __tact_dict_set_int_int PROCINLINE:<{
+    OVER
+    ISNULL
+    IF:<{
+      2DROP
+      -ROT
+      DICTIDEL
+      DROP
+    }>ELSE<{
+      NEWC
+      SWAP
+      STIX
+      s1 s3 s3 XCHG3
+      DICTISETB
+    }>
+  }>
+  __tact_dict_get_int_int PROCINLINE:<{
+    s1 s3 s3 XCHG3
+    DICTIGET
+    NULLSWAPIFNOT
+    IF:<{
+      SWAP
+      LDIX
+      DROP
+    }>ELSE<{
+      2DROP
+      PUSHNULL
+    }>
+  }>
+  __tact_dict_get_uint_uint PROCINLINE:<{
+    s1 s3 s3 XCHG3
+    DICTUGET
+    NULLSWAPIFNOT
+    IF:<{
+      SWAP
+      LDUX
+      DROP
+    }>ELSE<{
+      2DROP
+      PUSHNULL
+    }>
+  }>
+  __tact_dict_set_int_cell PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      -ROT
+      DICTIDEL
+      DROP
+    }>ELSE<{
+      s1 s3 s3 XCHG3
+      DICTISETREF
+    }>
+  }>
+  __tact_dict_get_int_cell PROCINLINE:<{
+    -ROT
+    DICTIGETREF
+    NULLSWAPIFNOT
+    IF:<{
+    }>ELSE<{
+      DROP
+      PUSHNULL
+    }>
+  }>
+  __tact_dict_set_slice_int PROCINLINE:<{
+    OVER
+    ISNULL
+    IF:<{
+      2DROP
+      -ROT
+      DICTDEL
+      DROP
+    }>ELSE<{
+      NEWC
+      SWAP
+      STIX
+      s1 s3 s3 XCHG3
+      DICTSETB
+    }>
+  }>
+  __tact_dict_get_slice_int PROCINLINE:<{
+    s1 s3 s3 XCHG3
+    DICTGET
+    NULLSWAPIFNOT
+    IF:<{
+      SWAP
+      LDIX
+      DROP
+    }>ELSE<{
+      2DROP
+      PUSHNULL
+    }>
+  }>
+  __tact_dict_set_slice_cell PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      -ROT
+      DICTDEL
+      DROP
+    }>ELSE<{
+      s1 s3 s3 XCHG3
+      DICTSETREF
+    }>
+  }>
+  __tact_dict_get_slice_cell PROCINLINE:<{
+    -ROT
+    DICTGETREF
+    NULLSWAPIFNOT
+    IF:<{
+    }>ELSE<{
+      DROP
+      PUSHNULL
+    }>
+  }>
+  __tact_slice_eq_bits PROCINLINE:<{
+    SDEQ
+  }>
+  __tact_slice_neq PROCINLINE:<{
+    SWAP
+    HASHSU
+    SWAP
+    HASHSU
+    NEQ
+  }>
+  __tact_string_builder_start PROCINLINE:<{
+    NIL
+    SWAP
+    TPUSH
+    PUSHNULL
+    TPUSH
+  }>
+  __tact_string_builder_start_string PROCINLINE:<{
+    NEWC
+    __tact_string_builder_start INLINECALLDICT
+  }>
+  __tact_string_builder_end PROCINLINE:<{
+    UNCONS
+    SWAP
+    ENDC
+    WHILE:<{
+      OVER
+      ISNULL
+      NOT
+    }>DO<{
+      SWAP
+      UNCONS
+      -ROT
+      STREF
+      ENDC
+    }>
+    NIP
+  }>
+  __tact_string_builder_end_slice PROCINLINE:<{
+    __tact_string_builder_end INLINECALLDICT
+    CTOS
+  }>
+  __tact_string_builder_append PROCREF:<{
+    DUP
+    SREFS
+    OVER
+    SBITS
+    WHILE:<{
+      DUP
+      0 GTINT
+      s2 PUSH
+      0 GTINT
+      OR
+    }>DO<{
+      s0 s3 XCHG
+      UNCONS
+      127 PUSHINT
+      s2 PUSH
+      BBITS
+      3 RSHIFT#
+      SUB
+      s0 s5 XCHG
+      3 RSHIFT#
+      s5 s5 XCPU
+      MIN
+      DUP
+      0 GTINT
+      IF:<{
+        DUP
+        3 LSHIFT#
+        s1 s5 XCHG
+        LDSLICEX
+        s3 s3 XCHG2
+        STSLICER
+        s0 s1 s4 XCHG3
+      }>
+      -ROT
+      CONS
+      s4 s1 PUSH2
+      SUB
+      0 GTINT
+      IF:<{
+        NEWC
+        SWAP
+        CONS
+        s4 s4 XCHG2
+        SUB
+        3 LSHIFT#
+      }>ELSE<{
+        NIP
+        s3 POP
+        0 GTINT
+        IF:<{
+          LDREF
+          DROP
+          CTOS
+          DUP
+          SREFS
+          OVER
+          SBITS
+        }>ELSE<{
+          0 PUSHINT
+          DUP
+        }>
+      }>
+    }>
+    3 BLKDROP
+  }>
+  __tact_int_to_string PROCREF:<{
+    NEWC
+    OVER
+    0 LESSINT
+    IF:<{
+      45 PUSHINT
+      SWAP
+      8 STU
+      SWAP
+      NEGATE
+      SWAP
+    }>
+    OVER
+    1000000000000000000000000000000 PUSHINTX
+    LESS
+    IF:<{
+      0 PUSHINT
+      DUP
+      1 PUSHINT
+      UNTIL:<{
+        s0 s4 XCHG
+        10 PUSHINT
+        DIVMOD
+        48 ADDCONST
+        s5 PUSH
+        MUL
+        s1 s2 XCHG
+        ADD
+        s0 s4 XCHG
+        8 LSHIFT#
+        s0 s2 XCHG
+        INC
+        OVER
+        0 EQINT
+        s5 s3 s0 XCHG3
+      }>
+      DROP
+      s3 POP
+      3 LSHIFT#
+      STUX
+    }>ELSE<{
+      NIL
+      0 PUSHINT
+      UNTIL:<{
+        s3 PUSH
+        10 PUSHINT
+        MOD
+        s1 s2 XCHG
+        TPUSH
+        SWAP
+        INC
+        s0 s3 XCHG
+        10 PUSHINT
+        DIV
+        DUP
+        0 EQINT
+        s1 s4 XCHG
+      }>
+      s3 POP
+      s2 PUSH
+      DEC
+      s0 s3 XCHG
+      REPEAT:<{
+        s0 s2 PUSH2
+        INDEXVAR
+        48 ADDCONST
+        ROT
+        8 STU
+        s0 s2 XCHG
+        DEC
+        -ROT
+      }>
+      DROP
+      NIP
+    }>
+    ENDC
+    CTOS
+  }>
+  $Deploy$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    2490013878 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    64 LDU
+    SWAP
+  }>
+  $DeployOk$_store PROCINLINE:<{
+    2952335191 PUSHINT
+    ROT
+    32 STU
+    64 STU
+  }>
+  $DeployOk$_store_cell PROCINLINE:<{
+    NEWC
+    SWAP
+    $DeployOk$_store INLINECALLDICT
+    ENDC
+  }>
+  $Pool$_store PROCREF:<{
+    s7 s8 XCHG2
+    32 STU
+    s0 s5 XCHG2
+    __tact_store_address INLINECALLDICT
+    s1 s3 XCHG
+    STDICT
+    32 STU
+    32 STU
+    32 STU
+    1 STI
+    STDICT
+  }>
+  $Pool$_store_cell PROCINLINE:<{
+    NEWC
+    8 -ROLL
+    $Pool$_store INLINECALLDICT
+    ENDC
+  }>
+  $Pool$_load PROCREF:<{
+    32 LDU
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDDICT
+    32 LDU
+    32 LDU
+    32 LDU
+    1 LDI
+    LDDICT
+    8 -ROLL
+  }>
+  $Pool$_as_optional PROCINLINE:<{
+    8 TUPLE
+  }>
+  $Pool$_load_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      CTOS
+      $Pool$_load INLINECALLDICT
+      1 8 BLKDROP2
+      $Pool$_as_optional INLINECALLDICT
+    }>
+  }>
+  $RoundConfig$_store PROCREF:<{
+    s5 s6 XCHG2
+    32 STU
+    s1 s3 XCHG
+    32 STU
+    SWAP
+    STGRAMS
+    32 STU
+    32 STU
+    1 STI
+  }>
+  $RoundConfig$_store_cell PROCINLINE:<{
+    NEWC
+    6 -ROLL
+    $RoundConfig$_store INLINECALLDICT
+    ENDC
+  }>
+  $RoundConfig$_load PROCREF:<{
+    32 LDU
+    32 LDU
+    LDGRAMS
+    32 LDU
+    32 LDU
+    1 LDI
+    6 -ROLL
+  }>
+  $RoundConfig$_as_optional PROCINLINE:<{
+    6 TUPLE
+  }>
+  $RoundConfig$_load_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      CTOS
+      $RoundConfig$_load INLINECALLDICT
+      1 6 BLKDROP2
+      $RoundConfig$_as_optional INLINECALLDICT
+    }>
+  }>
+  $TicketPayoutResponse$_store PROCINLINE:<{
+    NEWC
+    SWAP
+    STSLICER
+    ENDC
+    SWAP
+    STREF
+  }>
+  $TicketPayoutResponse$_store_cell PROCINLINE:<{
+    NEWC
+    SWAP
+    $TicketPayoutResponse$_store INLINECALLDICT
+    ENDC
+  }>
+  $TicketPayoutResponse$_load PROCINLINE:<{
+    LDREF
+    SWAP
+    CTOS
+  }>
+  $TicketPayoutResponse$_as_optional PROCINLINE:<{
+    1 TUPLE
+  }>
+  $TicketPayoutResponse$_load_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      CTOS
+      $TicketPayoutResponse$_load INLINECALLDICT
+      NIP
+      $TicketPayoutResponse$_as_optional INLINECALLDICT
+    }>
+  }>
+  $UserTicket$_store PROCINLINE:<{
+    SWAP
+    STDICT
+  }>
+  $UserTicket$_store_cell PROCINLINE:<{
+    NEWC
+    SWAP
+    $UserTicket$_store INLINECALLDICT
+    ENDC
+  }>
+  $UserTicket$_load PROCINLINE:<{
+    LDDICT
+    SWAP
+  }>
+  $UserTicket$_as_optional PROCINLINE:<{
+    1 TUPLE
+  }>
+  $UserTicket$_load_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      CTOS
+      $UserTicket$_load INLINECALLDICT
+      NIP
+      $UserTicket$_as_optional INLINECALLDICT
+    }>
+  }>
+  $RoundTicket$_store PROCINLINE:<{
+    SWAP
+    STDICT
+  }>
+  $RoundTicket$_store_cell PROCINLINE:<{
+    NEWC
+    SWAP
+    $RoundTicket$_store INLINECALLDICT
+    ENDC
+  }>
+  $RoundTicket$_load PROCINLINE:<{
+    LDDICT
+    SWAP
+  }>
+  $RoundTicket$_as_optional PROCINLINE:<{
+    1 TUPLE
+  }>
+  $RoundTicket$_load_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      CTOS
+      $RoundTicket$_load INLINECALLDICT
+      NIP
+      $RoundTicket$_as_optional INLINECALLDICT
+    }>
+  }>
+  $ClaimInfo$_store PROCINLINE:<{
+    SWAP
+    STDICT
+  }>
+  $ClaimInfo$_store_cell PROCINLINE:<{
+    NEWC
+    SWAP
+    $ClaimInfo$_store INLINECALLDICT
+    ENDC
+  }>
+  $ClaimInfo$_load PROCINLINE:<{
+    LDDICT
+    SWAP
+  }>
+  $ClaimInfo$_as_optional PROCINLINE:<{
+    1 TUPLE
+  }>
+  $ClaimInfo$_load_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      CTOS
+      $ClaimInfo$_load INLINECALLDICT
+      NIP
+      $ClaimInfo$_as_optional INLINECALLDICT
+    }>
+  }>
+  $UserClaim$_store PROCINLINE:<{
+    SWAP
+    STDICT
+  }>
+  $UserClaim$_store_cell PROCINLINE:<{
+    NEWC
+    SWAP
+    $UserClaim$_store INLINECALLDICT
+    ENDC
+  }>
+  $UserClaim$_load PROCINLINE:<{
+    LDDICT
+    SWAP
+  }>
+  $UserClaim$_as_optional PROCINLINE:<{
+    1 TUPLE
+  }>
+  $UserClaim$_load_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      CTOS
+      $UserClaim$_load INLINECALLDICT
+      NIP
+      $UserClaim$_as_optional INLINECALLDICT
+    }>
+  }>
+  $Result$_store PROCINLINE:<{
+    SWAP
+    STDICT
+  }>
+  $Result$_store_cell PROCINLINE:<{
+    NEWC
+    SWAP
+    $Result$_store INLINECALLDICT
+    ENDC
+  }>
+  $Result$_load PROCINLINE:<{
+    LDDICT
+    SWAP
+  }>
+  $Result$_as_optional PROCINLINE:<{
+    1 TUPLE
+  }>
+  $Result$_load_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      CTOS
+      $Result$_load INLINECALLDICT
+      NIP
+      $Result$_as_optional INLINECALLDICT
+    }>
+  }>
+  $CreatePool$_load PROCREF:<{
+    32 LDU
+    SWAP
+    2095598070 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    __tact_load_address INLINECALLDICT
+    SWAP
+    32 LDU
+    8 LDU
+    32 LDU
+    32 LDU
+    32 LDU
+    1 LDI
+    LDDICT
+    8 -ROLL
+  }>
+  $Claim$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    1449747896 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    LDGRAMS
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDREF
+    SWAP
+    CTOS
+    s1 s5 XCHG
+    s1 s4 XCHG
+    s3 s3 s0 XCHG3
+  }>
+  $WinningNumbersDrawnEvent$_store PROCINLINE:<{
+    3552390527 PUSHINT
+    s0 s4 XCHG2
+    32 STU
+    s1 s2 XCHG
+    257 PUSHINT
+    STIX
+    257 PUSHINT
+    STIX
+    257 PUSHINT
+    STIX
+  }>
+  $WinningNumbersDrawnEvent$_store_cell PROCINLINE:<{
+    NEWC
+    3 -ROLL
+    $WinningNumbersDrawnEvent$_store INLINECALLDICT
+    ENDC
+  }>
+  $BuyTicket$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    3748203161 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    3 -ROLL
+  }>
+  $DrawWinningNumbers$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    3591482628 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    257 PUSHINT
+    LDIX
+    257 PUSHINT
+    LDIX
+    LDREF
+    SWAP
+    CTOS
+    s3 s3 s0 XCHG3
+  }>
+  $SetAdmin$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    3397822855 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    __tact_load_address INLINECALLDICT
+  }>
+  $SetPublicKey$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    3279683070 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    257 PUSHINT
+    LDIX
+    SWAP
+  }>
+  $PoolCreatedEvent$_store PROCREF:<{
+    590692540 PUSHINT
+    s0 s11 XCHG2
+    32 STU
+    s1 s9 XCHG
+    257 PUSHINT
+    STIX
+    s1 s7 XCHG
+    32 STU
+    s1 s5 XCHG
+    8 STU
+    s1 s3 XCHG
+    32 STU
+    32 STU
+    1 STI
+    32 STU
+    STDICT
+    SWAP
+    __tact_store_address INLINECALLDICT
+    STDICT
+  }>
+  $PoolCreatedEvent$_store_cell PROCINLINE:<{
+    NEWC
+    10 -ROLL
+    $PoolCreatedEvent$_store INLINECALLDICT
+    ENDC
+  }>
+  $TicketBoughtEvent$_store PROCINLINE:<{
+    1249282626 PUSHINT
+    s0 s6 XCHG2
+    32 STU
+    s1 s4 XCHG
+    257 PUSHINT
+    STIX
+    s1 s2 XCHG
+    257 PUSHINT
+    STIX
+    257 PUSHINT
+    STIX
+    NEWC
+    ROT
+    __tact_store_address INLINECALLDICT
+    NEWC
+    s0 s3 XCHG2
+    STSLICER
+    ENDC
+    ROT
+    STREF
+    ENDC
+    SWAP
+    STREF
+  }>
+  $TicketBoughtEvent$_store_cell PROCINLINE:<{
+    NEWC
+    5 -ROLL
+    $TicketBoughtEvent$_store INLINECALLDICT
+    ENDC
+  }>
+  $ClaimedEvent$_store PROCINLINE:<{
+    916403026 PUSHINT
+    s0 s5 XCHG2
+    32 STU
+    s1 s3 XCHG
+    257 PUSHINT
+    STIX
+    257 PUSHINT
+    STIX
+    SWAP
+    STGRAMS
+    SWAP
+    __tact_store_address INLINECALLDICT
+  }>
+  $ClaimedEvent$_store_cell PROCINLINE:<{
+    NEWC
+    4 -ROLL
+    $ClaimedEvent$_store INLINECALLDICT
+    ENDC
+  }>
+  $Lottery$_store PROCINLINE:<{
+    s10 s9 XCHG2
+    __tact_store_address INLINECALLDICT
+    s1 s7 XCHG
+    STDICT
+    s0 s5 XCHG
+    NEWC
+    STDICT
+    s1 s4 XCHG
+    257 PUSHINT
+    STIX
+    s1 s2 XCHG
+    STDICT
+    STDICT
+    SWAP
+    NEWC
+    STDICT
+    s1 s3 XCHG
+    STDICT
+    s4 PUSH
+    ISNULL
+    NOT
+    IF:<{
+      TRUE
+      SWAP
+      1 STI
+      s1 s4 XCHG
+      257 PUSHINT
+      STIX
+    }>ELSE<{
+      s4 POP
+      FALSE
+      s0 s4 XCHG2
+      1 STI
+    }>
+    s1 s2 XCHG
+    STDICT
+    ENDC
+    SWAP
+    STREF
+    ENDC
+    SWAP
+    STREF
+  }>
+  $Lottery$_load PROCINLINE:<{
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDDICT
+    LDREF
+    SWAP
+    CTOS
+    LDDICT
+    257 PUSHINT
+    LDIX
+    LDDICT
+    LDDICT
+    LDREF
+    DROP
+    CTOS
+    LDDICT
+    LDDICT
+    1 LDI
+    SWAP
+    IF:<{
+      257 PUSHINT
+      LDIX
+    }>ELSE<{
+      PUSHNULL
+      SWAP
+    }>
+    LDDICT
+    DROP
+    s8 s10 XCHG
+    s8 s9 XCHG
+  }>
+  $StateInit$_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+    2 UNTUPLE
+  }>
+  $Context$_get_value PROCINLINE:<{
+    s1 s3 XCHG
+    3 BLKDROP
+  }>
+  $Pool$_get_rounds PROCINLINE:<{
+    s5 s7 XCHG
+    7 BLKDROP
+  }>
+  $Pool$_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+    8 UNTUPLE
+  }>
+  $Pool$_to_tuple PROCINLINE:<{
+    8 TUPLE
+  }>
+  $Pool$_to_opt_tuple PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      $Pool$_not_null INLINECALLDICT
+      $Pool$_to_tuple INLINECALLDICT
+    }>
+  }>
+  $Pool$_to_opt_external PROCINLINE:<{
+    $Pool$_to_opt_tuple INLINECALLDICT
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+    }>
+  }>
+  $RoundConfig$_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+    6 UNTUPLE
+  }>
+  $RoundConfig$_to_tuple PROCINLINE:<{
+    6 TUPLE
+  }>
+  $RoundConfig$_to_opt_tuple PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      $RoundConfig$_not_null INLINECALLDICT
+      $RoundConfig$_to_tuple INLINECALLDICT
+    }>
+  }>
+  $RoundConfig$_to_opt_external PROCINLINE:<{
+    $RoundConfig$_to_opt_tuple INLINECALLDICT
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+    }>
+  }>
+  $TicketPayoutResponse$_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+    1 UNTUPLE
+  }>
+  $TicketPayoutResponse$_to_tuple PROCINLINE:<{
+    1 TUPLE
+  }>
+  $TicketPayoutResponse$_to_opt_tuple PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      $TicketPayoutResponse$_not_null INLINECALLDICT
+      $TicketPayoutResponse$_to_tuple INLINECALLDICT
+    }>
+  }>
+  $TicketPayoutResponse$_to_opt_external PROCINLINE:<{
+    $TicketPayoutResponse$_to_opt_tuple INLINECALLDICT
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+    }>
+  }>
+  $UserTicket$_get_users PROCINLINE:<{
+  }>
+  $UserTicket$_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+    1 UNTUPLE
+  }>
+  $UserTicket$_to_external PROCINLINE:<{
+  }>
+  $RoundTicket$_get_rounds PROCINLINE:<{
+  }>
+  $RoundTicket$_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+    1 UNTUPLE
+  }>
+  $ClaimInfo$_get_info PROCINLINE:<{
+  }>
+  $ClaimInfo$_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+    1 UNTUPLE
+  }>
+  $UserClaim$_get_user PROCINLINE:<{
+  }>
+  $UserClaim$_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+    1 UNTUPLE
+  }>
+  $UserClaim$_to_tuple PROCINLINE:<{
+    1 TUPLE
+  }>
+  $UserClaim$_to_opt_tuple PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      $UserClaim$_not_null INLINECALLDICT
+      $UserClaim$_to_tuple INLINECALLDICT
+    }>
+  }>
+  $UserClaim$_to_opt_external PROCINLINE:<{
+    $UserClaim$_to_opt_tuple INLINECALLDICT
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+    }>
+  }>
+  $Result$_get_rounds PROCINLINE:<{
+  }>
+  $Result$_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+    1 UNTUPLE
+  }>
+  $Result$_to_tuple PROCINLINE:<{
+    1 TUPLE
+  }>
+  $Result$_to_opt_tuple PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      $Result$_not_null INLINECALLDICT
+      $Result$_to_tuple INLINECALLDICT
+    }>
+  }>
+  $Result$_to_opt_external PROCINLINE:<{
+    $Result$_to_opt_tuple INLINECALLDICT
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+    }>
+  }>
+  $Lottery$_contract_init PROCREF:<{
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+    __tact_context_get_sender INLINECALLDICT
+    1 PUSHINT
+    0 PUSHINT
+    257 PUSHINT
+    s2 PUSH
+    10 PUSHINT
+    s2 PUSH
+    s4 s10 XCHG
+    __tact_dict_set_int_int INLINECALLDICT
+    257 PUSHINT
+    2 PUSHINT
+    20 PUSHINT
+    s2 PUSH
+    __tact_dict_set_int_int INLINECALLDICT
+    257 PUSHINT
+    3 PUSHINT
+    30 PUSHINT
+    s2 PUSH
+    __tact_dict_set_int_int INLINECALLDICT
+    257 PUSHINT
+    4 PUSHINT
+    40 PUSHINT
+    s2 PUSH
+    __tact_dict_set_int_int INLINECALLDICT
+    s2 s9 XCHG
+    s2 s8 XCHG
+    s7 s6 s0 XCHG3
+    s5 s1 s4 XCHG3
+    s0 s1 s3 XCHG3
+  }>
+  $Lottery$_contract_load PROCREF:<{
+    c4 PUSH
+    CTOS
+    LDREF
+    SWAP
+    __tact_context_sys SETGLOB
+    1 LDI
+    SWAP
+    IFJMP:<{
+      $Lottery$_load INLINECALLDICT
+      1 10 BLKDROP2
+    }>
+    DROP
+    MYADDR
+    11 PLDU
+    10 PUSHPOW2
+    EQUAL
+    137 THROWIFNOT
+    $Lottery$_contract_init INLINECALLDICT
+  }>
+  $Lottery$_contract_store PROCINLINE:<{
+    NEWC
+    __tact_context_sys GETGLOB
+    SWAP
+    STREF
+    TRUE
+    SWAP
+    1 STI
+    10 -ROLL
+    $Lottery$_store INLINECALLDICT
+    ENDC
+    c4 POP
+  }>
+  $global_random PROCINLINE:<{
+    __tact_prepare_random INLINECALLDICT
+    OVER
+    SUB
+    RAND
+    ADD
+  }>
+  $global_send PROCREF:<{
+    NEWC
+    1 PUSHINT
+    SWAP
+    2 STI
+    s0 s7 XCHG2
+    __tact_store_bool INLINECALLDICT
+    0 PUSHINT
+    SWAP
+    3 STI
+    s0 s5 XCHG2
+    __tact_store_address INLINECALLDICT
+    s0 s3 XCHG2
+    STGRAMS
+    0 PUSHINT
+    SWAP
+    105 STI
+    s3 PUSH
+    ISNULL
+    NOT
+    IF:<{
+      TRUE
+    }>ELSE<{
+      s4 PUSH
+      ISNULL
+      NOT
+    }>
+    IF:<{
+      TRUE
+      __tact_store_bool INLINECALLDICT
+      NEWC
+      FALSE
+      __tact_store_bool INLINECALLDICT
+      FALSE
+      __tact_store_bool INLINECALLDICT
+      s4 PUSH
+      ISNULL
+      NOT
+      IF:<{
+        TRUE
+        __tact_store_bool INLINECALLDICT
+        s0 s4 XCHG
+        __tact_not_null INLINECALLDICT
+        s0 s4 XCHG2
+        STREF
+      }>ELSE<{
+        s4 POP
+        s0 s3 XCHG
+        FALSE
+        __tact_store_bool INLINECALLDICT
+      }>
+      s4 PUSH
+      ISNULL
+      NOT
+      IF:<{
+        TRUE
+        __tact_store_bool INLINECALLDICT
+        s0 s4 XCHG
+        __tact_not_null INLINECALLDICT
+        s0 s4 XCHG2
+        STREF
+      }>ELSE<{
+        s4 POP
+        s0 s3 XCHG
+        FALSE
+        __tact_store_bool INLINECALLDICT
+      }>
+      FALSE
+      __tact_store_bool INLINECALLDICT
+      s0 s2 XCHG
+      TRUE
+      __tact_store_bool INLINECALLDICT
+      s0 s2 XCHG
+      ENDC
+      ROT
+      STREF
+    }>ELSE<{
+      s3 POP
+      s3 POP
+      SWAP
+      FALSE
+      __tact_store_bool INLINECALLDICT
+    }>
+    OVER
+    ISNULL
+    NOT
+    IF:<{
+      TRUE
+      __tact_store_bool INLINECALLDICT
+      SWAP
+      __tact_not_null INLINECALLDICT
+      SWAP
+      STREF
+    }>ELSE<{
+      NIP
+      FALSE
+      __tact_store_bool INLINECALLDICT
+    }>
+    ENDC
+    SWAP
+    SENDRAWMSG
+  }>
+  $global_emit PROCINLINE:<{
+    NEWC
+    15211807202738752817960438464513 PUSHINT
+    SWAP
+    104 STU
+    STREF
+    ENDC
+    0 PUSHINT
+    SENDRAWMSG
+  }>
+  $Lottery$_fun_isAdmin PROCREF:<{
+    267 PUSHINT
+    s10 PUSH
+    s0 s2 XCHG
+    1 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    __tact_not_null INLINECALLDICT
+  }>
+  $Lottery$_fun_requireOwnerOrAdmin PROCREF:<{
+    58319 PUSHINT
+    __tact_context_get_sender INLINECALLDICT
+    s11 s(-1) PUXC
+    __tact_slice_eq_bits INLINECALLDICT
+    IF:<{
+      TRUE
+    }>ELSE<{
+      __tact_context_get_sender INLINECALLDICT
+      s10 s11 XCHG
+      s1 s11 XCHG
+      s1 s9 XCHG
+      s1 s8 XCHG
+      s1 s7 XCHG
+      s1 s6 XCHG
+      s1 s5 XCHG
+      s1 s4 XCHG
+      s3 s3 s0 XCHG3
+      $Lottery$_fun_isAdmin INLINECALLDICT
+      s10 s11 XCHG
+      s9 s10 XCHG
+      s8 s9 XCHG
+      s7 s8 XCHG
+      s6 s7 XCHG
+      s5 s6 XCHG
+      s4 s5 XCHG
+      s3 s4 XCHG
+      s1 s3 s0 XCHG3
+    }>
+    THROWANYIFNOT
+  }>
+  $Lottery$_fun_setAdmin PROCREF:<{
+    s1 s9 XCHG
+    267 PUSHINT
+    SWAP
+    TRUE
+    1 PUSHINT
+    __tact_dict_set_slice_int INLINECALLDICT
+    s0 s8 XCHG
+  }>
+  $Pool$_constructor_poolId_creator_rounds_startTime_endTime_sequence_active_prizes PROCINLINE:<{
+  }>
+  $RoundTicket$_constructor_rounds PROCINLINE:<{
+  }>
+  $RoundConfig$_constructor_roundId_poolId_ticketPrice_startTime_endTime_active PROCINLINE:<{
+  }>
+  $UserTicket$_constructor_users PROCINLINE:<{
+  }>
+  $PoolCreatedEvent$_constructor_poolId_ticketPrice_initialRounds_startTime_endTime_active_sequence_rounds_creator_prizes PROCINLINE:<{
+  }>
+  $Lottery$_fun_verifyPoolPrizes PROCREF:<{
+    0 PUSHINT
+    1 PUSHINT
+    4 PUSHINT
+    REPEAT:<{
+      8 PUSHINT
+      s3 s(-1) s(-1) PUXCPU
+      s3 s(-1) PUXC
+      __tact_dict_get_uint_uint INLINECALLDICT
+      DUP
+      ISNULL
+      NOT
+      IF:<{
+        __tact_not_null INLINECALLDICT
+        s1 s2 XCHG
+        ADD
+        SWAP
+      }>ELSE<{
+        DROP
+      }>
+      INC
+    }>
+    DROP
+    41780 PUSHINT
+    s2 POP
+    101 LESSINT
+    THROWANYIFNOT
+    TRUE
+  }>
+  $Lottery$_fun_createPool PROCREF:<{
+    NIP
+    s4 POP
+    s4 POP
+    s9 s15 XCHG
+    s8 s14 XCHG
+    s7 s13 XCHG
+    s6 s12 XCHG
+    s5 s11 XCHG
+    s4 s10 XCHG
+    s3 s15 XCHG
+    s14 s13 s12 XCHG3
+    $Lottery$_fun_requireOwnerOrAdmin INLINECALLDICT
+    52453 PUSHINT
+    s12 PUSH
+    0 GTINT
+    THROWANYIFNOT
+    42342 PUSHINT
+    s11 PUSH
+    0 GTINT
+    THROWANYIFNOT
+    57401 PUSHINT
+    s13 PUSH
+    17 s() PUSH
+    LESS
+    THROWANYIFNOT
+    s14 PUSH
+    $Lottery$_fun_verifyPoolPrizes INLINECALLDICT
+    26690 PUSHINT
+    SWAP
+    THROWANYIFNOT
+    s6 PUSH
+    INC
+    __tact_context_get_sender INLINECALLDICT
+    s8 s(-1) PUXC
+    PUSHNULL
+    16 s() PUSH
+    20 s() PUSH
+    16 s() PUSH
+    TRUE
+    22 s() PUSH
+    $Pool$_constructor_poolId_creator_rounds_startTime_endTime_sequence_active_prizes INLINECALLDICT
+    PUSHNULL
+    $RoundTicket$_constructor_rounds INLINECALLDICT
+    1 PUSHINT
+    22 s() PUSH
+    REPEAT:<{
+      DUP
+      DEC
+      22 s() PUSH
+      MUL
+      24 s() PUSH
+      SWAP
+      ADD
+      OVER
+      23 s() PUSH
+      MUL
+      25 s() PUSH
+      SWAP
+      ADD
+      28 s() PUSH
+      OVER
+      LESS
+      IF:<{
+        DROP
+        27 s() PUSH
+      }>ELSE<{
+      }>
+      TRUE
+      s3 PUSH
+      s0 s3 XCHG
+      21 s() PUSH
+      s0 s3 XCHG
+      29 s() PUSH
+      s0 s3 XCHG
+      $RoundConfig$_constructor_roundId_poolId_ticketPrice_startTime_endTime_active INLINECALLDICT
+      257 PUSHINT
+      PUSHNULL
+      $UserTicket$_constructor_users INLINECALLDICT
+      $UserTicket$_store_cell INLINECALLDICT
+      s8 PUSH
+      s3 s10 XCHG
+      SWAP
+      __tact_dict_set_int_cell INLINECALLDICT
+      5 -ROLL
+      257 PUSHINT
+      s0 s8 XCHG
+      $RoundConfig$_store_cell INLINECALLDICT
+      s9 s3 s0 XCHG3
+      s9 s(-1) PUXC
+      __tact_dict_set_int_cell INLINECALLDICT
+      s0 s7 XCHG
+      INC
+    }>
+    DROP
+    s5 s8 XCHG
+    s4 s7 XCHG
+    257 PUSHINT
+    s7 PUSH
+    s0 s5 XCHG
+    s4 s10 XCHG
+    s3 s9 XCHG
+    s0 s10 s9 XCHG3
+    $Pool$_store_cell INLINECALLDICT
+    s12 s3 s0 XCHG3
+    s11 s(-1) PUXC
+    __tact_dict_set_int_cell INLINECALLDICT
+    257 PUSHINT
+    s0 s11 XCHG
+    $RoundTicket$_store_cell INLINECALLDICT
+    s9 s11 s0 XCHG3
+    s10 s(-1) PUXC
+    __tact_dict_set_int_cell INLINECALLDICT
+    TRUE
+    __tact_context_get_sender INLINECALLDICT
+    s9 s10 XCHG
+    s8 17 s() XCHG
+    s7 s15 XCHG
+    s6 16 s() XCHG
+    s5 19 s() XCHG
+    s1 s4 XCHG
+    s3 s14 XCHG
+    s10 s0 s0 XCHG3
+    s0 18 s() XCHG
+    $PoolCreatedEvent$_constructor_poolId_ticketPrice_initialRounds_startTime_endTime_active_sequence_rounds_creator_prizes INLINECALLDICT
+    $PoolCreatedEvent$_store_cell INLINECALLDICT
+    $global_emit INLINECALLDICT
+    s3 s9 XCHG
+    s8 s7 s0 XCHG3
+    s4 s6 XCHG
+    s0 s5 XCHG
+    3 2 BLKSWAP
+  }>
+  $Lottery$_fun_asciiToChar PROCREF:<{
+    DUP
+    47 GTINT
+    IF:<{
+      DUP
+      58 LESSINT
+    }>ELSE<{
+      FALSE
+    }>
+    IFJMP:<{
+      __tact_int_to_string INLINECALLDICT
+    }>
+    DUP
+    64 GTINT
+    IF:<{
+      DUP
+      91 LESSINT
+    }>ELSE<{
+      FALSE
+    }>
+    IFJMP:<{
+      __tact_int_to_string INLINECALLDICT
+    }>
+    DROP
+    B{b5ee9c724101010100020000004cacb9cd} B>boc <s PUSHSLICE
+  }>
+  $RandomTicketResponse$_constructor_ASCIINumber_ticket PROCINLINE:<{
+  }>
+  $Lottery$_fun_generateRandomASCIIString PROCREF:<{
+    __tact_string_builder_start_string INLINECALLDICT
+    0 PUSHINT
+    s0 s2 XCHG
+    REPEAT:<{
+      0 PUSHINT
+      2 PUSHINT
+      $global_random INLINECALLDICT
+      0 EQINT
+      IF:<{
+        48 PUSHINT
+        58 PUSHINT
+        $global_random INLINECALLDICT
+      }>ELSE<{
+        65 PUSHINT
+        91 PUSHINT
+        $global_random INLINECALLDICT
+      }>
+      s0 s2 XCHG
+      100 MULCONST
+      s2 PUSH
+      ADD
+      s10 s12 XCHG
+      5 8 REVERSE
+      s7 s11 XCHG
+      s6 s12 XCHG
+      s5 s11 XCHG
+      s4 s12 XCHG
+      s3 s11 XCHG
+      s12 s11 s12 XCHG3
+      $Lottery$_fun_asciiToChar INLINECALLDICT
+      s1 s11 XCHG
+      __tact_string_builder_append INLINECALLDICT
+      s9 s11 XCHG
+      s8 s10 XCHG
+      s7 s9 XCHG
+      s6 s8 XCHG
+      s5 s7 XCHG
+      s4 s6 XCHG
+      s3 s5 XCHG
+      s4 s3 s0 XCHG3
+    }>
+    __tact_string_builder_end_slice INLINECALLDICT
+    $RandomTicketResponse$_constructor_ASCIINumber_ticket INLINECALLDICT
+  }>
+  $Ticket$_constructor_ticket_ticketNumber_owner PROCINLINE:<{
+  }>
+  $TicketPayoutResponse$_constructor_ticket PROCINLINE:<{
+  }>
+  $Lottery$_fun_createTicket PROCREF:<{
+    __tact_string_builder_start_string INLINECALLDICT
+    SWAP
+    REPEAT:<{
+      s9 s13 XCHG
+      s8 s12 XCHG
+      s7 s11 XCHG
+      s6 s10 XCHG
+      s5 s13 XCHG
+      s4 s12 XCHG
+      s3 s11 XCHG
+      s10 s13 s12 XCHG3
+      4 PUSHINT
+      $Lottery$_fun_generateRandomASCIIString INLINECALLDICT
+      NIP
+      B{b5ee9c724101010100020000004cacb9cd} B>boc <s PUSHSLICE
+      s14 PUSH
+      __tact_string_builder_end_slice INLINECALLDICT
+      __tact_slice_neq INLINECALLDICT
+      IF:<{
+        B{b5ee9c724101010100030000022cdd26222c} B>boc <s PUSHSLICE
+        s1 s14 XCHG
+        __tact_string_builder_append INLINECALLDICT
+        s0 s13 XCHG
+      }>
+      s13 s13 XCPU
+      __tact_string_builder_append INLINECALLDICT
+      s13 POP
+      s9 s13 XCHG
+      s8 s12 XCHG
+      4 8 BLKSWAP
+    }>
+    s9 PUSH
+    257 PUSHINT
+    s4 PUSH
+    __tact_dict_get_int_cell INLINECALLDICT
+    $RoundTicket$_load_opt INLINECALLDICT
+    DUP
+    ISNULL
+    NOT
+    IF:<{
+      DUP
+      $RoundTicket$_not_null INLINECALLDICT
+      $RoundTicket$_get_rounds INLINECALLDICT
+      257 PUSHINT
+      s4 PUSH
+      __tact_dict_get_int_cell INLINECALLDICT
+      $UserTicket$_load_opt INLINECALLDICT
+      DUP
+      ISNULL
+      NOT
+      IF:<{
+        $UserTicket$_not_null INLINECALLDICT
+        $UserTicket$_get_users INLINECALLDICT
+        DUP
+        267 PUSHINT
+        s7 PUSH
+        __tact_dict_get_slice_cell INLINECALLDICT
+        $TicketPayoutResponse$_load_opt INLINECALLDICT
+        B{b5ee9c724101010100020000004cacb9cd} B>boc <s PUSHSLICE
+        s4 PUSH
+        __tact_string_builder_end_slice INLINECALLDICT
+        __tact_slice_neq INLINECALLDICT
+        IF:<{
+          DUP
+          ISNULL
+          NOT
+        }>ELSE<{
+          FALSE
+        }>
+        IF:<{
+          B{b5ee9c724101010100030000022cdd26222c} B>boc <s PUSHSLICE
+          s1 s4 XCHG
+          __tact_string_builder_append INLINECALLDICT
+          s0 s3 XCHG
+        }>
+        DUP
+        ISNULL
+        NOT
+        IF:<{
+          $TicketPayoutResponse$_not_null INLINECALLDICT
+          s1 s3 XCHG
+          __tact_string_builder_append INLINECALLDICT
+          s0 s2 XCHG
+        }>ELSE<{
+          DROP
+        }>
+        s2 PUSH
+        __tact_string_builder_end_slice INLINECALLDICT
+        $TicketPayoutResponse$_constructor_ticket INLINECALLDICT
+        SWAP
+        $UserTicket$_constructor_users INLINECALLDICT
+        267 PUSHINT
+        s0 s2 XCHG
+        $TicketPayoutResponse$_store_cell INLINECALLDICT
+        s1 s3 XCHG
+        s1 s7 XCHG
+        __tact_dict_set_slice_cell INLINECALLDICT
+        s0 s4 XCHG
+        $RoundTicket$_not_null INLINECALLDICT
+        $RoundTicket$_get_rounds INLINECALLDICT
+        $RoundTicket$_constructor_rounds INLINECALLDICT
+        257 PUSHINT
+        s0 s5 XCHG
+        $UserTicket$_store_cell INLINECALLDICT
+        s5 s3 s0 XCHG3
+        __tact_dict_set_int_cell INLINECALLDICT
+        257 PUSHINT
+        SWAP
+        $RoundTicket$_store_cell INLINECALLDICT
+        s3 s9 XCHG
+        s1 s2 XCHG
+        __tact_dict_set_int_cell INLINECALLDICT
+        s0 s6 XCHG
+      }>ELSE<{
+        s2 s5 XCHG
+        5 BLKDROP
+      }>
+    }>ELSE<{
+      s1 s4 XCHG
+      4 BLKDROP
+    }>
+    __tact_string_builder_end_slice INLINECALLDICT
+  }>
+  $SendParameters$_constructor_to_value_mode PROCINLINE:<{
+    TRUE
+    3 -ROLL
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+  }>
+  $TicketBoughtEvent$_constructor_roundId_poolId_quantity_buyer_tickets PROCINLINE:<{
+    s3 s4 XCHG
+  }>
+  $Lottery$_fun_buyTicket PROCREF:<{
+    s10 PUSH
+    257 PUSHINT
+    s4 PUSH
+    __tact_dict_get_int_cell INLINECALLDICT
+    $Pool$_load_opt INLINECALLDICT
+    DUP
+    ISNULL
+    IF:<{
+      42120 PUSHINT
+      THROWANY
+    }>
+    $Pool$_not_null INLINECALLDICT
+    s1 s4 XCHG
+    4 BLKDROP
+    2 2 BLKDROP2
+    13687 PUSHINT
+    SWAP
+    THROWANYIFNOT
+    257 PUSHINT
+    s3 PUSH
+    __tact_dict_get_int_cell INLINECALLDICT
+    $RoundConfig$_load_opt INLINECALLDICT
+    DUP
+    ISNULL
+    IF:<{
+      36876 PUSHINT
+      THROWANY
+    }>
+    $RoundConfig$_not_null INLINECALLDICT
+    s4 POP
+    s4 POP
+    47697 PUSHINT
+    s0 s3 XCHG2
+    THROWANYIFNOT
+    24801 PUSHINT
+    NOW
+    s0 s3 XCHG2
+    GEQ
+    IF:<{
+      NOW
+      s0 s3 XCHG2
+      LESS
+    }>ELSE<{
+      s2 POP
+      FALSE
+    }>
+    THROWANYIFNOT
+    59272 PUSHINT
+    s2 PUSH
+    0 GTINT
+    THROWANYIFNOT
+    __tact_context_get_sender INLINECALLDICT
+    s1 s2 XCPU
+    MUL
+    58383 PUSHINT
+    __tact_context_get INLINECALLDICT
+    $Context$_get_value INLINECALLDICT
+    s2 PUSH
+    GEQ
+    THROWANYIFNOT
+    10 5 BLKSWAP
+    s11 s14 s13 PUSH3
+    s15 PUSH
+    $Lottery$_fun_createTicket INLINECALLDICT
+    __tact_context_get INLINECALLDICT
+    $Context$_get_value INLINECALLDICT
+    s12 PUSH
+    GREATER
+    IF:<{
+      __tact_context_get INLINECALLDICT
+      $Context$_get_value INLINECALLDICT
+      s0 s12 XCHG2
+      SUB
+      s12 s(-1) PUXC
+      66 PUSHINT
+      $SendParameters$_constructor_to_value_mode INLINECALLDICT
+      $global_send INLINECALLDICT
+    }>ELSE<{
+      s11 POP
+    }>
+    s4 s13 XCHG
+    s3 s14 XCHG
+    s12 s11 s10 XCHG3
+    $TicketBoughtEvent$_constructor_roundId_poolId_quantity_buyer_tickets INLINECALLDICT
+    $TicketBoughtEvent$_store_cell INLINECALLDICT
+    $global_emit INLINECALLDICT
+    5 5 BLKSWAP
+    s3 s4 XCHG
+  }>
+  $Result$_constructor_rounds PROCINLINE:<{
+  }>
+  $WinningNumbersDrawnEvent$_constructor_poolId_roundId_winningNumber PROCINLINE:<{
+  }>
+  $Lottery$_fun_roundById PROCREF:<{
+    257 PUSHINT
+    s10 s0 s2 PUXC2
+    __tact_dict_get_int_cell INLINECALLDICT
+    $Pool$_load_opt INLINECALLDICT
+    $Pool$_not_null INLINECALLDICT
+    $Pool$_get_rounds INLINECALLDICT
+    257 PUSHINT
+    ROT
+    __tact_dict_get_int_cell INLINECALLDICT
+    $RoundConfig$_load_opt INLINECALLDICT
+    $RoundConfig$_not_null INLINECALLDICT
+    $RoundConfig$_as_optional INLINECALLDICT
+  }>
+  $Lottery$_fun_drawWinningNumbers PROCREF:<{
+    DROP
+    10 2 BLKSWAP
+    $Lottery$_fun_requireOwnerOrAdmin INLINECALLDICT
+    s3 PUSH
+    257 PUSHINT
+    s13 PUSH
+    __tact_dict_get_int_cell INLINECALLDICT
+    $Result$_load_opt INLINECALLDICT
+    DUP
+    ISNULL
+    NOT
+    IF:<{
+      DUP
+      $Result$_not_null INLINECALLDICT
+      $Result$_get_rounds INLINECALLDICT
+      257 PUSHINT
+      s13 s0 PUSH2
+      __tact_dict_get_int_int INLINECALLDICT
+      ISNULL
+      NOT
+      IF:<{
+        20265 PUSHINT
+        THROWANY
+      }>
+    }>ELSE<{
+      DROP
+      257 PUSHINT
+      PUSHNULL
+      $Result$_constructor_rounds INLINECALLDICT
+      $Result$_store_cell INLINECALLDICT
+      s13 PUSH
+      s3 s6 XCHG
+      SWAP
+      __tact_dict_set_int_cell INLINECALLDICT
+      DUP
+      257 PUSHINT
+      s13 PUSH
+      __tact_dict_get_int_cell INLINECALLDICT
+      $Result$_load_opt INLINECALLDICT
+      s1 s4 XCHG
+    }>
+    10 -ROLL
+    s12 s11 PUSH2
+    $Lottery$_fun_roundById INLINECALLDICT
+    36876 PUSHINT
+    OVER
+    ISNULL
+    NOT
+    THROWANYIFNOT
+    $RoundConfig$_not_null INLINECALLDICT
+    4 BLKDROP
+    10 2 BLKSWAP
+    4 PUSHINT
+    $Lottery$_fun_generateRandomASCIIString INLINECALLDICT
+    DROP
+    s0 s13 XCHG
+    $Result$_not_null INLINECALLDICT
+    $Result$_get_rounds INLINECALLDICT
+    $Result$_constructor_rounds INLINECALLDICT
+    257 PUSHINT
+    s0 s2 s1 XC2PU
+    s1 16 s() XCHG
+    s15 s(-1) PUXC
+    __tact_dict_set_int_int INLINECALLDICT
+    257 PUSHINT
+    SWAP
+    $Result$_store_cell INLINECALLDICT
+    s3 s4 XCHG
+    s1 s15 s0 XCHG3
+    __tact_dict_set_int_cell INLINECALLDICT
+    s8 s9 s10 XCHG3
+    $WinningNumbersDrawnEvent$_constructor_poolId_roundId_winningNumber INLINECALLDICT
+    $WinningNumbersDrawnEvent$_store_cell INLINECALLDICT
+    $global_emit INLINECALLDICT
+    s4 s9 XCHG
+    s3 s8 XCHG
+    s7 s1 s5 XCHG3
+    s4 s4 XCHG2
+    s6 s1 s6 XCHG3
+    s0 s3 XCHG
+  }>
+  $Lottery$_fun_getMessageHash PROCREF:<{
+    s0 s3 XCHG
+    NEWC
+    32 STI
+    s1 s2 XCHG
+    32 STI
+    ROT
+    __tact_store_address INLINECALLDICT
+    SWAP
+    STGRAMS
+    ENDC
+    HASHCU
+  }>
+  $UserClaim$_constructor_user PROCINLINE:<{
+  }>
+  $ClaimInfo$_constructor_info PROCINLINE:<{
+  }>
+  $ClaimedEvent$_constructor_poolId_roundId_amount_receiver PROCINLINE:<{
+  }>
+  $Lottery$_fun_isClaim PROCREF:<{
+    c2 SAVE
+    SAMEALTSAVE
+    s3 PUSH
+    257 PUSHINT
+    s4 PUSH
+    __tact_dict_get_int_cell INLINECALLDICT
+    $ClaimInfo$_load_opt INLINECALLDICT
+    $ClaimInfo$_not_null INLINECALLDICT
+    $ClaimInfo$_get_info INLINECALLDICT
+    257 PUSHINT
+    s3 PUSH
+    __tact_dict_get_int_cell INLINECALLDICT
+    $UserClaim$_load_opt INLINECALLDICT
+    $UserClaim$_not_null INLINECALLDICT
+    $UserClaim$_get_user INLINECALLDICT
+    267 PUSHINT
+    s2 PUSH
+    1 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    ISNULL
+    NOT
+    IF:<{
+      257 PUSHINT
+      s4 s0 s3 PUXC2
+      __tact_dict_get_int_cell INLINECALLDICT
+      $ClaimInfo$_load_opt INLINECALLDICT
+      $ClaimInfo$_not_null INLINECALLDICT
+      $ClaimInfo$_get_info INLINECALLDICT
+      257 PUSHINT
+      ROT
+      __tact_dict_get_int_cell INLINECALLDICT
+      $UserClaim$_load_opt INLINECALLDICT
+      $UserClaim$_not_null INLINECALLDICT
+      $UserClaim$_get_user INLINECALLDICT
+      267 PUSHINT
+      ROT
+      1 PUSHINT
+      __tact_dict_get_slice_int INLINECALLDICT
+      __tact_not_null INLINECALLDICT
+      IFJMP:<{
+        TRUE
+        RETALT
+      }>
+    }>ELSE<{
+      3 BLKDROP
+    }>
+    FALSE
+  }>
+  $Lottery$_fun_claimPrize PROCREF:<{
+    10 5 BLKSWAP
+    s14 s13 s12 PUSH3
+    s14 PUSH
+    $Lottery$_fun_getMessageHash INLINECALLDICT
+    48401 PUSHINT
+    s3 PUSH
+    __tact_not_null INLINECALLDICT
+    s1 s13 XCHG
+    CHKSIGNU
+    s1 s11 XCHG
+    THROWANYIFNOT
+    9 ROLL
+    s13 s12 s10 PUSH3
+    $Lottery$_fun_isClaim INLINECALLDICT
+    61167 PUSHINT
+    SWAP
+    NOT
+    THROWANYIFNOT
+    PUSHNULL
+    $UserClaim$_constructor_user INLINECALLDICT
+    267 PUSHINT
+    s12 PUSH
+    TRUE
+    1 PUSHINT
+    __tact_dict_set_slice_int INLINECALLDICT
+    OVER
+    257 PUSHINT
+    16 s() PUSH
+    __tact_dict_get_int_cell INLINECALLDICT
+    $ClaimInfo$_load_opt INLINECALLDICT
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+      $ClaimInfo$_constructor_info INLINECALLDICT
+      257 PUSHINT
+      s0 s2 XCHG
+      $UserClaim$_store_cell INLINECALLDICT
+      s2 s15 s(-1) XCPUXC
+      __tact_dict_set_int_cell INLINECALLDICT
+      257 PUSHINT
+      SWAP
+      $ClaimInfo$_store_cell INLINECALLDICT
+      s15 s(-1) PUXC
+      __tact_dict_set_int_cell INLINECALLDICT
+    }>ELSE<{
+      DUP
+      $ClaimInfo$_not_null INLINECALLDICT
+      $ClaimInfo$_get_info INLINECALLDICT
+      257 PUSHINT
+      16 s() PUSH
+      __tact_dict_get_int_cell INLINECALLDICT
+      $UserClaim$_load_opt INLINECALLDICT
+      $UserClaim$_not_null INLINECALLDICT
+      267 PUSHINT
+      s14 PUSH
+      1 PUSHINT
+      __tact_dict_get_slice_int INLINECALLDICT
+      ISNULL
+      IF:<{
+        $ClaimInfo$_not_null INLINECALLDICT
+        $ClaimInfo$_get_info INLINECALLDICT
+        $ClaimInfo$_constructor_info INLINECALLDICT
+        257 PUSHINT
+        s0 s2 XCHG
+        $UserClaim$_store_cell INLINECALLDICT
+        s2 s15 s(-1) XCPUXC
+        __tact_dict_set_int_cell INLINECALLDICT
+        257 PUSHINT
+        SWAP
+        $ClaimInfo$_store_cell INLINECALLDICT
+        s15 s(-1) PUXC
+        __tact_dict_set_int_cell INLINECALLDICT
+      }>ELSE<{
+        2DROP
+        61167 PUSHINT
+        THROWANY
+      }>
+    }>
+    s10 s11 PUSH2
+    67 PUSHINT
+    $SendParameters$_constructor_to_value_mode INLINECALLDICT
+    $global_send INLINECALLDICT
+    s3 s13 XCHG
+    s12 s11 s10 XCHG3
+    $ClaimedEvent$_constructor_poolId_roundId_amount_receiver INLINECALLDICT
+    $ClaimedEvent$_store_cell INLINECALLDICT
+    $global_emit INLINECALLDICT
+    4 6 BLKSWAP
+  }>
+  $Lottery$_fun_admins PROCREF:<{
+    s8 PUSH
+  }>
+  $Lottery$_fun_currentPool PROCREF:<{
+    s7 PUSH
+  }>
+  $Lottery$_fun_poolById PROCREF:<{
+    257 PUSHINT
+    s9 PUSH
+    s0 s2 XCHG
+    __tact_dict_get_int_cell INLINECALLDICT
+    $Pool$_load_opt INLINECALLDICT
+  }>
+  $Lottery$_fun_usersTicket PROCREF:<{
+    257 PUSHINT
+    s8 s0 s2 PUXC2
+    __tact_dict_get_int_cell INLINECALLDICT
+    $RoundTicket$_load_opt INLINECALLDICT
+    $RoundTicket$_not_null INLINECALLDICT
+    $RoundTicket$_get_rounds INLINECALLDICT
+    257 PUSHINT
+    ROT
+    __tact_dict_get_int_cell INLINECALLDICT
+    $UserTicket$_load_opt INLINECALLDICT
+    $UserTicket$_not_null INLINECALLDICT
+  }>
+  $Lottery$_fun_userTicketByAddress PROCREF:<{
+    257 PUSHINT
+    s9 s0 s3 PUXC2
+    __tact_dict_get_int_cell INLINECALLDICT
+    $RoundTicket$_load_opt INLINECALLDICT
+    $RoundTicket$_not_null INLINECALLDICT
+    $RoundTicket$_get_rounds INLINECALLDICT
+    257 PUSHINT
+    ROT
+    __tact_dict_get_int_cell INLINECALLDICT
+    $UserTicket$_load_opt INLINECALLDICT
+    $UserTicket$_not_null INLINECALLDICT
+    $UserTicket$_get_users INLINECALLDICT
+    267 PUSHINT
+    ROT
+    __tact_dict_get_slice_cell INLINECALLDICT
+    $TicketPayoutResponse$_load_opt INLINECALLDICT
+  }>
+  $Lottery$_fun_resultByRound PROCREF:<{
+    257 PUSHINT
+    s6 s0 s2 PUXC2
+    __tact_dict_get_int_cell INLINECALLDICT
+    $Result$_load_opt INLINECALLDICT
+    DUP
+    ISNULL
+    NOT
+    IFJMP:<{
+      $Result$_not_null INLINECALLDICT
+      $Result$_get_rounds INLINECALLDICT
+      257 PUSHINT
+      s0 s2 s1 XC2PU
+      __tact_dict_get_int_int INLINECALLDICT
+    }>
+    2DROP
+    PUSHNULL
+  }>
+  $Lottery$_fun_resultByPool PROCREF:<{
+    257 PUSHINT
+    s5 PUSH
+    s0 s2 XCHG
+    __tact_dict_get_int_cell INLINECALLDICT
+    $Result$_load_opt INLINECALLDICT
+  }>
+  $Lottery$_fun_publicKey PROCREF:<{
+    OVER
+  }>
+  $Lottery$_fun_claimData PROCREF:<{
+    257 PUSHINT
+    s3 s0 s2 PUXC2
+    __tact_dict_get_int_cell INLINECALLDICT
+    $ClaimInfo$_load_opt INLINECALLDICT
+    $ClaimInfo$_not_null INLINECALLDICT
+    $ClaimInfo$_get_info INLINECALLDICT
+    257 PUSHINT
+    ROT
+    __tact_dict_get_int_cell INLINECALLDICT
+    $UserClaim$_load_opt INLINECALLDICT
+  }>
+  $SendParameters$_constructor_bounce_to_value_mode_body_code_data PROCINLINE:<{
+  }>
+  $Lottery$_fun_forward PROCREF:<{
+    PUSHNULL
+    PUSHNULL
+    s2 PUSH
+    ISNULL
+    NOT
+    IF:<{
+      2DROP
+      $StateInit$_not_null INLINECALLDICT
+      SWAP
+    }>ELSE<{
+      s2 POP
+    }>
+    s2 s4 XCHG
+    0 PUSHINT
+    s0 s3 XCHG
+    s0 s4 XCHG
+    66 PUSHINT
+    s2 s3 XCHG2
+    $SendParameters$_constructor_bounce_to_value_mode_body_code_data INLINECALLDICT
+    $global_send INLINECALLDICT
+  }>
+  $Lottery$_fun_notify PROCINLINE:<{
+    __tact_context_get_sender INLINECALLDICT
+    SWAP
+    FALSE
+    PUSHNULL
+    $Lottery$_fun_forward INLINECALLDICT
+  }>
+  $Lottery$_fun_owner PROCREF:<{
+    s9 PUSH
+  }>
+  $DeployOk$_constructor_queryId PROCINLINE:<{
+  }>
+  $Lottery$_internal_binary_CreatePool PROCINLINE:<{
+    NIP
+    s6 POP
+    0 PUSHINT
+    s0 s2 PUXC
+    s6 s4 s0 XCHG3
+    TRUE
+    $RoundConfig$_constructor_roundId_poolId_ticketPrice_startTime_endTime_active INLINECALLDICT
+    s6 s8 XCHG
+    6 ROLL
+    $Lottery$_fun_createPool INLINECALLDICT
+  }>
+  $Lottery$_internal_binary_BuyTicket PROCINLINE:<{
+    $Lottery$_fun_buyTicket INLINECALLDICT
+  }>
+  $Lottery$_internal_binary_DrawWinningNumbers PROCINLINE:<{
+    $Lottery$_fun_drawWinningNumbers INLINECALLDICT
+  }>
+  $Lottery$_internal_binary_SetAdmin PROCINLINE:<{
+    $Lottery$_fun_setAdmin INLINECALLDICT
+  }>
+  $Lottery$_internal_binary_Claim PROCINLINE:<{
+    $Lottery$_fun_claimPrize INLINECALLDICT
+  }>
+  $Lottery$_internal_binary_SetPublicKey PROCINLINE:<{
+    s2 POP
+  }>
+  $Lottery$_internal_binary_Deploy PROCINLINE:<{
+    $DeployOk$_constructor_queryId INLINECALLDICT
+    $DeployOk$_store_cell INLINECALLDICT
+    $Lottery$_fun_notify INLINECALLDICT
+  }>
+  %admins PROC:<{
+    $Lottery$_contract_load INLINECALLDICT
+    $Lottery$_fun_admins INLINECALLDICT
+    10 1 BLKDROP2
+  }>
+  %isAdmin PROC:<{
+    __tact_verify_address INLINECALLDICT
+    $Lottery$_contract_load INLINECALLDICT
+    10 ROLL
+    $Lottery$_fun_isAdmin INLINECALLDICT
+    10 1 BLKDROP2
+  }>
+  %currentPool PROC:<{
+    $Lottery$_contract_load INLINECALLDICT
+    $Lottery$_fun_currentPool INLINECALLDICT
+    10 1 BLKDROP2
+  }>
+  %poolById PROC:<{
+    $Lottery$_contract_load INLINECALLDICT
+    10 ROLL
+    $Lottery$_fun_poolById INLINECALLDICT
+    10 1 BLKDROP2
+    $Pool$_to_opt_external INLINECALLDICT
+  }>
+  %usersTicket PROC:<{
+    $Lottery$_contract_load INLINECALLDICT
+    2 10 BLKSWAP
+    $Lottery$_fun_usersTicket INLINECALLDICT
+    10 1 BLKDROP2
+    $UserTicket$_to_external INLINECALLDICT
+  }>
+  %userTicketByAddress PROC:<{
+    __tact_verify_address INLINECALLDICT
+    $Lottery$_contract_load INLINECALLDICT
+    3 10 BLKSWAP
+    $Lottery$_fun_userTicketByAddress INLINECALLDICT
+    10 1 BLKDROP2
+    $TicketPayoutResponse$_to_opt_external INLINECALLDICT
+  }>
+  %roundById PROC:<{
+    $Lottery$_contract_load INLINECALLDICT
+    2 10 BLKSWAP
+    $Lottery$_fun_roundById INLINECALLDICT
+    10 1 BLKDROP2
+    $RoundConfig$_to_opt_external INLINECALLDICT
+  }>
+  %resultByRound PROC:<{
+    $Lottery$_contract_load INLINECALLDICT
+    2 10 BLKSWAP
+    $Lottery$_fun_resultByRound INLINECALLDICT
+    10 1 BLKDROP2
+  }>
+  %resultByPool PROC:<{
+    $Lottery$_contract_load INLINECALLDICT
+    10 ROLL
+    $Lottery$_fun_resultByPool INLINECALLDICT
+    10 1 BLKDROP2
+    $Result$_to_opt_external INLINECALLDICT
+  }>
+  %publicKey PROC:<{
+    $Lottery$_contract_load INLINECALLDICT
+    $Lottery$_fun_publicKey INLINECALLDICT
+    10 1 BLKDROP2
+  }>
+  %claimData PROC:<{
+    $Lottery$_contract_load INLINECALLDICT
+    2 10 BLKSWAP
+    $Lottery$_fun_claimData INLINECALLDICT
+    10 1 BLKDROP2
+    $UserClaim$_to_opt_external INLINECALLDICT
+  }>
+  %isClaim PROC:<{
+    __tact_verify_address INLINECALLDICT
+    $Lottery$_contract_load INLINECALLDICT
+    3 10 BLKSWAP
+    $Lottery$_fun_isClaim INLINECALLDICT
+    10 1 BLKDROP2
+  }>
+  %owner PROC:<{
+    $Lottery$_contract_load INLINECALLDICT
+    $Lottery$_fun_owner INLINECALLDICT
+    10 1 BLKDROP2
+  }>
+  lazy_deployment_completed PROC:<{
+    c4 PUSH
+    CTOS
+    1 LDI
+    SWAP
+  }>
+  $Lottery$_contract_router_internal PROCREF:<{
+    SWAP
+    IFJMP:<{
+      DROP
+      TRUE
+    }>
+    0 PUSHINT
+    OVER
+    SBITS
+    31 GTINT
+    IF:<{
+      DROP
+      DUP
+      32 PLDU
+    }>
+    DUP
+    2095598070 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $CreatePool$_load INLINECALLDICT
+      1 8 BLKDROP2
+      $Lottery$_internal_binary_CreatePool INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    3748203161 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $BuyTicket$_load INLINECALLDICT
+      1 3 BLKDROP2
+      $Lottery$_internal_binary_BuyTicket INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    3591482628 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $DrawWinningNumbers$_load INLINECALLDICT
+      1 3 BLKDROP2
+      $Lottery$_internal_binary_DrawWinningNumbers INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    3397822855 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $SetAdmin$_load INLINECALLDICT
+      NIP
+      $Lottery$_internal_binary_SetAdmin INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    1449747896 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $Claim$_load INLINECALLDICT
+      1 5 BLKDROP2
+      $Lottery$_internal_binary_Claim INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    3279683070 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $SetPublicKey$_load INLINECALLDICT
+      NIP
+      $Lottery$_internal_binary_SetPublicKey INLINECALLDICT
+      TRUE
+    }>
+    2490013878 PUSHINT
+    EQUAL
+    IFJMP:<{
+      $Deploy$_load INLINECALLDICT
+      NIP
+      $Lottery$_internal_binary_Deploy INLINECALLDICT
+      TRUE
+    }>
+    DROP
+    FALSE
+  }>
+  recv_internal PROC:<{
+    SWAP
+    CTOS
+    4 LDU
+    SWAP
+    1 PUSHINT
+    AND
+    NEGATE
+    SWAP
+    LDMSGADDR
+    SWAP
+    __tact_verify_address INLINECALLDICT
+    s0 s4 s2 PUXCPU
+    s0 s3 XCHG
+    4 TUPLE
+    __tact_context SETGLOB
+    s0 s2 XCHG
+    __tact_context_sender SETGLOB
+    $Lottery$_contract_load INLINECALLDICT
+    2 10 BLKSWAP
+    $Lottery$_contract_router_internal INLINECALLDICT
+    130 THROWIFNOT
+    $Lottery$_contract_store INLINECALLDICT
+  }>
+}END>c
