@@ -1,4 +1,4 @@
-import { Address, beginCell, toNano } from '@ton/core';
+import { Address, beginCell, Dictionary, toNano } from '@ton/core';
 import { Lottery } from '../wrappers/Lottery';
 import { NetworkProvider, sleep } from '@ton/blueprint';
 import { mnemonicToWalletKey, sign } from '@ton/crypto';
@@ -7,7 +7,7 @@ export async function run(provider: NetworkProvider, args: string[]) {
     const ui = provider.ui();
 
     // const address = Address.parse(args.length > 0 ? args[0] : await ui.input('Lottery address'));
-    const address = Address.parse('EQAwO2CucgqsCctKFFqVPAgY48iLO96xjOJxZgcuha5UgSmE');
+    const address = Address.parse('EQDJ8OFZReFjvlHF7zaCf68s8UWQT8A8q_sDQpVpWfHl7Sbj');
 
     if (!(await provider.isContractDeployed(address))) {
         ui.write(`Error: Contract at address ${address} is not deployed!`);
@@ -26,6 +26,11 @@ export async function run(provider: NetworkProvider, args: string[]) {
     //         admin: Address.parse('0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP'),
     //     }
     // );
+    let prizes: Dictionary<number, number> = Dictionary.empty(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8));
+    prizes.set(1, 10);
+    prizes.set(2, 15);
+    prizes.set(3, 20);
+    prizes.set(4, 25);
 
     await lottery.send(
         provider.sender(), {
@@ -40,6 +45,7 @@ export async function run(provider: NetworkProvider, args: string[]) {
             active: true,
             sequence: BigInt(3600 * 24),
             jettonWallet: Address.parse('EQDw0Uwf9kK-_AlMOJV7sgmYSX86tAD83q9R8LKc-UMy1DfT'),
+            prizes: prizes
         }
     );
 
@@ -49,6 +55,7 @@ export async function run(provider: NetworkProvider, args: string[]) {
     let attempt = 1;
     let poolId = 1n;
     console.log('pools', pools);
+    console.log('Prizes: ', pools.get(1n)?.prizes);
     while (poolId) {
         ui.setActionPrompt(`Attempt ${attempt}: `);
         let pool = await lottery.getPoolById(poolId);

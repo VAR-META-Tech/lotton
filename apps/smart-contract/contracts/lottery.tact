@@ -32,7 +32,7 @@ contract Lottery with Deployable, Ownable {
     // =============== Private Methods ============== //
 
     fun requireOwnerOrAdmin() {
-        require(sender() == self.owner || self.admin.get(sender())!!, "Only the owner or admin can call this function");
+        require(sender() == self.owner || self.isAdmin(sender()), "Only the owner or admin can call this function");
     }
 
     fun setAdmin(admin: Address) {
@@ -56,8 +56,14 @@ contract Lottery with Deployable, Ownable {
     }
 
 
-    fun createPool(initialRounds: Int, sequence: Int, config: RoundConfig) {
+    fun createPool(initialRounds: Int, sequence: Int, config: RoundConfig, prizes: map<Int as uint8, Int as uint8>) {
         self.requireOwnerOrAdmin();
+        require(initialRounds > 0, "Initial rounds must be positive");
+        require(sequence > 0, "Sequence must be positive");
+        require(config.startTime < config.endTime, "Start time must be before end time");
+
+        let validPrizes = self.verifyPoolPrizes(prizes);
+        require(validPrizes, "Invalid prizes");
 
         let poolId: Int = self.nextPoolId;
         self.nextPoolId += 1;
@@ -69,7 +75,8 @@ contract Lottery with Deployable, Ownable {
             startTime: config.startTime,
             endTime: config.endTime,
             sequence: sequence,
-            active: true
+            active: true,
+            prizes: prizes
         };
 
         let roundTickets = RoundTicket{
@@ -106,15 +113,25 @@ contract Lottery with Deployable, Ownable {
             active: true,
             sequence,
             rounds: pool.rounds,
-            creator: sender()
+            creator: sender(),
+            prizes: prizes
         }.toCell());
     }
 
-    fun rewardSettings(match:Int, percent: Int) {
-        self.requireOwnerOrAdmin();
-        require(match >= 1 && match <= TICKET_DIGITS, "Invalid match number");
-        require(percent >= 0 && percent <= 100, "Invalid reward percentage");
-        self.rewardSettings.set(match, percent);
+    fun verifyPoolPrizes(prizes: map<Int as uint8, Int as uint8>): Bool {
+        let totalPrize: Int = 0;
+        let index: Int = 1;
+        repeat(TICKET_DIGITS) {
+            let prize: Int? = prizes.get(index);
+            if (prize != null) {
+                totalPrize += prize!!;
+            }
+            index += 1;
+        }
+
+        require(totalPrize <= 100, "Total prize must be less than or equal to 100");
+        require(index > 0, "Prizes must be set");
+        return true;
     }
 
     // ---------------- User functions ---------------- //
@@ -252,7 +269,7 @@ contract Lottery with Deployable, Ownable {
             send(SendParameters{
                 to: user,
                 value: context().value - totalCost,
-                mode: (SendRemainingValue + SendIgnoreErrors)
+                mode: SendRemainingValue | SendIgnoreErrors
             });
         }
 
@@ -363,7 +380,7 @@ contract Lottery with Deployable, Ownable {
         send(SendParameters{
             to: msg.receiver,
             value: msg.amount,
-            mode: (SendRemainingValue + SendIgnoreErrors),
+            mode: SendRemainingValue | SendIgnoreErrors | SendPayGasSeparately,
         });
 
         emit(ClaimedEvent{
@@ -380,6 +397,7 @@ contract Lottery with Deployable, Ownable {
         let startTime: Int = msg.startTime;
         let endTime: Int = msg.endTime;
         let sequence: Int = msg.sequence;
+        let prizes = msg.prizes;
 
         let config: RoundConfig = RoundConfig{
             roundId: 0, // Sẽ được set trong hàm createPool
@@ -390,13 +408,7 @@ contract Lottery with Deployable, Ownable {
             active: true
         };
 
-        self.createPool(initialRounds, sequence, config);
-    }
-
-    receive(msg: RewardSetting) {
-        let match: Int = msg.match;
-        let percent: Int = msg.percent;
-        self.rewardSettings(match, percent);
+        self.createPool(initialRounds, sequence, config, prizes);
     }
 
     receive(msg: BuyTicket) {
@@ -496,6 +508,7 @@ struct Pool {
     endTime: Int as uint32;
     sequence: Int as uint32;
     active: Bool;
+    prizes: map<Int as uint8, Int as uint8>;
 }
 
 // Struct to represent a round configuration
@@ -547,6 +560,7 @@ struct UserClaim {
 struct Result {
     rounds: map<Int, Int>;
 }
+
 // ---------------- Messages ---------------- //
 
 message CreatePool {
@@ -557,6 +571,7 @@ message CreatePool {
     endTime: Int as uint32;
     sequence: Int as uint32;
     active: Bool;
+    prizes: map<Int as uint8, Int as uint8>;
 }
 
 message Claim {
@@ -573,9 +588,9 @@ message WinningNumbersDrawnEvent {
     winningNumber: Int;
 }
 
-message RewardSetting {
-    match: Int;
-    percent: Int;
+message UpdatePizes {
+    poolId: Int;
+    prizes: map<Int as uint8, Int as uint8>;
 }
 
 message BuyTicket {
@@ -609,6 +624,7 @@ message PoolCreatedEvent {
     sequence: Int as uint32;
     rounds: map<Int, RoundConfig>;
     creator: Address;
+    prizes: map<Int as uint8, Int as uint8>;
 }
 
 message RoundCreated {
