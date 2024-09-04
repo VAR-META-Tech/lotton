@@ -1,4 +1,3 @@
-import Router from 'next/router';
 import { useUserStore } from '@/stores';
 import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
@@ -25,13 +24,14 @@ const onRefreshToken = async () => {
 
       return data?.accessToken;
     } catch (e) {
-      Router.replace('/');
-      store?.logout();
+      store?.setAccessToken('');
+      store?.setRefreshToken('');
     }
   } else {
-    Router.replace('/');
-    store?.logout();
+    store?.setAccessToken('');
+    store?.setRefreshToken('');
   }
+
   return null;
 };
 
