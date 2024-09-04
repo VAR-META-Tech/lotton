@@ -27,10 +27,10 @@ export class Pool extends BaseTime {
   @ManyToOne(() => Token)
   currency: Token;
 
-  @Column()
+  @Column({ type: 'bigint' })
   startTime: number;
 
-  @Column()
+  @Column({ type: 'bigint' })
   endTime: number;
 
   @Column()

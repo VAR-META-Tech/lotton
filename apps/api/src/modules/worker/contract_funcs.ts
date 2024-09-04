@@ -305,23 +305,28 @@ export function loadTuplePool(source: TupleReader) {
 }
 
 export function loadPoolCreatedEvent(slice: Slice) {
-  const sc_0 = slice;
-  if (sc_0.loadUint(32) !== 1607214464) {
+  let sc_0 = slice;
+  if (sc_0.loadUint(32) !== 590692540) {
     throw Error('Invalid prefix');
   }
-  const _poolId = sc_0.loadIntBig(257);
-  const _ticketPrice = sc_0.loadUintBig(32);
-  const _initialRounds = sc_0.loadUintBig(8);
-  const _startTime = sc_0.loadUintBig(32);
-  const _endTime = sc_0.loadUintBig(32);
-  const _active = sc_0.loadBit();
-  const _sequence = sc_0.loadUintBig(32);
-  const _rounds = Dictionary.load(
+  let _poolId = sc_0.loadIntBig(257);
+  let _ticketPrice = sc_0.loadUintBig(32);
+  let _initialRounds = sc_0.loadUintBig(8);
+  let _startTime = sc_0.loadUintBig(32);
+  let _endTime = sc_0.loadUintBig(32);
+  let _active = sc_0.loadBit();
+  let _sequence = sc_0.loadUintBig(32);
+  let _rounds = Dictionary.load(
     Dictionary.Keys.BigInt(257),
     dictValueParserRoundConfig(),
     sc_0,
   );
-  const _creator = sc_0.loadAddress();
+  let _creator = sc_0.loadAddress();
+  let _prizes = Dictionary.load(
+    Dictionary.Keys.Uint(8),
+    Dictionary.Values.Uint(8),
+    sc_0,
+  );
   return {
     $$type: 'PoolCreatedEvent' as const,
     poolId: _poolId,
@@ -333,6 +338,7 @@ export function loadPoolCreatedEvent(slice: Slice) {
     sequence: _sequence,
     rounds: _rounds,
     creator: _creator,
+    prizes: _prizes,
   };
 }
 

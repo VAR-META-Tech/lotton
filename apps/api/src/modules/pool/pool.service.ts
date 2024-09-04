@@ -315,8 +315,8 @@ export class PoolService {
       !!updatePoolDto?.sequency ||
       !!updatePoolDto?.totalRounds) &&
       (pool.endTime =
-        updatePoolDto?.startTime +
-        updatePoolDto?.sequency * updatePoolDto?.totalRounds);
+        +updatePoolDto?.startTime +
+        +updatePoolDto?.sequency * +updatePoolDto?.totalRounds);
 
     return pool;
   }

@@ -63,12 +63,16 @@ export class CrawlWorkerService {
       const currentBlockNumber = (await this.getCurrentBloc()).blockNumber;
       const latestBlockNumber = (await this.getContractState()).lastTransaction
         .lt;
+      console.log(+currentBlockNumber, +latestBlockNumber);
+
       if (+currentBlockNumber >= +latestBlockNumber) return;
 
       const transactions = await this.getTransactions(
         latestBlockNumber,
         currentBlockNumber.toString(),
       );
+
+      console.log('Transaction Length', transactions.length);
 
       for (const tx of transactions) {
         const isAbortedTx = tx.description?.['aborted'];

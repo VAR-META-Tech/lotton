@@ -15,7 +15,7 @@ export async function run(provider: NetworkProvider, args: string[]) {
     }
 
     const lottery = provider.open(Lottery.fromAddress(address));
-    const now = Math.floor(Date.now()/1000);
+    const now = Math.floor(Date.now() / 1000);
 
     // await lottery.send(
     //     provider.sender(), {
@@ -33,7 +33,8 @@ export async function run(provider: NetworkProvider, args: string[]) {
     prizes.set(4, 25);
 
     await lottery.send(
-        provider.sender(), {
+        provider.sender(),
+        {
             value: toNano('0.05'),
         },
         {
@@ -45,8 +46,12 @@ export async function run(provider: NetworkProvider, args: string[]) {
             active: true,
             sequence: BigInt(3600 * 24),
             jettonWallet: Address.parse('EQDw0Uwf9kK-_AlMOJV7sgmYSX86tAD83q9R8LKc-UMy1DfT'),
+<<<<<<< Updated upstream
             prizes: prizes
         }
+=======
+        },
+>>>>>>> Stashed changes
     );
 
     ui.write('Waiting for counter to increase...');
@@ -59,98 +64,107 @@ export async function run(provider: NetworkProvider, args: string[]) {
     while (poolId) {
         ui.setActionPrompt(`Attempt ${attempt}: `);
         let pool = await lottery.getPoolById(poolId);
-        console.log('pool', pool);
-        let round = await lottery.getRoundById(1n, 1n);
-        console.log('round', round);
-        if (round?.roundId) {
-            await lottery.send(
-                provider.sender(), {
-                    value: toNano('1.5'),
-                },
-                {
-                    $$type: 'BuyTicket',
-                    poolId: 1n,
-                    roundId: 1n,
-                    quantity: 1n
-                }
-            );
-            console.log('Waiting for user ticket...');
-            await sleep(20000);
-            console.log('Address: ', provider.sender().address!!);
-            let userTicket = await lottery.getUsersTicket(1n, 1n);
-            let attempt2 = 1;
-            let x = await lottery.getPublicKey();
-            console.log('publicKey', x);
-            console.log('userTicket', userTicket);
-            let userTicketNumber = await lottery.getUserTicketByAddress(round?.poolId, round?.roundId, provider.sender().address!!);
-            console.log('userTicketNumber', userTicketNumber);
+        console.log('111 pool', pool);
+        // let round = await lottery.getRoundById(1n, 1n);
+        // console.log('round', round);
+        // if (round?.roundId) {
+        //     await lottery.send(
+        //         provider.sender(),
+        //         {
+        //             value: toNano('1.5'),
+        //         },
+        //         {
+        //             $$type: 'BuyTicket',
+        //             poolId: 1n,
+        //             roundId: 1n,
+        //             quantity: 1n,
+        //         },
+        //     );
+        //     console.log('Waiting for user ticket...');
+        //     await sleep(20000);
+        //     console.log('Address: ', provider.sender().address!!);
+        //     let userTicket = await lottery.getUsersTicket(1n, 1n);
+        //     let attempt2 = 1;
+        //     let x = await lottery.getPublicKey();
+        //     console.log('publicKey', x);
+        //     console.log('userTicket', userTicket);
+        //     let userTicketNumber = await lottery.getUserTicketByAddress(
+        //         round?.poolId,
+        //         round?.roundId,
+        //         provider.sender().address!!,
+        //     );
+        //     console.log('userTicketNumber', userTicketNumber);
 
-            // draw lottery
-            await lottery.send(
-                provider.sender(), {
-                    value: toNano('0.05'),
-                },
-                {
-                    $$type: 'DrawWinningNumbers',
-                    poolId: 1n,
-                    roundId: 1n,
-                    latestTxHash: '0x1234567890',
-                }
-            );
+        //     // draw lottery
+        //     await lottery.send(
+        //         provider.sender(),
+        //         {
+        //             value: toNano('0.05'),
+        //         },
+        //         {
+        //             $$type: 'DrawWinningNumbers',
+        //             poolId: 1n,
+        //             roundId: 1n,
+        //             latestTxHash: '0x1234567890',
+        //         },
+        //     );
 
-            console.log('Waiting for winner...');
-            await sleep(20000);
-            let result = await lottery.getResultByPool(round?.poolId);
-            console.log('result', result);
-            //get the signature from mock server
-            let airDropAmount: bigint = 1000000000n;
-            const signatureData = beginCell()
-                .storeInt(1, 32)
-                .storeInt(1, 32)
-                .storeAddress(provider.sender().address!!)
-                .storeCoins(airDropAmount)
-                .endCell();
-            let WALLET_MNEMONIC='surround basket park setup state favorite relax document ecology into huge bring business crunch walnut arm frog rain label start fade near earn segment'
+        //     console.log('Waiting for winner...');
+        //     await sleep(20000);
+        //     let result = await lottery.getResultByPool(round?.poolId);
+        //     console.log('result', result);
+        //     //get the signature from mock server
+        //     let airDropAmount: bigint = 1000000000n;
+        //     const signatureData = beginCell()
+        //         .storeInt(1, 32)
+        //         .storeInt(1, 32)
+        //         .storeAddress(provider.sender().address!!)
+        //         .storeCoins(airDropAmount)
+        //         .endCell();
+        //     let WALLET_MNEMONIC =
+        //         'surround basket park setup state favorite relax document ecology into huge bring business crunch walnut arm frog rain label start fade near earn segment';
 
-            const keyPair = await mnemonicToWalletKey(WALLET_MNEMONIC.split(" "));
-            const signature = sign(signatureData.hash(), keyPair.secretKey);
-            let signatureCell = beginCell().storeBuffer(signature).asSlice();
-            let publicKeyBigInt = BigInt(`0x${keyPair.publicKey.toString('hex')}`);
-            console.log('publicKeyBigInt', publicKeyBigInt);
-            await lottery.send(
-                provider.sender(), {
-                    value: toNano('0.06'),
-                },
-                {
-                    $$type: 'SetPublicKey',
-                    publicKey: publicKeyBigInt
-                }
-            );
+        //     const keyPair = await mnemonicToWalletKey(WALLET_MNEMONIC.split(' '));
+        //     const signature = sign(signatureData.hash(), keyPair.secretKey);
+        //     let signatureCell = beginCell().storeBuffer(signature).asSlice();
+        //     let publicKeyBigInt = BigInt(`0x${keyPair.publicKey.toString('hex')}`);
+        //     console.log('publicKeyBigInt', publicKeyBigInt);
+        //     await lottery.send(
+        //         provider.sender(),
+        //         {
+        //             value: toNano('0.06'),
+        //         },
+        //         {
+        //             $$type: 'SetPublicKey',
+        //             publicKey: publicKeyBigInt,
+        //         },
+        //     );
 
-            await sleep(20000);
+        //     await sleep(20000);
 
-            console.log('Claiming the prize...');
-            let claim = await lottery.send(
-                provider.sender(), {
-                    value: toNano('0.07'),
-                },
-                {
-                    $$type: 'Claim',
-                    poolId: 1n,
-                    roundId: 1n,
-                    amount: airDropAmount,
-                    receiver: provider.sender().address!!,
-                    signature: signatureCell
-                }
-            )
-            await sleep(20000);
-            console.log('claim', claim);
+        //     console.log('Claiming the prize...');
+        //     let claim = await lottery.send(
+        //         provider.sender(),
+        //         {
+        //             value: toNano('0.07'),
+        //         },
+        //         {
+        //             $$type: 'Claim',
+        //             poolId: 1n,
+        //             roundId: 1n,
+        //             amount: airDropAmount,
+        //             receiver: provider.sender().address!!,
+        //             signature: signatureCell,
+        //         },
+        //     );
+        //     await sleep(20000);
+        //     console.log('claim', claim);
 
-            let userClaim = await lottery.getClaimData(1n, 1n);
-            console.log('userClaim', userClaim);
-            let isClaimed = await lottery.getIsClaim(1n, 1n, provider.sender().address!!);
-            console.log('isClaimed', isClaimed);
-        }
+        //     let userClaim = await lottery.getClaimData(1n, 1n);
+        //     console.log('userClaim', userClaim);
+        //     let isClaimed = await lottery.getIsClaim(1n, 1n, provider.sender().address!!);
+        //     console.log('isClaimed', isClaimed);
+        // }
     }
 
     ui.clearActionPrompt();
