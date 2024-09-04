@@ -16,11 +16,17 @@ interface IClaimStepProps {
 }
 
 export const CheckPrizeDrawer: FCC = ({ children }) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const { poolList } = useWinPools();
   const [claimStep, setClaimStep] = useState<IClaimStepProps>({
     poolId: null,
     roundId: null,
   });
+
+  const handleOpenChange = () => {
+    setClaimStep({ poolId: null, roundId: null });
+    setIsOpen(false);
+  };
 
   const titleDraw = useMemo(() => {
     if (poolList.length === 0) return 'Check Prizes';
@@ -74,7 +80,7 @@ export const CheckPrizeDrawer: FCC = ({ children }) => {
   }, [claimStep?.poolId, claimStep?.roundId, handleChangeStep, poolList]);
 
   return (
-    <Drawer onOpenChange={() => setClaimStep({ poolId: null, roundId: null })}>
+    <Drawer open={isOpen} onOpenChange={handleOpenChange}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent>
         <div className="w-full">

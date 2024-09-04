@@ -4,12 +4,12 @@ import axios from 'axios';
 
 import { env } from '@/lib/const';
 import { refreshTokenRequest } from './auth';
+import Router from 'next/router';
+import { ROUTES } from '@/lib/routes';
 
 export const request = axios.create({
   baseURL: env.API_URL,
 });
-
-let isRefreshPending = false;
 
 const onRefreshToken = async () => {
   const store = useUserStore.getState();
@@ -26,8 +26,12 @@ const onRefreshToken = async () => {
     } catch (e) {
       store?.setAccessToken('');
       store?.setRefreshToken('');
+      Router.replace(ROUTES.HOME);
+      store?.logout();
     }
   } else {
+    Router.replace(ROUTES.HOME);
+    store?.logout();
     store?.setAccessToken('');
     store?.setRefreshToken('');
   }
@@ -46,12 +50,10 @@ const handleError = async (error: any) => {
   const originalRequest = error.config!;
   const data = error?.response?.data as any;
 
-  if (data?.meta?.message === 'Unauthorized' && data?.meta?.code === 401 && !isRefreshPending) {
-    isRefreshPending = true;
+  if (data?.meta?.message === 'Unauthorized' && data?.meta?.code === 401 && !originalRequest?._retry) {
+    originalRequest._retry = true;
 
     const token = await onRefreshToken();
-
-    if (token) isRefreshPending = false;
 
     axios.defaults.headers.Authorization = `Bearer ${token}`;
 

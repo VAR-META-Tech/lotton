@@ -1,4 +1,4 @@
-import React, { FC, HTMLAttributes, useMemo } from 'react';
+import React, { FC, HTMLAttributes, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { Icons } from '@/assets/icons';
 import { MAX_TICKET, MIN_TICKET } from '@/modules/LandingPage/utils/const';
@@ -15,17 +15,22 @@ import { useForm } from 'react-hook-form';
 import { buyTicketSchema, BuyTicketType } from '@/modules/LandingPage/types/schema';
 import { IGetPoolDetailCurrency } from '@/apis/pools';
 import { FormWrapper } from '@/components/ui/form';
+import { toast } from 'sonner';
+import { useBuyTicketStore } from '@/stores/BuyTicketStore';
 
 interface Props {
   ticketPrice: number;
   roundId: number;
   currency: IGetPoolDetailCurrency | undefined;
+  roundIdOnChain: number;
   poolIdOnChain: number;
 }
 
-const BuyTicketForm: FC<Props> = ({ ticketPrice, roundId, currency, poolIdOnChain }) => {
-  const { buyTicket } = usePoolContract();
+const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundIdOnChain }) => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const { buyTicket, getLastTx } = usePoolContract();
   const { balance } = useWallet();
+  const clear = useBuyTicketStore.use.clear();
 
   const form = useForm<BuyTicketType>({
     resolver: zodResolver(buyTicketSchema),
@@ -76,13 +81,48 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, roundId, currency, poolIdOnChai
         return;
       }
 
+      setLoading(true);
+      const lastTx = await getLastTx();
+      const lastTxHash = lastTx?.[0].hash().toString('base64');
+
       buyTicket({
         poolId: poolIdOnChain || 0,
         quantity: amount,
-        roundId: roundId,
+        roundId: roundIdOnChain,
       });
+      console.log('🚀 ~ handleSubmit ~ :', {
+        poolId: poolIdOnChain || 0,
+        quantity: amount,
+        roundId: roundIdOnChain,
+      });
+
+      let newLastTxHash = lastTxHash;
+      while (newLastTxHash === lastTxHash) {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        const updatedLastTx = await getLastTx();
+        const isAbortedTx = (updatedLastTx?.[0]?.description as any)?.aborted;
+
+        if (isAbortedTx) {
+          toast.error('Buy tickets unsuccessful');
+
+          clear();
+
+          return;
+        }
+
+        newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
+      }
+
+      if (newLastTxHash !== lastTxHash) {
+        toast.success('Buy tickets successful');
+
+        clear();
+      }
     } catch (error) {
       onMutateError(error);
+      setLoading(false);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -149,7 +189,7 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, roundId, currency, poolIdOnChai
           </HStack>
         </VStack>
 
-        <Button type="submit" size={'lg'} className="text-base font-medium mt-10 text-white">
+        <Button loading={loading} type="submit" size={'lg'} className="text-base font-medium mt-10 text-white">
           Buy
         </Button>
       </VStack>

@@ -11,7 +11,7 @@ import { Icons } from '@/assets/icons';
 interface Props {
   rounds: IGetPoolDetailRound[];
   currentRound: string;
-  date: string | undefined;
+  date: number;
   isEndRound?: boolean;
 }
 
@@ -27,7 +27,9 @@ const PoolRound: FC<Props> = ({ currentRound, date, isEndRound = false }) => {
                 <span className="bg-navigate-tab px-3 py-1 rounded-lg h-8">{currentRound}</span>
               </div>
 
-              <div className="text-xs">{!!date && `Draw ${format(new Date(date), 'MMM dd, yyyy, HH:mm a')}`}</div>
+              <div className="text-xs">
+                {!!date && `Draw ${format(new Date(date * 1000), 'MMM dd, yyyy, HH:mm a')}`}
+              </div>
 
               {!!isEndRound && (
                 <Link href={'#'} target="_blank" className="text-xs text-primary flex gap-2 items-center">

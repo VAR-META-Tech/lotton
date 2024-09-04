@@ -15,10 +15,11 @@ interface Props {
   holdingTicket: number;
   poolId: number;
   roundId: number;
+  roundIdOnChain: number;
   poolIdOnChain: number;
 }
 
-const PoolAction: FC<Props> = ({ holdingTicket, poolId, roundId, poolIdOnChain }) => {
+const PoolAction: FC<Props> = ({ holdingTicket, poolId, roundId, poolIdOnChain, roundIdOnChain }) => {
   const { isLoggedIn, status } = useAuth();
   const setPoolId = useBuyTicketStore.use.setPoolId();
 
@@ -55,7 +56,12 @@ const PoolAction: FC<Props> = ({ holdingTicket, poolId, roundId, poolIdOnChain }
     <div>
       {renderComponent}
 
-      <BuyTicketDrawer poolId={poolId || 0} roundId={roundId} poolIdOnChain={poolIdOnChain} />
+      <BuyTicketDrawer
+        poolId={poolId || 0}
+        roundId={roundId}
+        roundIdOnChain={roundIdOnChain}
+        poolIdOnChain={poolIdOnChain}
+      />
     </div>
   );
 };

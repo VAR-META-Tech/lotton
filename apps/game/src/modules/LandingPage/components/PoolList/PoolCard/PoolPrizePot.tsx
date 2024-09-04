@@ -7,7 +7,7 @@ import { HStack, VStack } from '@/components/ui/Utilities';
 import PoolAction from './PoolAction';
 import { AnimatePresence, motion } from 'framer-motion';
 import { slideAnimation } from '@/modules/LandingPage/utils/const';
-import WinningNumber from '@/modules/CheckPage/components/CheckPrizeDrawer/WinningNumber';
+import WinningNumber from '@/modules/CheckPage/components/CheckPrizeDrawer/CheckPrize/WinningNumber';
 import UserTicketCount from './UserTicketCount';
 import { IGetPoolDetailCurrency } from '@/apis/pools';
 
@@ -17,6 +17,7 @@ interface Props {
   poolId: number;
   roundId: number;
   currency: IGetPoolDetailCurrency | undefined;
+  roundIdOnChain: number;
   poolIdOnChain: number;
   winCode: string;
 }
@@ -28,6 +29,7 @@ const PoolPrizePot: FC<Props> = ({
   roundId,
   currency,
   poolIdOnChain,
+  roundIdOnChain,
   winCode,
 }) => {
   const prizePot = useMemo(() => {
@@ -49,13 +51,19 @@ const PoolPrizePot: FC<Props> = ({
                 <div className="text-xs text-gray-color text-center">{`~ ${prettyNumber(10000)} USD`}</div>
               </div>
 
-              <PoolAction holdingTicket={0} poolId={poolId || 0} roundId={roundId} poolIdOnChain={poolIdOnChain} />
+              <PoolAction
+                holdingTicket={0}
+                poolId={poolId || 0}
+                roundId={roundId}
+                roundIdOnChain={roundIdOnChain}
+                poolIdOnChain={poolIdOnChain}
+              />
             </VStack>
           </motion.div>
         </AnimatePresence>
       </div>
     );
-  }, [currency?.symbol, currentRound, poolId, poolIdOnChain, roundId]);
+  }, [currency?.symbol, currentRound, poolId, poolIdOnChain, roundId, roundIdOnChain]);
 
   const prizePotWinningNumber = useMemo(() => {
     return (

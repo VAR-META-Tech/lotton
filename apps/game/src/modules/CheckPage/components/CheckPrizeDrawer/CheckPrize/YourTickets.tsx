@@ -1,9 +1,9 @@
 import { Icons } from '@/assets/icons';
 import { VStack } from '@/components/ui/Utilities';
 import { FC, useCallback } from 'react';
-import TicketMatch from '../TicketMatch';
-import SummaryTickets from '../SummaryTickets';
 import { IGetPoolJoinedItemRound } from '@/apis/pools';
+import SummaryTickets from '../../SummaryTickets';
+import TicketMatch from '../../TicketMatch';
 
 interface IYourTicketsProps {
   round: IGetPoolJoinedItemRound;

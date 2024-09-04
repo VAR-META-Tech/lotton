@@ -1,9 +1,9 @@
 import React from 'react';
-import TicketInfo from '../TicketInfo';
-import WinningNumber from './WinningNumber';
-import YourTickets from './YourTickets';
+import TicketInfo from '../../TicketInfo';
 import { FCC } from '@/types';
 import { IGetPoolJoinedItemRound } from '@/apis/pools';
+import WinningNumber from './WinningNumber';
+import YourTickets from './YourTickets';
 
 interface Props {
   name: string;
