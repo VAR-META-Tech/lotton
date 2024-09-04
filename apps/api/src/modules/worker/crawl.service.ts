@@ -16,6 +16,7 @@ import {
   Transaction as TransactionDB,
   UserTicket,
 } from '@/database/entities';
+import { EVENT_HEADER, PoolStatusEnum } from '@/shared/enums';
 
 import {
   getCurrentPool,
@@ -78,15 +79,16 @@ export class CrawlWorkerService {
           const originalBody = inMsg?.body.beginParse();
           const body = originalBody.clone();
           const op = body.loadUint(32);
+          console.log('op', op);
 
           switch (op) {
-            case 2004140043:
+            case EVENT_HEADER.CREATE_POOL_EVENT:
               await this.createPoolEvent(tx);
               break;
-            case 3748203161:
+            case EVENT_HEADER.BUY_TICKETS_EVENT:
               await this.buyTicketsEvent(tx);
               break;
-            case 3591482628:
+            case EVENT_HEADER.DRAW_WINNING_NUMBER:
               await this.drawWinningNumber(tx);
               break;
 
@@ -98,6 +100,7 @@ export class CrawlWorkerService {
 
       await this.updateBlockLt(latestBlockNumber);
     } catch (error) {
+      console.error('Error at: doCrawlJob');
       console.log(error);
     }
   }
@@ -253,16 +256,21 @@ export class CrawlWorkerService {
       const outMsgs = tx.outMessages.values()[0];
       const originalBody = outMsgs?.body.beginParse();
       const payload = loadPoolCreatedEvent(originalBody);
-      const poolIdOnChain = payload.poolId;
 
-      const pools = await this.getPools();
-      const getPool = pools.find((p) => p.poolId === poolIdOnChain);
-      if (!getPool) return;
+      const pool = await this.poolRepository.findOneBy({
+        status: PoolStatusEnum.INACTIVE,
+        startTime: Number(payload.startTime),
+        sequency: Number(payload.sequence),
+      });
+      if (!pool) return;
+      pool.poolIdOnChain = Number(payload.poolId);
+      pool.totalRounds = payload.rounds.values().length;
+      pool.endTime = Number(payload.endTime);
+      pool.ticketPrice = Number(payload.ticketPrice);
+      pool.status = PoolStatusEnum.ACTIVE;
 
-      const poolOffChain = await this.getPool(poolIdOnChain);
-      if (!poolOffChain) return;
-
-      const rounds = getPool.rounds.values();
+      await this.poolRepository.save(pool);
+      const rounds = payload.rounds.values();
 
       await this.poolRoundRepository
         .createQueryBuilder()
@@ -271,7 +279,7 @@ export class CrawlWorkerService {
         .values(
           rounds.map((round) => ({
             id: null,
-            pool: poolOffChain,
+            pool: pool,
             roundIdOnChain: Number(round.roundId),
             roundNumber: Number(round.roundId),
             startTime: Number(round.startTime),
@@ -300,19 +308,6 @@ export class CrawlWorkerService {
       throw error;
     }
   }
-
-  // async getPoolIdOnChange(poolId: number) {
-  //   const builder = new TupleBuilder();
-  //   builder.writeNumber(BigInt(poolId));
-
-  //   const currentPool = await getPoolById(
-  //     this.tonClient.provider(this.gameContractAddress),
-  //     BigInt(poolId),
-  //   );
-
-  //   const result = currentPool.readTupleOpt();
-  //   return result ? loadTuplePool(result) : null;
-  // }
 
   async updateBlockLt(lt: string) {
     try {

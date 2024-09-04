@@ -57,12 +57,12 @@ export class CreatePoolDto {
   @Min(1)
   currency: number;
 
-  @ApiProperty({ required: true, description: 'pool id on-chain', example: 1 })
-  @IsNumber()
-  @IsNotEmpty()
-  @Type(() => Number)
-  @Min(1)
-  poolIdOnChain: number;
+  // @ApiProperty({ required: true, description: 'pool id on-chain', example: 1 })
+  // @IsNumber()
+  // @IsNotEmpty()
+  // @Type(() => Number)
+  // @Min(1)
+  // poolIdOnChain: number;
 
   @ApiProperty({
     required: true,

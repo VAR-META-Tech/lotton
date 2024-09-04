@@ -155,10 +155,10 @@ export class RoundPrizesService {
                   '0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP',
                 ),
                 ticketPrice: BigInt(1),
-                initialRounds: BigInt(6),
-                startTime: BigInt(1724989513),
+                initialRounds: BigInt(10),
+                startTime: BigInt(new Date().valueOf().toString().slice(0, -3)),
                 endTime: BigInt(1725985385),
-                sequence: BigInt(600),
+                sequence: BigInt(1200),
                 active: true,
               }),
             )

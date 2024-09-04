@@ -59,3 +59,9 @@ export enum BinanceIntervalEnum {
   ONE_WEEK = '1w',
   ONE_MONTH = '1M',
 }
+
+export enum EVENT_HEADER {
+  CREATE_POOL_EVENT = 2004140043,
+  BUY_TICKETS_EVENT = 3748203161,
+  DRAW_WINNING_NUMBER = 3591482628,
+}

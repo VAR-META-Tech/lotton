@@ -280,7 +280,7 @@ function dictValueParserPool(): DictionaryValue<Pool> {
   };
 }
 
-function loadTuplePool(source: TupleReader) {
+export function loadTuplePool(source: TupleReader) {
   const _poolId = source.readBigNumber();
   const _creator = source.readAddress();
   const _rounds = Dictionary.loadDirect(
@@ -306,7 +306,7 @@ function loadTuplePool(source: TupleReader) {
 
 export function loadPoolCreatedEvent(slice: Slice) {
   const sc_0 = slice;
-  if (sc_0.loadUint(32) !== 190665403) {
+  if (sc_0.loadUint(32) !== 1607214464) {
     throw Error('Invalid prefix');
   }
   const _poolId = sc_0.loadIntBig(257);
@@ -316,6 +316,11 @@ export function loadPoolCreatedEvent(slice: Slice) {
   const _endTime = sc_0.loadUintBig(32);
   const _active = sc_0.loadBit();
   const _sequence = sc_0.loadUintBig(32);
+  const _rounds = Dictionary.load(
+    Dictionary.Keys.BigInt(257),
+    dictValueParserRoundConfig(),
+    sc_0,
+  );
   const _creator = sc_0.loadAddress();
   return {
     $$type: 'PoolCreatedEvent' as const,
@@ -326,6 +331,7 @@ export function loadPoolCreatedEvent(slice: Slice) {
     endTime: _endTime,
     active: _active,
     sequence: _sequence,
+    rounds: _rounds,
     creator: _creator,
   };
 }
@@ -343,7 +349,7 @@ export async function getCurrentPool(provider: ContractProvider) {
 
 export async function getPoolById(provider: ContractProvider, poolId: bigint) {
   const builder = new TupleBuilder();
-  builder.writeNumber(Number(poolId));
+  builder.writeNumber(poolId);
   const source = (await provider.get('poolById', builder.build())).stack;
   const result_p = source.readTupleOpt();
   const result = result_p ? loadTuplePool(result_p) : null;

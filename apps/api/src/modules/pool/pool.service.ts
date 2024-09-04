@@ -45,14 +45,14 @@ export class PoolService {
       pool.currency = await this.tokenRepository.findOne({
         where: { id: +createPoolDto.currency },
       });
-      pool.poolIdOnChain = createPoolDto.poolIdOnChain;
+      // pool.poolIdOnChain = createPoolDto.poolIdOnChain;
       pool.sequency = createPoolDto.sequency;
       pool.totalRounds = createPoolDto.totalRounds;
       pool.startTime = createPoolDto.startTime;
       pool.ticketPrice = createPoolDto.ticketPrice;
       pool.endTime =
-        createPoolDto.startTime +
-        createPoolDto.sequency * createPoolDto.totalRounds;
+        +createPoolDto.startTime +
+        +createPoolDto.sequency * +createPoolDto.totalRounds;
 
       await this.poolRepository.save(pool);
 
