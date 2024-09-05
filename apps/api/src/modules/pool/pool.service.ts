@@ -331,13 +331,17 @@ export class PoolService {
         .createQueryBuilder('pool')
         .leftJoinAndSelect('pool.rounds', 'rounds')
         .leftJoinAndSelect('rounds.ticket', 'ticket')
-        .where('ticket.userWallet = :userWallet', { userWallet: user.wallet });
+        .andWhere('ticket.userWallet = :userWallet', {
+          userWallet: user.wallet,
+        });
 
       const count = await queryBuilder
         .clone()
         .groupBy('rounds.id')
         .select(['count(ticket.id) as totalTicket', 'rounds.id as roundId'])
         .getRawMany();
+
+      console.log(count);
 
       if (type == UserPoolType.WINNER) {
         queryBuilder.andWhere('ticket.winningMatch > 0');
@@ -585,10 +589,10 @@ export class PoolService {
         ...item,
         rounds: item.rounds
           .map((round) => ({
+            ...round,
             totalTicket: Number(
               rounds.find((item) => item.roundId == round.id)?.totalTicket,
             ),
-            ...round,
           }))
           .sort((a, b) => a.roundNumber - b.roundNumber),
       })),

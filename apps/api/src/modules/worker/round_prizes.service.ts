@@ -12,17 +12,21 @@ import {
 import type { Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
-import type { Pool, PoolRound } from '@/database/entities';
+import type { Pool, PoolRound, UserTicket } from '@/database/entities';
 import { getLogger } from '@/utils/logger';
 
 import {
   getCurrentPool,
+  getResultByRound,
   loadGetterTupleUserTicket,
   storeBuyTicket,
   storeCreatePool,
   storeDrawWinningNumbers,
   storeSetAdmin,
 } from './contract_funcs';
+import { PoolStatusEnum } from '@/shared/enums';
+import { Logger } from '@nestjs/common';
+import { calculatorMatch, splitTickets } from './func';
 
 const logger = getLogger('CrawlTokenService');
 
@@ -34,6 +38,7 @@ export class RoundPrizesService {
     private poolRepository: Repository<Pool>,
     private poolRoundRepository: Repository<PoolRound>,
     private configService: ConfigService<StellaConfig>,
+    private userTicketRepository: Repository<UserTicket>,
   ) {
     this.tonClient = new TonClient({
       endpoint: this.configService.get('contract.rpcEndpoint', {
@@ -83,9 +88,9 @@ export class RoundPrizesService {
     // this.setAdmin();
     const pools = await this.getPoolsAvailable();
     for (const pool of pools) {
-      const rounds = await this.getRoundsAvailable(pool.poolIdOnChain);
+      const rounds = await this.getRoundsAvailable(pool.id);
       for (const round of rounds) {
-        await this.drawWinningNumbers(pool.id, round.id);
+        await this.drawWinningNumbers(pool.poolIdOnChain, round.roundIdOnChain);
       }
     }
   }
@@ -204,43 +209,98 @@ export class RoundPrizesService {
         this.tonClient.provider(Address.parse(this.contractAddress)),
       )
     ).values();
-    console.log(pools);
+    console.log(pools.map((p) => p.rounds.values()));
     console.log('get pools ok');
   }
 
-  async drawWinningNumbers(poolId: number, roundId: number) {
-    const { contract, keyPair } = await this.makeWallet();
-    // Create a transfer
-    // await adminWallet.send(contractProvider, messageDraw);
-    console.log('start');
-    const seqno = await contract.getSeqno();
-    const transfer = await contract.createTransfer({
-      seqno,
-      secretKey: keyPair.secretKey,
-      messages: [
-        internal({
-          value: toNano('0.05'),
-          to: this.configService.get('contract.gameContractAddress', {
-            infer: true,
-          }),
-          body: beginCell()
-            .store(
-              storeDrawWinningNumbers({
-                $$type: 'DrawWinningNumbers',
-                poolId: BigInt(poolId),
-                roundId: BigInt(roundId),
-                latestTxHash: '',
-              }),
-            )
-            .endCell(),
-        }),
-      ],
-    });
-    await contract.send(transfer);
+  async getResultByRound(poolId: bigint, roundId: bigint) {
+    const result = await getResultByRound(
+      this.tonClient.provider(Address.parse(this.contractAddress)),
+      poolId,
+      roundId,
+    );
 
-    console.log('draw ok');
-    // console.log(transfer);
-    // console.log(await contract.getSeqno());
+    if (!result) {
+      console.log('get getResultByRound ok', result);
+      return [];
+    }
+    const ticketDraw = splitTickets(Number(result).toString(), 1);
+    console.log('get getResultByRound ok', ticketDraw);
+    return ticketDraw;
+  }
+
+  async drawWinningNumbers(poolId: number, roundId: number) {
+    try {
+      console.log('Draw poolId', poolId, 'roundId', roundId);
+
+      const ticketsDraw = await this.getResultByRound(
+        BigInt(poolId),
+        BigInt(roundId),
+      );
+      if (ticketsDraw.length === 1) {
+        return await this.setWinningDraw(poolId, roundId, ticketsDraw[0]);
+      }
+
+      const { contract, keyPair } = await this.makeWallet();
+      // Create a transfer
+      const seqno = await contract.getSeqno();
+      const transfer = await contract.createTransfer({
+        seqno,
+        secretKey: keyPair.secretKey,
+        messages: [
+          internal({
+            value: toNano('0.05'),
+            to: this.configService.get('contract.gameContractAddress', {
+              infer: true,
+            }),
+            body: beginCell()
+              .store(
+                storeDrawWinningNumbers({
+                  $$type: 'DrawWinningNumbers',
+                  poolId: BigInt(poolId),
+                  roundId: BigInt(roundId),
+                  latestTxHash: '',
+                }),
+              )
+              .endCell(),
+          }),
+        ],
+      });
+      await contract.send(transfer);
+      console.log('draw ok');
+      await this.wait(1000);
+    } catch (error) {
+      Logger.error(error);
+    }
+  }
+
+  async setWinningDraw(
+    poolIdOnChain: number,
+    roundIdOnChain: number,
+    ticketDraw: string,
+  ) {
+    // Set draw winning code for round
+    const roundExist = await this.poolRoundRepository.findOneBy({
+      roundIdOnChain,
+      pool: {
+        poolIdOnChain,
+      },
+    });
+    roundExist.winningCode = ticketDraw;
+    await this.poolRoundRepository.save(roundExist);
+
+    // Set winning code for user ticket
+    const userTicketsExist = await this.userTicketRepository.findBy({
+      round: {
+        id: roundExist.id,
+      },
+    });
+    const userTicketsUpdate = userTicketsExist.map((ticket) => ({
+      ...ticket,
+      winningCode: ticketDraw,
+      winningMatch: calculatorMatch(ticket.code, ticketDraw ?? ''),
+    }));
+    await this.userTicketRepository.save(userTicketsUpdate);
   }
 
   async getPoolsAvailable() {
@@ -248,6 +308,7 @@ export class RoundPrizesService {
       this.poolRepository
         .createQueryBuilder()
         .where('startTime < UNIX_TIMESTAMP(NOW())')
+        .andWhere('status = :status', { status: PoolStatusEnum.ACTIVE })
         // .andWhere('endTime > UNIX_TIMESTAMP(NOW())')
         .getMany()
     );
@@ -261,5 +322,9 @@ export class RoundPrizesService {
       .andWhere('UNIX_TIMESTAMP(NOW()) > endTime')
       .andWhere('winningCode IS NULL')
       .getMany();
+  }
+
+  wait(timeout: number) {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
   }
 }

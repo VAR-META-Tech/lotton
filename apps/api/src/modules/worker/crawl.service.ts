@@ -25,6 +25,7 @@ import {
   loadTicketBoughtEvent,
   loadWinningNumbersDrawnEvent,
 } from './contract_funcs';
+import { calculatorMatch, splitTickets } from './func';
 
 @Injectable()
 export class CrawlWorkerService {
@@ -119,19 +120,18 @@ export class CrawlWorkerService {
       const originalOutMsgBody = outMsgsFirst?.body.beginParse();
       const payloadOutMsg = loadWinningNumbersDrawnEvent(originalOutMsgBody);
 
-      const tickets = this.splitTickets(
-        payloadOutMsg.winningNumber.toString(),
-        1,
-      );
+      const tickets = splitTickets(payloadOutMsg.winningNumber.toString(), 1);
 
       // Set draw winning code for round
       const roundExist = await this.poolRoundRepository.findOneBy({
         roundIdOnChain: Number(payloadOutMsg.roundId),
       });
+      if (!roundExist) return;
+
       roundExist.winningCode = tickets?.[0];
       await this.poolRoundRepository.save(roundExist);
 
-      // // Set winning code for user ticket
+      // Set winning code for user ticket
       const userTicketsExist = await this.userTicketRepository.findBy({
         round: {
           id: roundExist.id,
@@ -140,7 +140,7 @@ export class CrawlWorkerService {
       const userTicketsUpdate = userTicketsExist.map((ticket) => ({
         ...ticket,
         winningCode: tickets?.[0],
-        winningMatch: this.calculatorMatch(ticket.code, tickets?.[0] ?? ''),
+        winningMatch: calculatorMatch(ticket.code, tickets?.[0] ?? ''),
       }));
       await this.userTicketRepository.save(userTicketsUpdate);
     } catch (error) {
@@ -190,7 +190,7 @@ export class CrawlWorkerService {
         transactionHash: txHash,
       });
 
-      const tickets = this.splitTickets(
+      const tickets = splitTickets(
         payloadOutMsg.tickets,
         Number(payloadInMsg.quantity),
       );
@@ -198,6 +198,8 @@ export class CrawlWorkerService {
       const roundExist = await this.poolRoundRepository.findOneBy({
         roundIdOnChain: Number(payloadOutMsg.roundId),
       });
+
+      if (!roundExist) return;
 
       // Create user tickets
       await this.userTicketRepository
@@ -234,26 +236,6 @@ export class CrawlWorkerService {
     } catch (error) {
       console.log(error);
     }
-  }
-
-  splitTickets(ticketsList: string, quantity: number) {
-    const ticketsString = ticketsList
-      .replace(/,/g, '')
-      .substring(0, 4 * 2 * quantity);
-
-    const tickets = [];
-    for (let i = 0; i < ticketsString.length; i += 8) {
-      const ticket = ticketsString.substring(i, i + 8);
-      let ticketConvert = '';
-
-      for (let i = 0; i < ticket.length; i += 2) {
-        const ticketChar = ticket.substring(i, i + 2);
-        ticketConvert += String.fromCharCode(+ticketChar);
-      }
-      tickets.push(ticketConvert);
-    }
-
-    return tickets;
   }
 
   async createPoolEvent(tx: Transaction) {
@@ -389,14 +371,5 @@ export class CrawlWorkerService {
     if (TonWeb.utils.Address.isValid(address))
       return Address.parse(address).toRawString();
     return address;
-  }
-
-  calculatorMatch(userCode: string, winningCode: string) {
-    for (let index = winningCode.length; index >= 0; index--) {
-      if (userCode.slice(0, index) === winningCode.slice(0, index))
-        return index;
-    }
-
-    return 0;
   }
 }

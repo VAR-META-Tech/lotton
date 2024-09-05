@@ -65,6 +65,7 @@ export class ManagerService {
       this.poolRepository,
       this.poolRoundRepository,
       this.configService,
+      this.userTicketRepository,
     );
   }
 

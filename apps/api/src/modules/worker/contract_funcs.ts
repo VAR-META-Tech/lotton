@@ -361,3 +361,16 @@ export async function getPoolById(provider: ContractProvider, poolId: bigint) {
   const result = result_p ? loadTuplePool(result_p) : null;
   return result;
 }
+
+export async function getResultByRound(
+  provider: ContractProvider,
+  poolId: bigint,
+  roundId: bigint,
+) {
+  let builder = new TupleBuilder();
+  builder.writeNumber(poolId);
+  builder.writeNumber(roundId);
+  let source = (await provider.get('resultByRound', builder.build())).stack;
+  let result = source.readBigNumberOpt();
+  return result;
+}

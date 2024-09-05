@@ -46,12 +46,8 @@ export async function run(provider: NetworkProvider, args: string[]) {
             active: true,
             sequence: BigInt(3600 * 24),
             jettonWallet: Address.parse('EQDw0Uwf9kK-_AlMOJV7sgmYSX86tAD83q9R8LKc-UMy1DfT'),
-<<<<<<< Updated upstream
-            prizes: prizes
-        }
-=======
+            prizes: prizes,
         },
->>>>>>> Stashed changes
     );
 
     ui.write('Waiting for counter to increase...');
