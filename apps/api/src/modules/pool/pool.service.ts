@@ -466,6 +466,8 @@ export class PoolService {
         .getRawOne();
 
       const signatureData = beginCell()
+        .storeInt(poolId, 32)
+        .storeInt(roundId, 32)
         .storeAddress(Address.parse(user.wallet))
         .storeCoins(prizesToClaim * 10 ** (token.decimals ?? 0))
         .endCell();
