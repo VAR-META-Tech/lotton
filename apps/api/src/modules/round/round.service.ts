@@ -31,15 +31,15 @@ export class RoundService {
         queryBuilder.andWhere('poolRound.poolId = :poolId', { poolId });
       }
       if (status && status == PoolRoundStatusEnum.UPCOMING) {
-        queryBuilder.andWhere('poolRound.startTime > NOW()');
+        queryBuilder.andWhere('poolRound.startTime > UNIX_TIMESTAMP(NOW())');
       }
       if (status && status == PoolRoundStatusEnum.ONGOING) {
         queryBuilder.andWhere(
-          'poolRound.startTime < NOW() AND poolRound.endTime > NOW()',
+          'poolRound.startTime < UNIX_TIMESTAMP(NOW()) AND poolRound.endTime > UNIX_TIMESTAMP(NOW())',
         );
       }
       if (status && status == PoolRoundStatusEnum.CLOSED) {
-        queryBuilder.andWhere('poolRound.endTime < NOW()');
+        queryBuilder.andWhere('poolRound.endTime < UNIX_TIMESTAMP(NOW())');
       }
       if (status && status == PoolRoundStatusEnum.DELETE) {
         queryBuilder.andWhere('poolRound.deletedAt IS NOT NULL').withDeleted();

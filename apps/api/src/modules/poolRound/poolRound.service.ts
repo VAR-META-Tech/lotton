@@ -32,7 +32,7 @@ export class PoolRoundService {
     return await this.roundRepository
       .createQueryBuilder()
       .where('poolId = :poolId', { poolId })
-      .andWhere('startTime <= NOW()')
+      .andWhere('startTime <= UNIX_TIMESTAMP(NOW())')
       .getCount();
   }
 

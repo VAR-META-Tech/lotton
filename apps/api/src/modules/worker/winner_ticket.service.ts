@@ -40,7 +40,7 @@ export class WinnerTicketService {
       const data = await this.dataSource.transaction(async (manager) => {
         const roundEnds = await manager
           .createQueryBuilder(PoolRound, 'poolRound')
-          .where('poolRound.endTime <= NOW()')
+          .where('poolRound.endTime <= UNIX_TIMESTAMP(NOW())')
           .andWhere('poolRound.winningCode IS NULL')
           .getMany();
 

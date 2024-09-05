@@ -219,15 +219,15 @@ export class PoolService {
         });
       }
       if (status && status == PoolRoundStatusEnum.UPCOMING) {
-        queryBuilder.andWhere('pool.startTime > NOW()');
+        queryBuilder.andWhere('pool.startTime > UNIX_TIMESTAMP(NOW())');
       }
       if (status && status == PoolRoundStatusEnum.ONGOING) {
         queryBuilder.andWhere(
-          'pool.startTime < NOW() AND pool.endTime > NOW()',
+          'pool.startTime < UNIX_TIMESTAMP(NOW()) AND pool.endTime > UNIX_TIMESTAMP(NOW())',
         );
       }
       if (status && status == PoolRoundStatusEnum.CLOSED) {
-        queryBuilder.andWhere('pool.endTime < NOW()');
+        queryBuilder.andWhere('pool.endTime < UNIX_TIMESTAMP(NOW())');
       }
       if (status && status == PoolRoundStatusEnum.DELETE) {
         queryBuilder.andWhere('pool.deletedAt IS NOT NULL').withDeleted();
