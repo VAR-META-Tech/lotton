@@ -478,7 +478,7 @@ export class PoolService {
         'base64',
       );
 
-      return { signature };
+      return { signature, prizesToClaim, token };
     } catch (error) {
       throw new BadRequestException(error);
     }
