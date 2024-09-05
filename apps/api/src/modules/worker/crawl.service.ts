@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Transaction } from '@ton/core';
-import { Address } from '@ton/core';
+import { Address, beginCell, toNano } from '@ton/core';
 import { TonClient } from '@ton/ton';
 import TonWeb from 'tonweb';
 import { Repository } from 'typeorm';

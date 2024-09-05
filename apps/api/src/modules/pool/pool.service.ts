@@ -6,7 +6,7 @@ import { Address, beginCell } from '@ton/ton';
 import dayjs from 'dayjs';
 import type { SelectQueryBuilder } from 'typeorm';
 import { Repository } from 'typeorm';
-
+import bigDecimal from 'js-big-decimal';
 import { Causes } from '@/common/exceptions/causes';
 import type { StellaConfig } from '@/configs';
 import type { User } from '@/database/entities';
@@ -25,6 +25,7 @@ import {
   UserPoolType,
 } from './dto/get-pool.query';
 import type { UpdatePoolDto } from './dto/update-pool.dto';
+import { parseUnits } from 'viem';
 
 export class PoolService {
   constructor(
@@ -419,13 +420,17 @@ export class PoolService {
         .leftJoinAndSelect('pool.rounds', 'rounds')
         .andWhere('pool.id = :poolId', { poolId })
         .andWhere('rounds.id = :roundId', { roundId })
-        .select(['pool.id as poolId', 'rounds.endTime as roundEndTime'])
+        .select([
+          'pool.poolIdOnChain as poolIdOnChain',
+          'rounds.roundIdOnChain as roundIdOnChain',
+          'rounds.endTime as roundEndTime',
+        ])
         .getRawOne();
       if (!roundExits) {
         throw new BadRequestException('Round does not exist');
       }
 
-      if (new Date(roundExits.roundEndTime) > new Date()) {
+      if (dayjs.unix(roundExits.roundEndTime) > dayjs()) {
         throw new BadRequestException('Round is running or not started');
       }
 
@@ -441,7 +446,6 @@ export class PoolService {
         );
 
       const allWinners = await this.countTicketWinning(builder);
-
       const userWinning = await this.getUserTicketWinning(builder, user.wallet);
 
       if (userWinning.length === 0) {
@@ -455,7 +459,7 @@ export class PoolService {
 
       const prizes = await this.getPrizes(poolId);
 
-      const prizesToClaim = this.calculateUserWinningPrize(
+      const prizesToClaimDecimal = this.calculateUserWinningPrize(
         userWinning,
         allocation,
         prizes,
@@ -469,12 +473,20 @@ export class PoolService {
         .select(['currency.decimals as decimals'])
         .getRawOne();
 
+      if (!token) throw Causes.NOT_FOUND('Token');
+
+      const prizesToClaim = prizesToClaimDecimal.getValue();
+      const prizesToClaimAmount = parseUnits(prizesToClaim, token.decimals);
+
+      console.log(roundExits);
+
       const signatureData = beginCell()
-        .storeInt(poolId, 32)
-        .storeInt(roundId, 32)
+        .storeInt(roundExits.poolIdOnChain, 32)
+        .storeInt(roundExits.roundIdOnChain, 32)
         .storeAddress(Address.parse(user.wallet))
-        .storeCoins(prizesToClaim * 10 ** (token.decimals ?? 0))
+        .storeCoins(prizesToClaimAmount)
         .endCell();
+
       const keyPair = await mnemonicToWalletKey(
         this.configService
           .get('contract.adminWalletPhrase', { infer: true })
@@ -488,7 +500,8 @@ export class PoolService {
         signature,
         prizesToClaim,
         token,
-        unitPrizes: prizesToClaim * 10 ** (token.decimals ?? 0),
+        roundExits,
+        unitPrizes: prizesToClaimAmount.toString(),
       };
     } catch (error) {
       throw new BadRequestException(error);
@@ -572,14 +585,29 @@ export class PoolService {
       const allocationPercent =
         allocation.find((a) => a.matchNumber == ticket.winningMatch)
           ?.allocation ?? 0;
-      const prizeForMatch = prizes.totalPrizes * (allocationPercent / 100);
-      const winningPrize =
-        prizeForMatch /
-          allWinners.find((a) => a.winningMatch == ticket.winningMatch)
-            ?.totalTickets ?? 0;
+      const totalTickets =
+        allWinners.find((a) => a.winningMatch == ticket.winningMatch)
+          ?.totalTickets ?? 0;
 
-      return acc + winningPrize;
-    }, 0);
+      const totalPrizesDecimal = new bigDecimal(prizes.totalPrizes);
+      const allocationPercentDecimal = new bigDecimal(allocationPercent);
+      const percentDecimal = new bigDecimal(100);
+      const prizeForMatch = totalPrizesDecimal
+        .multiply(allocationPercentDecimal)
+        .divide(percentDecimal);
+
+      const totalTicketsDecimal = new bigDecimal(totalTickets);
+
+      // const prizeForMatch = prizes.totalPrizes * (allocationPercent / 100);
+      const winningPrize = prizeForMatch.divide(totalTicketsDecimal);
+      // const winningPrize =
+      //   prizeForMatch /
+      //     allWinners.find((a) => a.winningMatch == ticket.winningMatch)
+      //       ?.totalTickets ?? 0;
+
+      return winningPrize.add(acc);
+      // return acc + winningPrize;
+    }, new bigDecimal(0));
   }
 
   mapTicket(data: FetchResult<Pool>, rounds: any[]) {

@@ -82,7 +82,9 @@ export class PoolController {
   })
   @UseGuards(UserJwtGuard)
   async claim(@GetUser('user') user: User, @Query() claimDto: ClaimDto) {
-    return await this.poolService.claim(user, claimDto);
+    const result = await this.poolService.claim(user, claimDto);
+    console.log({ result });
+    return result;
   }
 
   @Get(':id')

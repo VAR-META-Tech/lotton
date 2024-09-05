@@ -57,7 +57,7 @@ export class ClaimDto {
   poolId: number;
 
   @ApiProperty({
-    description: 'Pool id',
+    description: 'Round id',
     required: false,
   })
   @IsNumber()

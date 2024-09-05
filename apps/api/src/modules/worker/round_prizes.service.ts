@@ -15,6 +15,8 @@ import type { StellaConfig } from '@/configs';
 import type { Pool, PoolRound, UserTicket } from '@/database/entities';
 import { getLogger } from '@/utils/logger';
 
+import { PoolStatusEnum } from '@/shared/enums';
+import { Logger } from '@nestjs/common';
 import {
   getCurrentPool,
   getResultByRound,
@@ -24,8 +26,6 @@ import {
   storeDrawWinningNumbers,
   storeSetAdmin,
 } from './contract_funcs';
-import { PoolStatusEnum } from '@/shared/enums';
-import { Logger } from '@nestjs/common';
 import { calculatorMatch, splitTickets } from './func';
 
 const logger = getLogger('CrawlTokenService');
@@ -86,6 +86,7 @@ export class RoundPrizesService {
     // this.getListPools();
     // this.buyTickets();
     // this.setAdmin();
+
     const pools = await this.getPoolsAvailable();
     for (const pool of pools) {
       const rounds = await this.getRoundsAvailable(pool.id);

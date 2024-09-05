@@ -37,7 +37,6 @@ export class ManagerService {
     @InjectRepository(Prizes)
     private readonly prizesRepository: Repository<Prizes>,
   ) {
-    // this.syncData();
     this.init();
     cron.schedule('* * * * *', async () => {
       this.syncData();
@@ -56,7 +55,7 @@ export class ManagerService {
         this.poolRepository,
         this.prizesRepository,
       ).doCrawlJob();
-      await this.wait(15000); // 15 seconds
+      await this.wait(10000); // 10 seconds
     }
   }
 
