@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import cron from 'node-cron';
 import { Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
@@ -38,9 +39,9 @@ export class ManagerService {
   ) {
     // this.syncData();
     this.init();
-    // cron.schedule('* * * * *', async () => {
-    //   this.syncData();
-    // });
+    cron.schedule('* * * * *', async () => {
+      this.syncData();
+    });
   }
 
   async init() {

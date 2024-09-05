@@ -74,7 +74,7 @@ export class CrawlWorkerService {
 
       console.log('Transaction Length', transactions.length);
 
-      for (const tx of transactions) {
+      for (const tx of transactions.reverse()) {
         const isAbortedTx = tx.description?.['aborted'];
         if (isAbortedTx) continue;
 
@@ -84,6 +84,7 @@ export class CrawlWorkerService {
           const body = originalBody.clone();
           const op = body.loadUint(32);
           console.log('op', op);
+          console.log('tx.lt', tx.lt);
 
           switch (op) {
             case EVENT_HEADER.CREATE_POOL_EVENT:
@@ -266,6 +267,7 @@ export class CrawlWorkerService {
         startTime: Number(payload.startTime),
         sequency: Number(payload.sequence),
       });
+
       if (!pool) return;
       pool.poolIdOnChain = Number(payload.poolId);
       pool.totalRounds = payload.rounds.values().length;
@@ -291,8 +293,8 @@ export class CrawlWorkerService {
           })),
         )
         .orUpdate(
-          ['roundNumber', 'startTime', 'endTime', 'poolId'],
-          ['roundIdOnChain'],
+          ['roundNumber', 'startTime', 'endTime'],
+          ['poolId', 'roundIdOnChain'],
         )
         .execute();
     } catch (error) {
