@@ -59,11 +59,11 @@ export function usePoolContract() {
 
     const messageBody = beginCell()
       .storeUint(1449747896, 32)
-      .storeInt(data.poolId, 257)
-      .storeInt(data.roundId, 257)
-      .storeCoins(data.amount)
-      .storeAddress(Address.parse(data.receiver))
-      .storeRef(signatureCell)
+      .storeInt(data.poolId, 257) //poolId
+      .storeInt(data.roundId, 257) //roundId
+      .storeCoins(data.amount) //amount
+      .storeAddress(Address.parse(data.receiver)) //receiver
+      .storeRef(signatureCell) //signature
       .endCell();
 
     return await poolContract?.claimPrize(provider, sender, messageBody);

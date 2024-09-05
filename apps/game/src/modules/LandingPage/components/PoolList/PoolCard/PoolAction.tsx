@@ -14,12 +14,12 @@ import { useBuyTicketStore } from '@/stores/BuyTicketStore';
 interface Props {
   holdingTicket: number;
   poolId: number;
-  roundId: number;
   roundIdOnChain: number;
   poolIdOnChain: number;
+  isBeforeRoundEnd: boolean;
 }
 
-const PoolAction: FC<Props> = ({ holdingTicket, poolId, roundId, poolIdOnChain, roundIdOnChain }) => {
+const PoolAction: FC<Props> = ({ holdingTicket, poolId, poolIdOnChain, roundIdOnChain, isBeforeRoundEnd }) => {
   const { isLoggedIn, status } = useAuth();
   const setPoolId = useBuyTicketStore.use.setPoolId();
 
@@ -35,12 +35,16 @@ const PoolAction: FC<Props> = ({ holdingTicket, poolId, roundId, poolIdOnChain, 
           this round
         </span>
 
-        <Button onClick={() => setPoolId(poolId)} className="bg-gradient-to-r from-primary to-[#ED9BD6]">
+        <Button
+          disabled={!isBeforeRoundEnd}
+          onClick={() => setPoolId(poolId)}
+          className="bg-gradient-to-r from-primary to-[#ED9BD6]"
+        >
           Buy Tickets
         </Button>
       </VStack>
     );
-  }, [holdingTicket, poolId, setPoolId]);
+  }, [holdingTicket, isBeforeRoundEnd, poolId, setPoolId]);
 
   const renderComponent = useMemo(() => {
     if (status === 'waiting') return <Spinner className="w-8 h-8 text-white" />;
@@ -56,12 +60,7 @@ const PoolAction: FC<Props> = ({ holdingTicket, poolId, roundId, poolIdOnChain, 
     <div>
       {renderComponent}
 
-      <BuyTicketDrawer
-        poolId={poolId || 0}
-        roundId={roundId}
-        roundIdOnChain={roundIdOnChain}
-        poolIdOnChain={poolIdOnChain}
-      />
+      <BuyTicketDrawer poolId={poolId || 0} roundIdOnChain={roundIdOnChain} poolIdOnChain={poolIdOnChain} />
     </div>
   );
 };

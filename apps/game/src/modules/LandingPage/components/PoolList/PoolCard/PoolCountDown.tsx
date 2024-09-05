@@ -22,7 +22,7 @@ const PoolCountDown: FC<Props> = ({ date }) => {
   const calculateTimeLeft = useCallback((): TimeLeft => {
     if (!date) return getDefaultTimeLeft();
 
-    const targetDate = new Date(date * 1000).getTime();
+    const targetDate = new Date(Number(date) * 1000).getTime();
     const now = Date.now();
 
     if (isNaN(targetDate)) return getDefaultTimeLeft();
@@ -42,7 +42,7 @@ const PoolCountDown: FC<Props> = ({ date }) => {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft);
 
   useEffect(() => {
-    if (!date || isNaN(new Date(date).getTime())) return;
+    if (!date || isNaN(new Date(Number(date) * 1000).getTime())) return;
 
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());

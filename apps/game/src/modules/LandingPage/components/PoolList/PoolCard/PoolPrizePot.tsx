@@ -15,22 +15,22 @@ interface Props {
   currentRound: string;
   isEndRound?: boolean;
   poolId: number;
-  roundId: number;
   currency: IGetPoolDetailCurrency | undefined;
   roundIdOnChain: number;
   poolIdOnChain: number;
   winCode: string;
+  isBeforeRoundEnd: boolean;
 }
 
 const PoolPrizePot: FC<Props> = ({
   currentRound,
   isEndRound = false,
   poolId,
-  roundId,
   currency,
   poolIdOnChain,
   roundIdOnChain,
   winCode,
+  isBeforeRoundEnd,
 }) => {
   const prizePot = useMemo(() => {
     return (
@@ -54,16 +54,16 @@ const PoolPrizePot: FC<Props> = ({
               <PoolAction
                 holdingTicket={0}
                 poolId={poolId || 0}
-                roundId={roundId}
                 roundIdOnChain={roundIdOnChain}
                 poolIdOnChain={poolIdOnChain}
+                isBeforeRoundEnd={isBeforeRoundEnd}
               />
             </VStack>
           </motion.div>
         </AnimatePresence>
       </div>
     );
-  }, [currency?.symbol, currentRound, poolId, poolIdOnChain, roundId, roundIdOnChain]);
+  }, [currency?.symbol, currentRound, isBeforeRoundEnd, poolId, poolIdOnChain, roundIdOnChain]);
 
   const prizePotWinningNumber = useMemo(() => {
     return (

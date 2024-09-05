@@ -11,7 +11,7 @@ export const useInfinityPoolJoined = () => {
   } = useInfinityPoolJoinedQuery({
     variables: {
       type: 'joined',
-      pageSizes: 10,
+      pageSizes: 100,
       page: 1,
     },
   });
