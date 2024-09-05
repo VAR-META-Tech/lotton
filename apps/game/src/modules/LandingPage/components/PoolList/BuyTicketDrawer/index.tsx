@@ -11,12 +11,11 @@ import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
 
 interface Props {
   poolId: number;
-  roundId: number;
   roundIdOnChain: number;
   poolIdOnChain: number;
 }
 
-const BuyTicketDrawer: FCC<Props> = ({ children, poolId, roundId, poolIdOnChain, roundIdOnChain }) => {
+const BuyTicketDrawer: FCC<Props> = ({ children, poolId, poolIdOnChain, roundIdOnChain }) => {
   const currentPoolId = useBuyTicketStore.use.poolId();
   const setPoolId = useBuyTicketStore.use.setPoolId();
 
@@ -52,7 +51,6 @@ const BuyTicketDrawer: FCC<Props> = ({ children, poolId, roundId, poolIdOnChain,
               <div className="space-y-10">
                 <BuyTicketForm
                   ticketPrice={ticketPrice}
-                  roundId={roundId}
                   currency={currency}
                   poolIdOnChain={poolIdOnChain}
                   roundIdOnChain={roundIdOnChain}

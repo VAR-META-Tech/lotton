@@ -35,7 +35,7 @@ export const PoolItem = ({ pool }: Props) => {
   };
 
   return (
-    <div className="shadow-lg border w-full max-w-lg grid grid-cols-6">
+    <div className="shadow-lg border w-full grid grid-cols-6">
       <div className="bg-background-2 col-span-2 border flex items-center justify-center p-4">
         <div className="font-semibold text-primary text-[1.625rem] text-center">{pool?.name || ''}</div>
       </div>
@@ -56,7 +56,6 @@ export const PoolItem = ({ pool }: Props) => {
 
       <BuyTicketDrawer
         poolId={pool?.id}
-        roundId={roundActive?.id}
         roundIdOnChain={roundActive?.roundIdOnChain}
         poolIdOnChain={pool?.poolIdOnChain}
       />

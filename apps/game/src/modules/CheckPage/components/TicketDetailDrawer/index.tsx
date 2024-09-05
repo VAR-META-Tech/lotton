@@ -31,7 +31,7 @@ export const TicketDetailDrawer: FCC<Props> = ({ children, pool, roundActiveNumb
   const isEndRound = useMemo(() => {
     if (!roundActiveInfo?.endTime) return false;
 
-    const roundEndtime = new Date(roundActiveInfo?.endTime);
+    const roundEndtime = new Date(Number(roundActiveInfo?.endTime) * 1000);
     const now = new Date();
 
     if (now > roundEndtime) {

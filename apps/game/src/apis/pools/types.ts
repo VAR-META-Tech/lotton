@@ -72,9 +72,9 @@ export interface IGetPoolDetailRound {
   id: number;
   roundIdOnChain: number;
   roundNumber: number;
-  startTime: number;
-  endTime: number;
-  winningCode: string;
+  startTime: string;
+  endTime: string;
+  winningCode: string | null;
 }
 
 export interface IGetPoolDetailPoolPrize {
@@ -182,4 +182,18 @@ export interface IGetClaimSignatureResponse extends TResponse<IGetClaimSignature
 
 export interface IGetClaimSignatureData {
   signature: string;
+  prizesToClaim: string;
+  token: IGetClaimSignatureToken;
+  roundExits: IGetClaimSignatureRoundExits;
+  unitPrizes: string;
+}
+
+export interface IGetClaimSignatureToken {
+  decimals: number;
+}
+
+export interface IGetClaimSignatureRoundExits {
+  poolIdOnChain: number;
+  roundIdOnChain: number;
+  roundEndTime: string;
 }

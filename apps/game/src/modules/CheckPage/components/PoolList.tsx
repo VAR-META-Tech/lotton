@@ -9,7 +9,7 @@ import { PoolItem } from './PoolItem';
 import { SkeletonPool } from './SkeletonPool';
 import { useInfinityPoolJoined } from '@/hooks/useInfinityPoolJoined';
 
-export const PoolList = () => {
+const PoolList = () => {
   const { poolList, fetchNextPage, hasNextPage, loadingPool, isFetchingNextPage } = useInfinityPoolJoined();
 
   const { ref: rootLoadMore, entry } = useIntersection({
@@ -24,7 +24,7 @@ export const PoolList = () => {
   return (
     <VStack spacing={56} align={'center'}>
       {!!poolList?.length && (
-        <VStack className="min-h-[calc(100vh-6.25rem)]">
+        <VStack className="min-h-[calc(100vh-6.25rem)] w-full">
           {poolList?.map((poolItem, index) => {
             return <PoolItem key={`${poolItem?.id}-${index}`} pool={poolItem} />;
           })}
@@ -40,3 +40,5 @@ export const PoolList = () => {
     </VStack>
   );
 };
+
+export default PoolList;

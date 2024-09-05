@@ -58,7 +58,7 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
         totalUsdValue={10000}
       />
 
-      <ClaimAction poolId={poolId} roundId={roundId} totalValue={totalValue} />
+      <ClaimAction poolId={poolId} roundId={roundId} />
     </VStack>
   );
 };

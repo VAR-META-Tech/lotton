@@ -15,7 +15,7 @@ import Empty from '@/components/Empty';
 const PoolList = () => {
   const [isShow, setIsShow] = useState(false);
   const { pools, isLoading } = useGetPools({
-    // status: 'upcoming',
+    status: 'ongoing',
   });
   const { carouselRef, selectedIndex, scrollSnaps, onDotButtonClick } = useCommonCarousel();
 

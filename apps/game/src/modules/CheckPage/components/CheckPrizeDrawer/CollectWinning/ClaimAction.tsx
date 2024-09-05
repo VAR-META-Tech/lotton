@@ -4,19 +4,20 @@ import { HStack } from '@/components/ui/Utilities';
 import { useAuth } from '@/hooks/useAuth';
 import { usePoolContract } from '@/hooks/usePoolContract';
 import { onMutateError } from '@/lib/common';
+import { useClaimStore } from '@/stores/ClaimStore';
 import React, { FC, useState } from 'react';
 import { toast } from 'sonner';
 
 interface Props {
   poolId: number;
   roundId: number;
-  totalValue: number;
 }
 
-const ClaimAction: FC<Props> = ({ poolId, roundId, totalValue }) => {
+const ClaimAction: FC<Props> = ({ poolId, roundId }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { claimPrize, getLastTx } = usePoolContract();
   const { user } = useAuth();
+  const setIsOpen = useClaimStore.use.setIsOpen();
 
   const { mutate: getClaimSignature } = useGetClaimSignatureMutation({
     onSuccess: async (data) => {
@@ -26,11 +27,11 @@ const ClaimAction: FC<Props> = ({ poolId, roundId, totalValue }) => {
         const lastTxHash = lastTx?.[0].hash().toString('base64');
 
         claimPrize({
-          poolId: poolId,
-          roundId: roundId,
-          amount: totalValue * Math.pow(10, 9) || 0,
+          poolId: data?.roundExits?.poolIdOnChain,
+          roundId: data?.roundExits?.roundIdOnChain,
+          amount: Number(data?.unitPrizes),
           receiver: user?.wallet || '',
-          signature: data.signature,
+          signature: data?.signature,
         });
 
         let newLastTxHash = lastTxHash;
@@ -41,12 +42,19 @@ const ClaimAction: FC<Props> = ({ poolId, roundId, totalValue }) => {
 
           if (isAbortedTx) {
             toast.error('Claimed failed');
+
+            setIsOpen(false);
+
             return;
           }
 
+          newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
+        }
+
+        if (newLastTxHash !== lastTxHash) {
           toast.success('Claim successful');
 
-          newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
+          setIsOpen(false);
         }
       } catch (error) {
         onMutateError(error);
@@ -66,7 +74,12 @@ const ClaimAction: FC<Props> = ({ poolId, roundId, totalValue }) => {
 
   return (
     <HStack pos={'center'}>
-      <Button loading={loading} onClick={handleClaim} size={'lg'} className="rounded-lg w-fit bg-primary text-white">
+      <Button
+        loading={loading}
+        onClick={handleClaim}
+        size={'lg'}
+        className="rounded-lg w-fit bg-primary text-white min-w-52"
+      >
         Claim
       </Button>
     </HStack>

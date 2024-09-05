@@ -17,16 +17,17 @@ import { IGetPoolDetailCurrency } from '@/apis/pools';
 import { FormWrapper } from '@/components/ui/form';
 import { toast } from 'sonner';
 import { useBuyTicketStore } from '@/stores/BuyTicketStore';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface Props {
   ticketPrice: number;
-  roundId: number;
   currency: IGetPoolDetailCurrency | undefined;
   roundIdOnChain: number;
   poolIdOnChain: number;
 }
 
 const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundIdOnChain }) => {
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState<boolean>(false);
   const { buyTicket, getLastTx } = usePoolContract();
   const { balance } = useWallet();
@@ -43,7 +44,6 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundI
     setValue,
     watch,
     formState: { errors },
-    setError,
     clearErrors,
   } = form;
 
@@ -51,6 +51,7 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundI
 
   const isMax = amount === MAX_TICKET;
   const isMin = amount === MIN_TICKET;
+  const tokenSymbol = currency?.symbol || '';
 
   const onAmountChange = (type: 'plus' | 'minus') => {
     clearErrors('amount');
@@ -73,24 +74,11 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundI
 
   const handleSubmit = async () => {
     try {
-      if (!amount) {
-        setError('amount', {
-          type: 'custom',
-          message: 'This amount is required',
-        });
-        return;
-      }
-
       setLoading(true);
       const lastTx = await getLastTx();
       const lastTxHash = lastTx?.[0].hash().toString('base64');
 
       buyTicket({
-        poolId: poolIdOnChain || 0,
-        quantity: amount,
-        roundId: roundIdOnChain,
-      });
-      console.log('🚀 ~ handleSubmit ~ :', {
         poolId: poolIdOnChain || 0,
         quantity: amount,
         roundId: roundIdOnChain,
@@ -105,6 +93,10 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundI
         if (isAbortedTx) {
           toast.error('Buy tickets unsuccessful');
 
+          queryClient.refetchQueries({
+            queryKey: ['/api/pools'],
+          });
+
           clear();
 
           return;
@@ -115,6 +107,10 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundI
 
       if (newLastTxHash !== lastTxHash) {
         toast.success('Buy tickets successful');
+
+        queryClient.refetchQueries({
+          queryKey: ['/api/pools'],
+        });
 
         clear();
       }
@@ -136,7 +132,7 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundI
             <HStack spacing={8}>
               <Image src={'/images/tokens/ton_symbol.webp'} width={24} height={24} alt="ton" />
 
-              <span className="text-2xl">{`${prettyNumber(ticketPrice)} ${currency?.symbol || ''}`}</span>
+              <span className="text-2xl">{`${prettyNumber(ticketPrice)} ${tokenSymbol}`}</span>
             </HStack>
           </HStack>
 
@@ -177,13 +173,13 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundI
             <HStack spacing={8}>
               <Image src={currency?.icon || '/images/tokens/ton_symbol.webp'} width={24} height={24} alt="ton" />
 
-              <span className="text-2xl">{`${prettyNumber(totalAmount)} ${currency?.symbol || ''}`}</span>
+              <span className="text-2xl">{`${prettyNumber(totalAmount)} ${tokenSymbol}`}</span>
             </HStack>
           </HStack>
           <HStack pos={'apart'}>
-            <span className="text-xs text-white">{`${currency?.symbol || ''} balance: ${prettyNumber(
+            <span className="text-xs text-white">{`${tokenSymbol} balance: ${prettyNumber(
               Number(balance || 0).toFixed(6)
-            )} TON`}</span>
+            )} ${tokenSymbol}`}</span>
 
             <span className="text-base text-gray-color">{`~ ${prettyNumber(0)} USD`}</span>
           </HStack>
