@@ -11,6 +11,7 @@ import PoolInfo from './PoolInfo';
 import PoolPrizePot from './PoolPrizePot';
 import PoolRound from './PoolRound';
 import RoundAction from './RoundAction';
+import { useForceUpdate } from '@mantine/hooks';
 
 const PoolCountDown = dynamic(() => import('./PoolCountDown'), { ssr: false });
 
@@ -22,6 +23,8 @@ interface Props extends HTMLAttributes<HTMLDivElement> {
 }
 
 const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, ...props }) => {
+  const forceUpdate = useForceUpdate();
+
   const [currentRound, setCurrentRound] = useState<number>(0);
 
   const { pool, rounds, poolPrizes, currency } = useGetPoolDetail({ poolId: poolId || 0, isActive });
@@ -30,18 +33,18 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
     ? `${roundActive.roundNumber < 10 ? `0${roundActive.roundNumber}` : roundActive.roundNumber}`
     : '00';
 
-  const isEndRound = useMemo(() => {
+  const getIsEndRound = () => {
     if (!rounds) return false;
 
-    const roundEndtime = new Date(Number(roundActive?.endTime) * 1000);
-    const now = new Date();
+    const roundEndtime = new Date(Number(roundActive?.endTime) * 1000).getTime();
+    const now = new Date().getTime();
 
     if (now > roundEndtime) {
       return true;
     }
 
     return false;
-  }, [roundActive?.endTime, rounds]);
+  };
 
   const getCurrentRound = useCallback(() => {
     const now = new Date().getTime();
@@ -67,12 +70,16 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
     setCurrentRound(currentActiveRound);
   }, [getCurrentRound]);
 
+  const handleForceUpdate = useCallback(() => {
+    forceUpdate();
+  }, [forceUpdate]);
+
   return (
     <div {...props} className={cn('w-full rounded-xl overflow-hidden relative', className)}>
       <div className="bg-navigate-tab py-1.5 h-[4.25rem]">
         <div className="text-primary text-2xl font-semibold text-center">{pool?.name}</div>
 
-        <PoolCountDown date={Number(roundActive?.endTime || 0)} />
+        <PoolCountDown date={Number(roundActive?.endTime || 0)} onForceUpdate={handleForceUpdate} />
       </div>
 
       <RoundAction
@@ -87,14 +94,14 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
           rounds={rounds}
           currentRound={roundActiveNumber}
           date={Number(roundActive?.endTime || 0)}
-          isEndRound={isEndRound}
+          isEndRound={getIsEndRound()}
         />
 
         <PoolPrizePot
           currentRound={roundActiveNumber}
           poolId={poolId || 0}
           currency={currency}
-          isEndRound={isEndRound}
+          isEndRound={getIsEndRound()}
           poolIdOnChain={pool?.poolIdOnChain || 0}
           roundIdOnChain={roundActive?.roundIdOnChain}
           isBeforeRoundEnd={isBeforeRoundEnd}
@@ -107,7 +114,7 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
         setIsShow={setIsShow}
         poolPrizes={poolPrizes}
         currency={currency}
-        isEndRound={isEndRound}
+        isEndRound={getIsEndRound()}
       />
     </div>
   );
