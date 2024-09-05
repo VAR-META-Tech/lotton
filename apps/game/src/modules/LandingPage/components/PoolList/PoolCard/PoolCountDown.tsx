@@ -2,6 +2,7 @@ import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 
 interface Props {
   date: number;
+  onForceUpdate: () => void;
 }
 
 interface TimeLeft {
@@ -18,7 +19,7 @@ const getDefaultTimeLeft = (): TimeLeft => ({
   seconds: 0,
 });
 
-const PoolCountDown: FC<Props> = ({ date }) => {
+const PoolCountDown: FC<Props> = ({ date, onForceUpdate }) => {
   const calculateTimeLeft = useCallback((): TimeLeft => {
     if (!date) return getDefaultTimeLeft();
 
@@ -45,11 +46,20 @@ const PoolCountDown: FC<Props> = ({ date }) => {
     if (!date || isNaN(new Date(Number(date) * 1000).getTime())) return;
 
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
+      const newTimeLeft = calculateTimeLeft();
+      setTimeLeft(newTimeLeft);
+
+      if (newTimeLeft.days === 0 && newTimeLeft.hours === 0 && newTimeLeft.minutes === 0 && newTimeLeft.seconds === 0) {
+        clearInterval(timer);
+
+        setTimeout(() => {
+          onForceUpdate();
+        }, 1500);
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [date, calculateTimeLeft]);
+  }, [date, calculateTimeLeft, onForceUpdate]);
 
   if (timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0) return <></>;
 
