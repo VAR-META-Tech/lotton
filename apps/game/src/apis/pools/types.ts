@@ -77,6 +77,12 @@ export interface IGetPoolDetailRound {
   endTime: string;
   winningCode?: string;
   totalPrizes: string;
+  winners: IGetPoolDetailWinner[];
+}
+
+export interface IGetPoolDetailWinner {
+  totalWinning: string;
+  winningMatch: number;
 }
 
 export interface IGetPoolDetailPoolPrize {

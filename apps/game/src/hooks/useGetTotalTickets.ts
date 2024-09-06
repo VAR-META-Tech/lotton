@@ -1,15 +1,25 @@
 import { useGetTotalTicketsQuery } from '@/apis/round';
+import { useEffect } from 'react';
 
 export const useGetTotalTickets = (id: number) => {
-  const { data, ...rest } = useGetTotalTicketsQuery({
+  const { data, refetch, ...rest } = useGetTotalTicketsQuery({
     variables: {
       id: id || 0,
     },
     enabled: !!id,
   });
 
+  useEffect(() => {
+    const refetchInterval = setInterval(() => {
+      refetch();
+    }, 15000);
+
+    return () => clearInterval(refetchInterval);
+  }, [refetch]);
+
   return {
     data,
+    refetch,
     ...rest,
   };
 };

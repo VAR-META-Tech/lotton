@@ -80,16 +80,22 @@ const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound 
             const allocationRate = Number(item?.allocation || 0) / 100;
             const totalPrizes = Number(fromNano(roundActive?.totalPrizes || 0));
             const value = totalPrizes * allocationRate;
+
+            const eachMatch = roundActive?.winners?.find((winner) => winner?.winningMatch === item?.matchNumber);
+            const eachMatchValue = Number(eachMatch?.totalWinning || 0);
+
             return (
               <MatchItem
                 key={`${item?.id}-${index}`}
                 title={`Match first ${item?.matchNumber}`}
                 value={`${prettyNumber(roundNumber(value))} ${currency?.symbol || ''}`}
-                subValue={`~ ${prettyNumber(Number(0 * allocationRate).toFixed(2))} USD`}
+                subValue={`~ ${prettyNumber(roundNumber(0 * allocationRate))} USD`}
               >
                 <VStack spacing={2} className="mt-1">
-                  <span className="text-xs">61.170005 TON each</span>
-                  <span className="text-xs">4 Winning Tickets</span>
+                  <span className="text-xs">
+                    {eachMatch ? roundNumber(Number(value) / eachMatchValue) : 0} TON each
+                  </span>
+                  <span className="text-xs">{eachMatchValue} Winning Tickets</span>
                 </VStack>
               </MatchItem>
             );
@@ -97,7 +103,7 @@ const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound 
         </div>
       </VStack>
     );
-  }, [currency?.symbol, isEndRound, poolPrizes, roundActive?.totalPrizes]);
+  }, [currency?.symbol, isEndRound, poolPrizes, roundActive?.totalPrizes, roundActive?.winners]);
 
   return (
     <div>
