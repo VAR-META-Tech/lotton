@@ -2,21 +2,20 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Message, Transaction } from '@ton/core';
-import { Address, beginCell, toNano } from '@ton/core';
+import { Address } from '@ton/core';
 import { TonClient } from '@ton/ton';
+import bigDecimal from 'js-big-decimal';
 import TonWeb from 'tonweb';
 import { Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
+import type { Pool, PoolPrize, Token } from '@/database/entities';
 import {
-  Pool,
-  Token,
   LatestBlock,
   PoolRound,
   Prizes,
   Transaction as TransactionDB,
   UserTicket,
-  PoolPrize,
 } from '@/database/entities';
 import { EVENT_HEADER, PoolStatusEnum } from '@/shared/enums';
 
@@ -28,7 +27,6 @@ import {
   loadWinningNumbersDrawnEvent,
 } from './contract_funcs';
 import { calculatorMatch, splitTickets } from './func';
-import bigDecimal from 'js-big-decimal';
 
 @Injectable()
 export class CrawlWorkerService {
@@ -68,7 +66,9 @@ export class CrawlWorkerService {
       const currentBlockNumber = (await this.getCurrentBloc()).blockNumber;
       const latestBlockNumber = (await this.getContractState()).lastTransaction
         .lt;
-      console.log(+currentBlockNumber, +latestBlockNumber);
+      Logger.debug(
+        'IN DB: ' + currentBlockNumber + ' ONCHAIN: ' + latestBlockNumber,
+      );
 
       // if (+currentBlockNumber >= +latestBlockNumber) return;
 
@@ -77,7 +77,7 @@ export class CrawlWorkerService {
         currentBlockNumber.toString(),
       );
 
-      console.log('Transaction Length', transactions.length);
+      Logger.debug('Transaction Length: ' + transactions.length);
 
       for (const tx of transactions.reverse()) {
         const isAbortedTx = tx.description?.['aborted'];
@@ -88,8 +88,6 @@ export class CrawlWorkerService {
           const originalBody = inMsg?.body.beginParse();
           const body = originalBody.clone();
           const op = body.loadUint(32);
-          console.log('op', op);
-          console.log('tx.lt', tx.lt);
 
           switch (op) {
             case EVENT_HEADER.CREATE_POOL_EVENT:
@@ -123,6 +121,7 @@ export class CrawlWorkerService {
     const outMsgsFirst = outMsgsList[0];
     const originalOutMsgBody = outMsgsFirst?.body.beginParse();
     const payloadOutMsg = loadWinningNumbersDrawnEvent(originalOutMsgBody);
+    Logger.debug({ payloadOutMsg });
   }
 
   async drawWinningNumber(tx: Transaction) {

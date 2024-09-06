@@ -7,7 +7,6 @@ import dayjs from 'dayjs';
 import bigDecimal from 'js-big-decimal';
 import type { SelectQueryBuilder } from 'typeorm';
 import { Repository } from 'typeorm';
-import { parseUnits } from 'viem';
 
 import { Causes } from '@/common/exceptions/causes';
 import type { StellaConfig } from '@/configs';
@@ -433,6 +432,9 @@ export class PoolService {
         .leftJoinAndSelect('rounds.ticket', 'ticket')
         .where('pool.id IN (:...poolIds)', {
           poolIds: pools.map((pool) => pool?.id ?? 0),
+        })
+        .andWhere('ticket.userWallet = :userWallet', {
+          userWallet: user.wallet,
         });
       // if (type == UserPoolType.WINNER) {
       //   queryBuilder.andWhere('ticket.winningMatch >= :winningMatch', {
