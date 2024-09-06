@@ -11,6 +11,7 @@ import WinningNumber from '@/modules/CheckPage/components/CheckPrizeDrawer/Check
 import UserTicketCount from './UserTicketCount';
 import { IGetPoolDetailData, IGetPoolDetailRound } from '@/apis/pools';
 import { fromNano } from '@ton/core';
+import { useGetTotalTickets } from '@/hooks/useGetTotalTickets';
 
 interface Props {
   pool: IGetPoolDetailData | undefined;
@@ -23,6 +24,8 @@ const PoolPrizePot: FC<Props> = ({ pool, roundActive, isEndRound = false, isBefo
   const roundActiveNumber = getRoundActiveNumber(roundActive?.roundNumber);
   const currency = pool?.currency;
   const tokenSymbol = currency?.symbol || '';
+
+  const { data } = useGetTotalTickets(roundActive?.id);
 
   const prizePot = useMemo(() => {
     return (
@@ -41,13 +44,18 @@ const PoolPrizePot: FC<Props> = ({ pool, roundActive, isEndRound = false, isBefo
                 <div className="text-xs text-gray-color text-center">{`~ ${prettyNumber(10000)} USD`}</div>
               </div>
 
-              <PoolAction pool={pool} roundActive={roundActive} holdingTicket={0} isBeforeRoundEnd={isBeforeRoundEnd} />
+              <PoolAction
+                pool={pool}
+                roundActive={roundActive}
+                holdingTicket={data || 0}
+                isBeforeRoundEnd={isBeforeRoundEnd}
+              />
             </VStack>
           </motion.div>
         </AnimatePresence>
       </div>
     );
-  }, [isBeforeRoundEnd, pool, roundActive, roundActiveNumber, tokenSymbol]);
+  }, [data, isBeforeRoundEnd, pool, roundActive, roundActiveNumber, tokenSymbol]);
 
   const prizePotWinningNumber = useMemo(() => {
     return (
@@ -63,14 +71,14 @@ const PoolPrizePot: FC<Props> = ({ pool, roundActive, isEndRound = false, isBefo
               />
 
               <div className="border-y border-y-navigate-tab py-4">
-                <UserTicketCount />
+                <UserTicketCount holdingTicket={data || 0} />
               </div>
             </VStack>
           </motion.div>
         </AnimatePresence>
       </VStack>
     );
-  }, [roundActiveNumber, roundActive?.winningCode]);
+  }, [roundActiveNumber, roundActive?.winningCode, data]);
 
   const renderContent = useMemo(() => {
     if (!isEndRound) {

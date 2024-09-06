@@ -87,6 +87,12 @@ const BuyTicketForm: FC<Props> = ({ pool, roundActive }) => {
       queryKey: ['/api/pools'],
     });
 
+    setTimeout(() => {
+      queryClient.refetchQueries({
+        queryKey: ['/api/rounds/total-tickets'],
+      });
+    }, 5000);
+
     clear();
   };
 
@@ -125,6 +131,7 @@ const BuyTicketForm: FC<Props> = ({ pool, roundActive }) => {
 
         if (isAbortedTx) {
           handleTransaction('error', 'Buy tickets unsuccessful');
+
           return;
         }
 

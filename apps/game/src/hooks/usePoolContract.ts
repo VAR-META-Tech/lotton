@@ -3,7 +3,7 @@ import { useAsyncInitialize } from './useAsyncInitialize';
 import { useTonConnect } from './useTonConnect';
 import { Address, beginCell, OpenedContract } from '@ton/core';
 import Pool from '@/contracts/pool';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { env } from '@/lib/const';
 import { useTonWallet } from '@tonconnect/ui-react';
 import { roundNumber } from '@/lib/common';
@@ -24,6 +24,7 @@ interface IClaimPrize {
 }
 
 export function usePoolContract() {
+  const [claimFee, setClaimFee] = useState(0);
   const client = useTonClient();
   const wallet = useTonWallet();
   const { sender } = useTonConnect();
@@ -90,8 +91,21 @@ export function usePoolContract() {
     });
   };
 
+  useEffect(() => {
+    async function getValue() {
+      if (!poolContract) return;
+      setClaimFee(0);
+
+      const fee = await poolContract.getClaimFee();
+
+      setClaimFee(Number(fee));
+    }
+    getValue();
+  }, [poolContract]);
+
   return {
     address: poolContract?.address.toString(),
+    claimFee,
     getLastTx,
     buyTicket,
     claimPrize,
