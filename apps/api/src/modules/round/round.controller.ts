@@ -1,9 +1,10 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { GetUser } from '@/common/decorators/user.decorator';
 import { User } from '@/database/entities';
 import { QueryPaginationDto } from '@/shared/dto/pagination.query';
+import { SwaggerOperationEnum } from '@/shared/enums';
 
 import { AdminJwtGuard } from '../auth/guards/admin_jwt.guard';
 import { UserJwtGuard } from '../auth/guards/user_jwt.guard';
@@ -16,6 +17,7 @@ import { RoundService } from './round.service';
 export class RoundController {
   constructor(private readonly roundService: RoundService) {}
 
+  @ApiOperation({ summary: SwaggerOperationEnum.ADMIN })
   @Get()
   @UseGuards(AdminJwtGuard)
   async findRounds(
@@ -25,6 +27,7 @@ export class RoundController {
     return await this.roundService.findRounds(query, pagination);
   }
 
+  @ApiOperation({ summary: SwaggerOperationEnum.ADMIN })
   @Get(':id')
   @UseGuards(AdminJwtGuard)
   async findRoundById(@Param('id') id: number) {
