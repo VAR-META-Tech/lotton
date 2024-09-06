@@ -434,21 +434,13 @@ export class PoolService {
         .where('pool.id IN (:...poolIds)', {
           poolIds: pools.map((pool) => pool?.id ?? 0),
         });
-      if (type == UserPoolType.WINNER) {
-        queryBuilder.andWhere('ticket.winningMatch >= :winningMatch', {
-          winningMatch: 1,
-        });
-      }
+      // if (type == UserPoolType.WINNER) {
+      //   queryBuilder.andWhere('ticket.winningMatch >= :winningMatch', {
+      //     winningMatch: 1,
+      //   });
+      // }
 
-      const [items, countTicket] = await Promise.all([
-        queryBuilder.clone().having('ticket.id IS NOT NULL').getMany(),
-        queryBuilder
-          .clone()
-          .select(['count(ticket.id) as totalTicket', 'rounds.id as roundId'])
-          .having('totalTicket > 0')
-          .groupBy('rounds.id')
-          .getRawMany(),
-      ]);
+      const [items, countTicket] = await this.ticketsJoined(type, queryBuilder);
 
       return this.mapTicket(
         generatePagination<Pool>(totalItems, items, page, take),
@@ -459,6 +451,38 @@ export class PoolService {
 
       throw new BadRequestException(error.message);
     }
+  }
+
+  ticketsJoined(
+    userPoolType: UserPoolType,
+    queryBuilder: SelectQueryBuilder<Pool>,
+  ) {
+    if (userPoolType === UserPoolType.JOINED) {
+      return Promise.all([
+        queryBuilder.clone().having('ticket.id IS NOT NULL').getMany(),
+        this.getTotalTicketsRound(queryBuilder),
+      ]);
+    }
+
+    return Promise.all([
+      queryBuilder
+        .clone()
+        .andWhere('ticket.winningMatch >= :winningMatch', {
+          winningMatch: 1,
+        })
+        .having('ticket.id IS NOT NULL')
+        .getMany(),
+      this.getTotalTicketsRound(queryBuilder),
+    ]);
+  }
+
+  getTotalTicketsRound(queryBuilder: SelectQueryBuilder<Pool>) {
+    return queryBuilder
+      .clone()
+      .select(['count(ticket.id) as totalTicket', 'rounds.id as roundId'])
+      .having('totalTicket > 0')
+      .groupBy('rounds.id')
+      .getRawMany();
   }
 
   async collectPrizes(
