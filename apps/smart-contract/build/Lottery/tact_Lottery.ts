@@ -1,30 +1,30 @@
-import {
+import { 
     Cell,
-    Slice,
-    Address,
-    Builder,
-    beginCell,
-    ComputeError,
-    TupleItem,
-    TupleReader,
-    Dictionary,
-    contractAddress,
-    ContractProvider,
-    Sender,
-    Contract,
-    ContractABI,
+    Slice, 
+    Address, 
+    Builder, 
+    beginCell, 
+    ComputeError, 
+    TupleItem, 
+    TupleReader, 
+    Dictionary, 
+    contractAddress, 
+    ContractProvider, 
+    Sender, 
+    Contract, 
+    ContractABI, 
     ABIType,
     ABIGetter,
     ABIReceiver,
     TupleBuilder,
-    DictionaryValue,
+    DictionaryValue
 } from '@ton/core';
 
 export type StateInit = {
     $$type: 'StateInit';
     code: Cell;
     data: Cell;
-};
+}
 
 export function storeStateInit(src: StateInit) {
     return (builder: Builder) => {
@@ -67,8 +67,8 @@ function dictValueParserStateInit(): DictionaryValue<StateInit> {
         },
         parse: (src) => {
             return loadStateInit(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type Context = {
@@ -77,7 +77,7 @@ export type Context = {
     sender: Address;
     value: bigint;
     raw: Slice;
-};
+}
 
 export function storeContext(src: Context) {
     return (builder: Builder) => {
@@ -130,8 +130,8 @@ function dictValueParserContext(): DictionaryValue<Context> {
         },
         parse: (src) => {
             return loadContext(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type SendParameters = {
@@ -143,7 +143,7 @@ export type SendParameters = {
     body: Cell | null;
     code: Cell | null;
     data: Cell | null;
-};
+}
 
 export function storeSendParameters(src: SendParameters) {
     return (builder: Builder) => {
@@ -152,21 +152,9 @@ export function storeSendParameters(src: SendParameters) {
         b_0.storeAddress(src.to);
         b_0.storeInt(src.value, 257);
         b_0.storeInt(src.mode, 257);
-        if (src.body !== null && src.body !== undefined) {
-            b_0.storeBit(true).storeRef(src.body);
-        } else {
-            b_0.storeBit(false);
-        }
-        if (src.code !== null && src.code !== undefined) {
-            b_0.storeBit(true).storeRef(src.code);
-        } else {
-            b_0.storeBit(false);
-        }
-        if (src.data !== null && src.data !== undefined) {
-            b_0.storeBit(true).storeRef(src.data);
-        } else {
-            b_0.storeBit(false);
-        }
+        if (src.body !== null && src.body !== undefined) { b_0.storeBit(true).storeRef(src.body); } else { b_0.storeBit(false); }
+        if (src.code !== null && src.code !== undefined) { b_0.storeBit(true).storeRef(src.code); } else { b_0.storeBit(false); }
+        if (src.data !== null && src.data !== undefined) { b_0.storeBit(true).storeRef(src.data); } else { b_0.storeBit(false); }
     };
 }
 
@@ -179,16 +167,7 @@ export function loadSendParameters(slice: Slice) {
     let _body = sc_0.loadBit() ? sc_0.loadRef() : null;
     let _code = sc_0.loadBit() ? sc_0.loadRef() : null;
     let _data = sc_0.loadBit() ? sc_0.loadRef() : null;
-    return {
-        $$type: 'SendParameters' as const,
-        bounce: _bounce,
-        to: _to,
-        value: _value,
-        mode: _mode,
-        body: _body,
-        code: _code,
-        data: _data,
-    };
+    return { $$type: 'SendParameters' as const, bounce: _bounce, to: _to, value: _value, mode: _mode, body: _body, code: _code, data: _data };
 }
 
 function loadTupleSendParameters(source: TupleReader) {
@@ -199,16 +178,7 @@ function loadTupleSendParameters(source: TupleReader) {
     let _body = source.readCellOpt();
     let _code = source.readCellOpt();
     let _data = source.readCellOpt();
-    return {
-        $$type: 'SendParameters' as const,
-        bounce: _bounce,
-        to: _to,
-        value: _value,
-        mode: _mode,
-        body: _body,
-        code: _code,
-        data: _data,
-    };
+    return { $$type: 'SendParameters' as const, bounce: _bounce, to: _to, value: _value, mode: _mode, body: _body, code: _code, data: _data };
 }
 
 function loadGetterTupleSendParameters(source: TupleReader) {
@@ -219,16 +189,7 @@ function loadGetterTupleSendParameters(source: TupleReader) {
     let _body = source.readCellOpt();
     let _code = source.readCellOpt();
     let _data = source.readCellOpt();
-    return {
-        $$type: 'SendParameters' as const,
-        bounce: _bounce,
-        to: _to,
-        value: _value,
-        mode: _mode,
-        body: _body,
-        code: _code,
-        data: _data,
-    };
+    return { $$type: 'SendParameters' as const, bounce: _bounce, to: _to, value: _value, mode: _mode, body: _body, code: _code, data: _data };
 }
 
 function storeTupleSendParameters(source: SendParameters) {
@@ -250,14 +211,14 @@ function dictValueParserSendParameters(): DictionaryValue<SendParameters> {
         },
         parse: (src) => {
             return loadSendParameters(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type Deploy = {
     $$type: 'Deploy';
     queryId: bigint;
-};
+}
 
 export function storeDeploy(src: Deploy) {
     return (builder: Builder) => {
@@ -269,9 +230,7 @@ export function storeDeploy(src: Deploy) {
 
 export function loadDeploy(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2490013878) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 2490013878) { throw Error('Invalid prefix'); }
     let _queryId = sc_0.loadUintBig(64);
     return { $$type: 'Deploy' as const, queryId: _queryId };
 }
@@ -299,14 +258,14 @@ function dictValueParserDeploy(): DictionaryValue<Deploy> {
         },
         parse: (src) => {
             return loadDeploy(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type DeployOk = {
     $$type: 'DeployOk';
     queryId: bigint;
-};
+}
 
 export function storeDeployOk(src: DeployOk) {
     return (builder: Builder) => {
@@ -318,9 +277,7 @@ export function storeDeployOk(src: DeployOk) {
 
 export function loadDeployOk(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2952335191) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 2952335191) { throw Error('Invalid prefix'); }
     let _queryId = sc_0.loadUintBig(64);
     return { $$type: 'DeployOk' as const, queryId: _queryId };
 }
@@ -348,15 +305,15 @@ function dictValueParserDeployOk(): DictionaryValue<DeployOk> {
         },
         parse: (src) => {
             return loadDeployOk(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type FactoryDeploy = {
     $$type: 'FactoryDeploy';
     queryId: bigint;
     cashback: Address;
-};
+}
 
 export function storeFactoryDeploy(src: FactoryDeploy) {
     return (builder: Builder) => {
@@ -369,9 +326,7 @@ export function storeFactoryDeploy(src: FactoryDeploy) {
 
 export function loadFactoryDeploy(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 1829761339) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 1829761339) { throw Error('Invalid prefix'); }
     let _queryId = sc_0.loadUintBig(64);
     let _cashback = sc_0.loadAddress();
     return { $$type: 'FactoryDeploy' as const, queryId: _queryId, cashback: _cashback };
@@ -403,15 +358,15 @@ function dictValueParserFactoryDeploy(): DictionaryValue<FactoryDeploy> {
         },
         parse: (src) => {
             return loadFactoryDeploy(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type ChangeOwner = {
     $$type: 'ChangeOwner';
     queryId: bigint;
     newOwner: Address;
-};
+}
 
 export function storeChangeOwner(src: ChangeOwner) {
     return (builder: Builder) => {
@@ -424,9 +379,7 @@ export function storeChangeOwner(src: ChangeOwner) {
 
 export function loadChangeOwner(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2174598809) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 2174598809) { throw Error('Invalid prefix'); }
     let _queryId = sc_0.loadUintBig(64);
     let _newOwner = sc_0.loadAddress();
     return { $$type: 'ChangeOwner' as const, queryId: _queryId, newOwner: _newOwner };
@@ -458,15 +411,15 @@ function dictValueParserChangeOwner(): DictionaryValue<ChangeOwner> {
         },
         parse: (src) => {
             return loadChangeOwner(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type ChangeOwnerOk = {
     $$type: 'ChangeOwnerOk';
     queryId: bigint;
     newOwner: Address;
-};
+}
 
 export function storeChangeOwnerOk(src: ChangeOwnerOk) {
     return (builder: Builder) => {
@@ -479,9 +432,7 @@ export function storeChangeOwnerOk(src: ChangeOwnerOk) {
 
 export function loadChangeOwnerOk(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 846932810) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 846932810) { throw Error('Invalid prefix'); }
     let _queryId = sc_0.loadUintBig(64);
     let _newOwner = sc_0.loadAddress();
     return { $$type: 'ChangeOwnerOk' as const, queryId: _queryId, newOwner: _newOwner };
@@ -513,8 +464,8 @@ function dictValueParserChangeOwnerOk(): DictionaryValue<ChangeOwnerOk> {
         },
         parse: (src) => {
             return loadChangeOwnerOk(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type Lottery$Data = {
@@ -524,12 +475,12 @@ export type Lottery$Data = {
     pools: Dictionary<bigint, Pool>;
     nextPoolId: bigint;
     usersTicket: Dictionary<bigint, RoundTicket>;
-    rewardSettings: Dictionary<bigint, bigint>;
     result: Dictionary<bigint, Result>;
     rewardPools: Dictionary<bigint, bigint>;
     publicKey: bigint | null;
     claimData: Dictionary<bigint, ClaimInfo>;
-};
+    claimFeePercent: bigint;
+}
 
 export function storeLottery$Data(src: Lottery$Data) {
     return (builder: Builder) => {
@@ -540,17 +491,11 @@ export function storeLottery$Data(src: Lottery$Data) {
         b_0.storeInt(src.nextPoolId, 257);
         let b_1 = new Builder();
         b_1.storeDict(src.usersTicket, Dictionary.Keys.BigInt(257), dictValueParserRoundTicket());
-        b_1.storeDict(src.rewardSettings, Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257));
         b_1.storeDict(src.result, Dictionary.Keys.BigInt(257), dictValueParserResult());
-        let b_2 = new Builder();
-        b_2.storeDict(src.rewardPools, Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257));
-        if (src.publicKey !== null && src.publicKey !== undefined) {
-            b_2.storeBit(true).storeInt(src.publicKey, 257);
-        } else {
-            b_2.storeBit(false);
-        }
-        b_2.storeDict(src.claimData, Dictionary.Keys.BigInt(257), dictValueParserClaimInfo());
-        b_1.storeRef(b_2.endCell());
+        b_1.storeDict(src.rewardPools, Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257));
+        if (src.publicKey !== null && src.publicKey !== undefined) { b_1.storeBit(true).storeInt(src.publicKey, 257); } else { b_1.storeBit(false); }
+        b_1.storeDict(src.claimData, Dictionary.Keys.BigInt(257), dictValueParserClaimInfo());
+        b_1.storeInt(src.claimFeePercent, 257);
         b_0.storeRef(b_1.endCell());
     };
 }
@@ -563,25 +508,12 @@ export function loadLottery$Data(slice: Slice) {
     let _nextPoolId = sc_0.loadIntBig(257);
     let sc_1 = sc_0.loadRef().beginParse();
     let _usersTicket = Dictionary.load(Dictionary.Keys.BigInt(257), dictValueParserRoundTicket(), sc_1);
-    let _rewardSettings = Dictionary.load(Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257), sc_1);
     let _result = Dictionary.load(Dictionary.Keys.BigInt(257), dictValueParserResult(), sc_1);
-    let sc_2 = sc_1.loadRef().beginParse();
-    let _rewardPools = Dictionary.load(Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257), sc_2);
-    let _publicKey = sc_2.loadBit() ? sc_2.loadIntBig(257) : null;
-    let _claimData = Dictionary.load(Dictionary.Keys.BigInt(257), dictValueParserClaimInfo(), sc_2);
-    return {
-        $$type: 'Lottery$Data' as const,
-        owner: _owner,
-        admin: _admin,
-        pools: _pools,
-        nextPoolId: _nextPoolId,
-        usersTicket: _usersTicket,
-        rewardSettings: _rewardSettings,
-        result: _result,
-        rewardPools: _rewardPools,
-        publicKey: _publicKey,
-        claimData: _claimData,
-    };
+    let _rewardPools = Dictionary.load(Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257), sc_1);
+    let _publicKey = sc_1.loadBit() ? sc_1.loadIntBig(257) : null;
+    let _claimData = Dictionary.load(Dictionary.Keys.BigInt(257), dictValueParserClaimInfo(), sc_1);
+    let _claimFeePercent = sc_1.loadIntBig(257);
+    return { $$type: 'Lottery$Data' as const, owner: _owner, admin: _admin, pools: _pools, nextPoolId: _nextPoolId, usersTicket: _usersTicket, result: _result, rewardPools: _rewardPools, publicKey: _publicKey, claimData: _claimData, claimFeePercent: _claimFeePercent };
 }
 
 function loadTupleLottery$Data(source: TupleReader) {
@@ -589,41 +521,13 @@ function loadTupleLottery$Data(source: TupleReader) {
     let _admin = Dictionary.loadDirect(Dictionary.Keys.Address(), Dictionary.Values.Bool(), source.readCellOpt());
     let _pools = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserPool(), source.readCellOpt());
     let _nextPoolId = source.readBigNumber();
-    let _usersTicket = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        dictValueParserRoundTicket(),
-        source.readCellOpt(),
-    );
-    let _rewardSettings = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        Dictionary.Values.BigInt(257),
-        source.readCellOpt(),
-    );
+    let _usersTicket = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserRoundTicket(), source.readCellOpt());
     let _result = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserResult(), source.readCellOpt());
-    let _rewardPools = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        Dictionary.Values.BigInt(257),
-        source.readCellOpt(),
-    );
+    let _rewardPools = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257), source.readCellOpt());
     let _publicKey = source.readBigNumberOpt();
-    let _claimData = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        dictValueParserClaimInfo(),
-        source.readCellOpt(),
-    );
-    return {
-        $$type: 'Lottery$Data' as const,
-        owner: _owner,
-        admin: _admin,
-        pools: _pools,
-        nextPoolId: _nextPoolId,
-        usersTicket: _usersTicket,
-        rewardSettings: _rewardSettings,
-        result: _result,
-        rewardPools: _rewardPools,
-        publicKey: _publicKey,
-        claimData: _claimData,
-    };
+    let _claimData = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserClaimInfo(), source.readCellOpt());
+    let _claimFeePercent = source.readBigNumber();
+    return { $$type: 'Lottery$Data' as const, owner: _owner, admin: _admin, pools: _pools, nextPoolId: _nextPoolId, usersTicket: _usersTicket, result: _result, rewardPools: _rewardPools, publicKey: _publicKey, claimData: _claimData, claimFeePercent: _claimFeePercent };
 }
 
 function loadGetterTupleLottery$Data(source: TupleReader) {
@@ -631,91 +535,27 @@ function loadGetterTupleLottery$Data(source: TupleReader) {
     let _admin = Dictionary.loadDirect(Dictionary.Keys.Address(), Dictionary.Values.Bool(), source.readCellOpt());
     let _pools = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserPool(), source.readCellOpt());
     let _nextPoolId = source.readBigNumber();
-    let _usersTicket = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        dictValueParserRoundTicket(),
-        source.readCellOpt(),
-    );
-    let _rewardSettings = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        Dictionary.Values.BigInt(257),
-        source.readCellOpt(),
-    );
+    let _usersTicket = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserRoundTicket(), source.readCellOpt());
     let _result = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserResult(), source.readCellOpt());
-    let _rewardPools = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        Dictionary.Values.BigInt(257),
-        source.readCellOpt(),
-    );
+    let _rewardPools = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257), source.readCellOpt());
     let _publicKey = source.readBigNumberOpt();
-    let _claimData = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        dictValueParserClaimInfo(),
-        source.readCellOpt(),
-    );
-    return {
-        $$type: 'Lottery$Data' as const,
-        owner: _owner,
-        admin: _admin,
-        pools: _pools,
-        nextPoolId: _nextPoolId,
-        usersTicket: _usersTicket,
-        rewardSettings: _rewardSettings,
-        result: _result,
-        rewardPools: _rewardPools,
-        publicKey: _publicKey,
-        claimData: _claimData,
-    };
+    let _claimData = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserClaimInfo(), source.readCellOpt());
+    let _claimFeePercent = source.readBigNumber();
+    return { $$type: 'Lottery$Data' as const, owner: _owner, admin: _admin, pools: _pools, nextPoolId: _nextPoolId, usersTicket: _usersTicket, result: _result, rewardPools: _rewardPools, publicKey: _publicKey, claimData: _claimData, claimFeePercent: _claimFeePercent };
 }
 
 function storeTupleLottery$Data(source: Lottery$Data) {
     let builder = new TupleBuilder();
     builder.writeAddress(source.owner);
-    builder.writeCell(
-        source.admin.size > 0
-            ? beginCell().storeDictDirect(source.admin, Dictionary.Keys.Address(), Dictionary.Values.Bool()).endCell()
-            : null,
-    );
-    builder.writeCell(
-        source.pools.size > 0
-            ? beginCell().storeDictDirect(source.pools, Dictionary.Keys.BigInt(257), dictValueParserPool()).endCell()
-            : null,
-    );
+    builder.writeCell(source.admin.size > 0 ? beginCell().storeDictDirect(source.admin, Dictionary.Keys.Address(), Dictionary.Values.Bool()).endCell() : null);
+    builder.writeCell(source.pools.size > 0 ? beginCell().storeDictDirect(source.pools, Dictionary.Keys.BigInt(257), dictValueParserPool()).endCell() : null);
     builder.writeNumber(source.nextPoolId);
-    builder.writeCell(
-        source.usersTicket.size > 0
-            ? beginCell()
-                  .storeDictDirect(source.usersTicket, Dictionary.Keys.BigInt(257), dictValueParserRoundTicket())
-                  .endCell()
-            : null,
-    );
-    builder.writeCell(
-        source.rewardSettings.size > 0
-            ? beginCell()
-                  .storeDictDirect(source.rewardSettings, Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257))
-                  .endCell()
-            : null,
-    );
-    builder.writeCell(
-        source.result.size > 0
-            ? beginCell().storeDictDirect(source.result, Dictionary.Keys.BigInt(257), dictValueParserResult()).endCell()
-            : null,
-    );
-    builder.writeCell(
-        source.rewardPools.size > 0
-            ? beginCell()
-                  .storeDictDirect(source.rewardPools, Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257))
-                  .endCell()
-            : null,
-    );
+    builder.writeCell(source.usersTicket.size > 0 ? beginCell().storeDictDirect(source.usersTicket, Dictionary.Keys.BigInt(257), dictValueParserRoundTicket()).endCell() : null);
+    builder.writeCell(source.result.size > 0 ? beginCell().storeDictDirect(source.result, Dictionary.Keys.BigInt(257), dictValueParserResult()).endCell() : null);
+    builder.writeCell(source.rewardPools.size > 0 ? beginCell().storeDictDirect(source.rewardPools, Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257)).endCell() : null);
     builder.writeNumber(source.publicKey);
-    builder.writeCell(
-        source.claimData.size > 0
-            ? beginCell()
-                  .storeDictDirect(source.claimData, Dictionary.Keys.BigInt(257), dictValueParserClaimInfo())
-                  .endCell()
-            : null,
-    );
+    builder.writeCell(source.claimData.size > 0 ? beginCell().storeDictDirect(source.claimData, Dictionary.Keys.BigInt(257), dictValueParserClaimInfo()).endCell() : null);
+    builder.writeNumber(source.claimFeePercent);
     return builder.build();
 }
 
@@ -726,8 +566,8 @@ function dictValueParserLottery$Data(): DictionaryValue<Lottery$Data> {
         },
         parse: (src) => {
             return loadLottery$Data(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type Pool = {
@@ -740,7 +580,7 @@ export type Pool = {
     sequence: bigint;
     active: boolean;
     prizes: Dictionary<number, number>;
-};
+}
 
 export function storePool(src: Pool) {
     return (builder: Builder) => {
@@ -766,91 +606,43 @@ export function loadPool(slice: Slice) {
     let _sequence = sc_0.loadUintBig(32);
     let _active = sc_0.loadBit();
     let _prizes = Dictionary.load(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8), sc_0);
-    return {
-        $$type: 'Pool' as const,
-        poolId: _poolId,
-        creator: _creator,
-        rounds: _rounds,
-        startTime: _startTime,
-        endTime: _endTime,
-        sequence: _sequence,
-        active: _active,
-        prizes: _prizes,
-    };
+    return { $$type: 'Pool' as const, poolId: _poolId, creator: _creator, rounds: _rounds, startTime: _startTime, endTime: _endTime, sequence: _sequence, active: _active, prizes: _prizes };
 }
 
 function loadTuplePool(source: TupleReader) {
     let _poolId = source.readBigNumber();
     let _creator = source.readAddress();
-    let _rounds = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        dictValueParserRoundConfig(),
-        source.readCellOpt(),
-    );
+    let _rounds = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserRoundConfig(), source.readCellOpt());
     let _startTime = source.readBigNumber();
     let _endTime = source.readBigNumber();
     let _sequence = source.readBigNumber();
     let _active = source.readBoolean();
     let _prizes = Dictionary.loadDirect(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8), source.readCellOpt());
-    return {
-        $$type: 'Pool' as const,
-        poolId: _poolId,
-        creator: _creator,
-        rounds: _rounds,
-        startTime: _startTime,
-        endTime: _endTime,
-        sequence: _sequence,
-        active: _active,
-        prizes: _prizes,
-    };
+    return { $$type: 'Pool' as const, poolId: _poolId, creator: _creator, rounds: _rounds, startTime: _startTime, endTime: _endTime, sequence: _sequence, active: _active, prizes: _prizes };
 }
 
 function loadGetterTuplePool(source: TupleReader) {
     let _poolId = source.readBigNumber();
     let _creator = source.readAddress();
-    let _rounds = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        dictValueParserRoundConfig(),
-        source.readCellOpt(),
-    );
+    let _rounds = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserRoundConfig(), source.readCellOpt());
     let _startTime = source.readBigNumber();
     let _endTime = source.readBigNumber();
     let _sequence = source.readBigNumber();
     let _active = source.readBoolean();
     let _prizes = Dictionary.loadDirect(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8), source.readCellOpt());
-    return {
-        $$type: 'Pool' as const,
-        poolId: _poolId,
-        creator: _creator,
-        rounds: _rounds,
-        startTime: _startTime,
-        endTime: _endTime,
-        sequence: _sequence,
-        active: _active,
-        prizes: _prizes,
-    };
+    return { $$type: 'Pool' as const, poolId: _poolId, creator: _creator, rounds: _rounds, startTime: _startTime, endTime: _endTime, sequence: _sequence, active: _active, prizes: _prizes };
 }
 
 function storeTuplePool(source: Pool) {
     let builder = new TupleBuilder();
     builder.writeNumber(source.poolId);
     builder.writeAddress(source.creator);
-    builder.writeCell(
-        source.rounds.size > 0
-            ? beginCell()
-                  .storeDictDirect(source.rounds, Dictionary.Keys.BigInt(257), dictValueParserRoundConfig())
-                  .endCell()
-            : null,
-    );
+    builder.writeCell(source.rounds.size > 0 ? beginCell().storeDictDirect(source.rounds, Dictionary.Keys.BigInt(257), dictValueParserRoundConfig()).endCell() : null);
     builder.writeNumber(source.startTime);
     builder.writeNumber(source.endTime);
     builder.writeNumber(source.sequence);
     builder.writeBoolean(source.active);
-    builder.writeCell(
-        source.prizes.size > 0
-            ? beginCell().storeDictDirect(source.prizes, Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8)).endCell()
-            : null,
-    );
+    builder.writeCell(source.prizes.size > 0 ? beginCell().storeDictDirect(source.prizes, Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8)).endCell() : null);
     return builder.build();
 }
 
@@ -861,8 +653,8 @@ function dictValueParserPool(): DictionaryValue<Pool> {
         },
         parse: (src) => {
             return loadPool(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type RoundConfig = {
@@ -873,7 +665,7 @@ export type RoundConfig = {
     startTime: bigint;
     endTime: bigint;
     active: boolean;
-};
+}
 
 export function storeRoundConfig(src: RoundConfig) {
     return (builder: Builder) => {
@@ -895,15 +687,7 @@ export function loadRoundConfig(slice: Slice) {
     let _startTime = sc_0.loadUintBig(32);
     let _endTime = sc_0.loadUintBig(32);
     let _active = sc_0.loadBit();
-    return {
-        $$type: 'RoundConfig' as const,
-        roundId: _roundId,
-        poolId: _poolId,
-        ticketPrice: _ticketPrice,
-        startTime: _startTime,
-        endTime: _endTime,
-        active: _active,
-    };
+    return { $$type: 'RoundConfig' as const, roundId: _roundId, poolId: _poolId, ticketPrice: _ticketPrice, startTime: _startTime, endTime: _endTime, active: _active };
 }
 
 function loadTupleRoundConfig(source: TupleReader) {
@@ -913,15 +697,7 @@ function loadTupleRoundConfig(source: TupleReader) {
     let _startTime = source.readBigNumber();
     let _endTime = source.readBigNumber();
     let _active = source.readBoolean();
-    return {
-        $$type: 'RoundConfig' as const,
-        roundId: _roundId,
-        poolId: _poolId,
-        ticketPrice: _ticketPrice,
-        startTime: _startTime,
-        endTime: _endTime,
-        active: _active,
-    };
+    return { $$type: 'RoundConfig' as const, roundId: _roundId, poolId: _poolId, ticketPrice: _ticketPrice, startTime: _startTime, endTime: _endTime, active: _active };
 }
 
 function loadGetterTupleRoundConfig(source: TupleReader) {
@@ -931,15 +707,7 @@ function loadGetterTupleRoundConfig(source: TupleReader) {
     let _startTime = source.readBigNumber();
     let _endTime = source.readBigNumber();
     let _active = source.readBoolean();
-    return {
-        $$type: 'RoundConfig' as const,
-        roundId: _roundId,
-        poolId: _poolId,
-        ticketPrice: _ticketPrice,
-        startTime: _startTime,
-        endTime: _endTime,
-        active: _active,
-    };
+    return { $$type: 'RoundConfig' as const, roundId: _roundId, poolId: _poolId, ticketPrice: _ticketPrice, startTime: _startTime, endTime: _endTime, active: _active };
 }
 
 function storeTupleRoundConfig(source: RoundConfig) {
@@ -960,14 +728,14 @@ function dictValueParserRoundConfig(): DictionaryValue<RoundConfig> {
         },
         parse: (src) => {
             return loadRoundConfig(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type TicketPayoutResponse = {
     $$type: 'TicketPayoutResponse';
     ticket: string;
-};
+}
 
 export function storeTicketPayoutResponse(src: TicketPayoutResponse) {
     return (builder: Builder) => {
@@ -1005,15 +773,15 @@ function dictValueParserTicketPayoutResponse(): DictionaryValue<TicketPayoutResp
         },
         parse: (src) => {
             return loadTicketPayoutResponse(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type RandomTicketResponse = {
     $$type: 'RandomTicketResponse';
     ASCIINumber: bigint;
     ticket: string;
-};
+}
 
 export function storeRandomTicketResponse(src: RandomTicketResponse) {
     return (builder: Builder) => {
@@ -1056,8 +824,8 @@ function dictValueParserRandomTicketResponse(): DictionaryValue<RandomTicketResp
         },
         parse: (src) => {
             return loadRandomTicketResponse(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type Ticket = {
@@ -1065,7 +833,7 @@ export type Ticket = {
     ticket: string;
     ticketNumber: bigint;
     owner: Address;
-};
+}
 
 export function storeTicket(src: Ticket) {
     return (builder: Builder) => {
@@ -1113,14 +881,14 @@ function dictValueParserTicket(): DictionaryValue<Ticket> {
         },
         parse: (src) => {
             return loadTicket(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type UserTicket = {
     $$type: 'UserTicket';
     users: Dictionary<Address, TicketPayoutResponse>;
-};
+}
 
 export function storeUserTicket(src: UserTicket) {
     return (builder: Builder) => {
@@ -1136,32 +904,18 @@ export function loadUserTicket(slice: Slice) {
 }
 
 function loadTupleUserTicket(source: TupleReader) {
-    let _users = Dictionary.loadDirect(
-        Dictionary.Keys.Address(),
-        dictValueParserTicketPayoutResponse(),
-        source.readCellOpt(),
-    );
+    let _users = Dictionary.loadDirect(Dictionary.Keys.Address(), dictValueParserTicketPayoutResponse(), source.readCellOpt());
     return { $$type: 'UserTicket' as const, users: _users };
 }
 
 function loadGetterTupleUserTicket(source: TupleReader) {
-    let _users = Dictionary.loadDirect(
-        Dictionary.Keys.Address(),
-        dictValueParserTicketPayoutResponse(),
-        source.readCellOpt(),
-    );
+    let _users = Dictionary.loadDirect(Dictionary.Keys.Address(), dictValueParserTicketPayoutResponse(), source.readCellOpt());
     return { $$type: 'UserTicket' as const, users: _users };
 }
 
 function storeTupleUserTicket(source: UserTicket) {
     let builder = new TupleBuilder();
-    builder.writeCell(
-        source.users.size > 0
-            ? beginCell()
-                  .storeDictDirect(source.users, Dictionary.Keys.Address(), dictValueParserTicketPayoutResponse())
-                  .endCell()
-            : null,
-    );
+    builder.writeCell(source.users.size > 0 ? beginCell().storeDictDirect(source.users, Dictionary.Keys.Address(), dictValueParserTicketPayoutResponse()).endCell() : null);
     return builder.build();
 }
 
@@ -1172,14 +926,14 @@ function dictValueParserUserTicket(): DictionaryValue<UserTicket> {
         },
         parse: (src) => {
             return loadUserTicket(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type RoundTicket = {
     $$type: 'RoundTicket';
     rounds: Dictionary<bigint, UserTicket>;
-};
+}
 
 export function storeRoundTicket(src: RoundTicket) {
     return (builder: Builder) => {
@@ -1206,13 +960,7 @@ function loadGetterTupleRoundTicket(source: TupleReader) {
 
 function storeTupleRoundTicket(source: RoundTicket) {
     let builder = new TupleBuilder();
-    builder.writeCell(
-        source.rounds.size > 0
-            ? beginCell()
-                  .storeDictDirect(source.rounds, Dictionary.Keys.BigInt(257), dictValueParserUserTicket())
-                  .endCell()
-            : null,
-    );
+    builder.writeCell(source.rounds.size > 0 ? beginCell().storeDictDirect(source.rounds, Dictionary.Keys.BigInt(257), dictValueParserUserTicket()).endCell() : null);
     return builder.build();
 }
 
@@ -1223,8 +971,8 @@ function dictValueParserRoundTicket(): DictionaryValue<RoundTicket> {
         },
         parse: (src) => {
             return loadRoundTicket(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type Winner = {
@@ -1232,7 +980,7 @@ export type Winner = {
     ticket: string;
     owner: Address;
     prize: bigint;
-};
+}
 
 export function storeWinner(src: Winner) {
     return (builder: Builder) => {
@@ -1280,14 +1028,14 @@ function dictValueParserWinner(): DictionaryValue<Winner> {
         },
         parse: (src) => {
             return loadWinner(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type ClaimInfo = {
     $$type: 'ClaimInfo';
     info: Dictionary<bigint, UserClaim>;
-};
+}
 
 export function storeClaimInfo(src: ClaimInfo) {
     return (builder: Builder) => {
@@ -1314,13 +1062,7 @@ function loadGetterTupleClaimInfo(source: TupleReader) {
 
 function storeTupleClaimInfo(source: ClaimInfo) {
     let builder = new TupleBuilder();
-    builder.writeCell(
-        source.info.size > 0
-            ? beginCell()
-                  .storeDictDirect(source.info, Dictionary.Keys.BigInt(257), dictValueParserUserClaim())
-                  .endCell()
-            : null,
-    );
+    builder.writeCell(source.info.size > 0 ? beginCell().storeDictDirect(source.info, Dictionary.Keys.BigInt(257), dictValueParserUserClaim()).endCell() : null);
     return builder.build();
 }
 
@@ -1331,14 +1073,14 @@ function dictValueParserClaimInfo(): DictionaryValue<ClaimInfo> {
         },
         parse: (src) => {
             return loadClaimInfo(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type UserClaim = {
     $$type: 'UserClaim';
     user: Dictionary<Address, boolean>;
-};
+}
 
 export function storeUserClaim(src: UserClaim) {
     return (builder: Builder) => {
@@ -1365,11 +1107,7 @@ function loadGetterTupleUserClaim(source: TupleReader) {
 
 function storeTupleUserClaim(source: UserClaim) {
     let builder = new TupleBuilder();
-    builder.writeCell(
-        source.user.size > 0
-            ? beginCell().storeDictDirect(source.user, Dictionary.Keys.Address(), Dictionary.Values.Bool()).endCell()
-            : null,
-    );
+    builder.writeCell(source.user.size > 0 ? beginCell().storeDictDirect(source.user, Dictionary.Keys.Address(), Dictionary.Values.Bool()).endCell() : null);
     return builder.build();
 }
 
@@ -1380,14 +1118,14 @@ function dictValueParserUserClaim(): DictionaryValue<UserClaim> {
         },
         parse: (src) => {
             return loadUserClaim(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type Result = {
     $$type: 'Result';
     rounds: Dictionary<bigint, bigint>;
-};
+}
 
 export function storeResult(src: Result) {
     return (builder: Builder) => {
@@ -1403,32 +1141,18 @@ export function loadResult(slice: Slice) {
 }
 
 function loadTupleResult(source: TupleReader) {
-    let _rounds = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        Dictionary.Values.BigInt(257),
-        source.readCellOpt(),
-    );
+    let _rounds = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257), source.readCellOpt());
     return { $$type: 'Result' as const, rounds: _rounds };
 }
 
 function loadGetterTupleResult(source: TupleReader) {
-    let _rounds = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        Dictionary.Values.BigInt(257),
-        source.readCellOpt(),
-    );
+    let _rounds = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257), source.readCellOpt());
     return { $$type: 'Result' as const, rounds: _rounds };
 }
 
 function storeTupleResult(source: Result) {
     let builder = new TupleBuilder();
-    builder.writeCell(
-        source.rounds.size > 0
-            ? beginCell()
-                  .storeDictDirect(source.rounds, Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257))
-                  .endCell()
-            : null,
-    );
+    builder.writeCell(source.rounds.size > 0 ? beginCell().storeDictDirect(source.rounds, Dictionary.Keys.BigInt(257), Dictionary.Values.BigInt(257)).endCell() : null);
     return builder.build();
 }
 
@@ -1439,8 +1163,8 @@ function dictValueParserResult(): DictionaryValue<Result> {
         },
         parse: (src) => {
             return loadResult(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type CreatePool = {
@@ -1453,7 +1177,7 @@ export type CreatePool = {
     sequence: bigint;
     active: boolean;
     prizes: Dictionary<number, number>;
-};
+}
 
 export function storeCreatePool(src: CreatePool) {
     return (builder: Builder) => {
@@ -1472,9 +1196,7 @@ export function storeCreatePool(src: CreatePool) {
 
 export function loadCreatePool(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2095598070) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 2095598070) { throw Error('Invalid prefix'); }
     let _jettonWallet = sc_0.loadAddress();
     let _ticketPrice = sc_0.loadUintBig(32);
     let _initialRounds = sc_0.loadUintBig(8);
@@ -1483,17 +1205,7 @@ export function loadCreatePool(slice: Slice) {
     let _sequence = sc_0.loadUintBig(32);
     let _active = sc_0.loadBit();
     let _prizes = Dictionary.load(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8), sc_0);
-    return {
-        $$type: 'CreatePool' as const,
-        jettonWallet: _jettonWallet,
-        ticketPrice: _ticketPrice,
-        initialRounds: _initialRounds,
-        startTime: _startTime,
-        endTime: _endTime,
-        sequence: _sequence,
-        active: _active,
-        prizes: _prizes,
-    };
+    return { $$type: 'CreatePool' as const, jettonWallet: _jettonWallet, ticketPrice: _ticketPrice, initialRounds: _initialRounds, startTime: _startTime, endTime: _endTime, sequence: _sequence, active: _active, prizes: _prizes };
 }
 
 function loadTupleCreatePool(source: TupleReader) {
@@ -1505,17 +1217,7 @@ function loadTupleCreatePool(source: TupleReader) {
     let _sequence = source.readBigNumber();
     let _active = source.readBoolean();
     let _prizes = Dictionary.loadDirect(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8), source.readCellOpt());
-    return {
-        $$type: 'CreatePool' as const,
-        jettonWallet: _jettonWallet,
-        ticketPrice: _ticketPrice,
-        initialRounds: _initialRounds,
-        startTime: _startTime,
-        endTime: _endTime,
-        sequence: _sequence,
-        active: _active,
-        prizes: _prizes,
-    };
+    return { $$type: 'CreatePool' as const, jettonWallet: _jettonWallet, ticketPrice: _ticketPrice, initialRounds: _initialRounds, startTime: _startTime, endTime: _endTime, sequence: _sequence, active: _active, prizes: _prizes };
 }
 
 function loadGetterTupleCreatePool(source: TupleReader) {
@@ -1527,17 +1229,7 @@ function loadGetterTupleCreatePool(source: TupleReader) {
     let _sequence = source.readBigNumber();
     let _active = source.readBoolean();
     let _prizes = Dictionary.loadDirect(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8), source.readCellOpt());
-    return {
-        $$type: 'CreatePool' as const,
-        jettonWallet: _jettonWallet,
-        ticketPrice: _ticketPrice,
-        initialRounds: _initialRounds,
-        startTime: _startTime,
-        endTime: _endTime,
-        sequence: _sequence,
-        active: _active,
-        prizes: _prizes,
-    };
+    return { $$type: 'CreatePool' as const, jettonWallet: _jettonWallet, ticketPrice: _ticketPrice, initialRounds: _initialRounds, startTime: _startTime, endTime: _endTime, sequence: _sequence, active: _active, prizes: _prizes };
 }
 
 function storeTupleCreatePool(source: CreatePool) {
@@ -1549,11 +1241,7 @@ function storeTupleCreatePool(source: CreatePool) {
     builder.writeNumber(source.endTime);
     builder.writeNumber(source.sequence);
     builder.writeBoolean(source.active);
-    builder.writeCell(
-        source.prizes.size > 0
-            ? beginCell().storeDictDirect(source.prizes, Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8)).endCell()
-            : null,
-    );
+    builder.writeCell(source.prizes.size > 0 ? beginCell().storeDictDirect(source.prizes, Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8)).endCell() : null);
     return builder.build();
 }
 
@@ -1564,8 +1252,8 @@ function dictValueParserCreatePool(): DictionaryValue<CreatePool> {
         },
         parse: (src) => {
             return loadCreatePool(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type Claim = {
@@ -1575,7 +1263,7 @@ export type Claim = {
     amount: bigint;
     receiver: Address;
     signature: Slice;
-};
+}
 
 export function storeClaim(src: Claim) {
     return (builder: Builder) => {
@@ -1591,22 +1279,13 @@ export function storeClaim(src: Claim) {
 
 export function loadClaim(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 1449747896) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 1449747896) { throw Error('Invalid prefix'); }
     let _poolId = sc_0.loadIntBig(257);
     let _roundId = sc_0.loadIntBig(257);
     let _amount = sc_0.loadCoins();
     let _receiver = sc_0.loadAddress();
     let _signature = sc_0.loadRef().asSlice();
-    return {
-        $$type: 'Claim' as const,
-        poolId: _poolId,
-        roundId: _roundId,
-        amount: _amount,
-        receiver: _receiver,
-        signature: _signature,
-    };
+    return { $$type: 'Claim' as const, poolId: _poolId, roundId: _roundId, amount: _amount, receiver: _receiver, signature: _signature };
 }
 
 function loadTupleClaim(source: TupleReader) {
@@ -1615,14 +1294,7 @@ function loadTupleClaim(source: TupleReader) {
     let _amount = source.readBigNumber();
     let _receiver = source.readAddress();
     let _signature = source.readCell().asSlice();
-    return {
-        $$type: 'Claim' as const,
-        poolId: _poolId,
-        roundId: _roundId,
-        amount: _amount,
-        receiver: _receiver,
-        signature: _signature,
-    };
+    return { $$type: 'Claim' as const, poolId: _poolId, roundId: _roundId, amount: _amount, receiver: _receiver, signature: _signature };
 }
 
 function loadGetterTupleClaim(source: TupleReader) {
@@ -1631,14 +1303,7 @@ function loadGetterTupleClaim(source: TupleReader) {
     let _amount = source.readBigNumber();
     let _receiver = source.readAddress();
     let _signature = source.readCell().asSlice();
-    return {
-        $$type: 'Claim' as const,
-        poolId: _poolId,
-        roundId: _roundId,
-        amount: _amount,
-        receiver: _receiver,
-        signature: _signature,
-    };
+    return { $$type: 'Claim' as const, poolId: _poolId, roundId: _roundId, amount: _amount, receiver: _receiver, signature: _signature };
 }
 
 function storeTupleClaim(source: Claim) {
@@ -1658,8 +1323,8 @@ function dictValueParserClaim(): DictionaryValue<Claim> {
         },
         parse: (src) => {
             return loadClaim(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type WinningNumbersDrawnEvent = {
@@ -1667,7 +1332,7 @@ export type WinningNumbersDrawnEvent = {
     poolId: bigint;
     roundId: bigint;
     winningNumber: bigint;
-};
+}
 
 export function storeWinningNumbersDrawnEvent(src: WinningNumbersDrawnEvent) {
     return (builder: Builder) => {
@@ -1681,42 +1346,25 @@ export function storeWinningNumbersDrawnEvent(src: WinningNumbersDrawnEvent) {
 
 export function loadWinningNumbersDrawnEvent(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 3552390527) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 3552390527) { throw Error('Invalid prefix'); }
     let _poolId = sc_0.loadIntBig(257);
     let _roundId = sc_0.loadIntBig(257);
     let _winningNumber = sc_0.loadIntBig(257);
-    return {
-        $$type: 'WinningNumbersDrawnEvent' as const,
-        poolId: _poolId,
-        roundId: _roundId,
-        winningNumber: _winningNumber,
-    };
+    return { $$type: 'WinningNumbersDrawnEvent' as const, poolId: _poolId, roundId: _roundId, winningNumber: _winningNumber };
 }
 
 function loadTupleWinningNumbersDrawnEvent(source: TupleReader) {
     let _poolId = source.readBigNumber();
     let _roundId = source.readBigNumber();
     let _winningNumber = source.readBigNumber();
-    return {
-        $$type: 'WinningNumbersDrawnEvent' as const,
-        poolId: _poolId,
-        roundId: _roundId,
-        winningNumber: _winningNumber,
-    };
+    return { $$type: 'WinningNumbersDrawnEvent' as const, poolId: _poolId, roundId: _roundId, winningNumber: _winningNumber };
 }
 
 function loadGetterTupleWinningNumbersDrawnEvent(source: TupleReader) {
     let _poolId = source.readBigNumber();
     let _roundId = source.readBigNumber();
     let _winningNumber = source.readBigNumber();
-    return {
-        $$type: 'WinningNumbersDrawnEvent' as const,
-        poolId: _poolId,
-        roundId: _roundId,
-        winningNumber: _winningNumber,
-    };
+    return { $$type: 'WinningNumbersDrawnEvent' as const, poolId: _poolId, roundId: _roundId, winningNumber: _winningNumber };
 }
 
 function storeTupleWinningNumbersDrawnEvent(source: WinningNumbersDrawnEvent) {
@@ -1734,15 +1382,15 @@ function dictValueParserWinningNumbersDrawnEvent(): DictionaryValue<WinningNumbe
         },
         parse: (src) => {
             return loadWinningNumbersDrawnEvent(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type UpdatePizes = {
     $$type: 'UpdatePizes';
     poolId: bigint;
     prizes: Dictionary<number, number>;
-};
+}
 
 export function storeUpdatePizes(src: UpdatePizes) {
     return (builder: Builder) => {
@@ -1755,9 +1403,7 @@ export function storeUpdatePizes(src: UpdatePizes) {
 
 export function loadUpdatePizes(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 4133815729) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 4133815729) { throw Error('Invalid prefix'); }
     let _poolId = sc_0.loadIntBig(257);
     let _prizes = Dictionary.load(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8), sc_0);
     return { $$type: 'UpdatePizes' as const, poolId: _poolId, prizes: _prizes };
@@ -1778,11 +1424,7 @@ function loadGetterTupleUpdatePizes(source: TupleReader) {
 function storeTupleUpdatePizes(source: UpdatePizes) {
     let builder = new TupleBuilder();
     builder.writeNumber(source.poolId);
-    builder.writeCell(
-        source.prizes.size > 0
-            ? beginCell().storeDictDirect(source.prizes, Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8)).endCell()
-            : null,
-    );
+    builder.writeCell(source.prizes.size > 0 ? beginCell().storeDictDirect(source.prizes, Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8)).endCell() : null);
     return builder.build();
 }
 
@@ -1793,8 +1435,8 @@ function dictValueParserUpdatePizes(): DictionaryValue<UpdatePizes> {
         },
         parse: (src) => {
             return loadUpdatePizes(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type BuyTicket = {
@@ -1802,7 +1444,7 @@ export type BuyTicket = {
     poolId: bigint;
     roundId: bigint;
     quantity: bigint;
-};
+}
 
 export function storeBuyTicket(src: BuyTicket) {
     return (builder: Builder) => {
@@ -1816,9 +1458,7 @@ export function storeBuyTicket(src: BuyTicket) {
 
 export function loadBuyTicket(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 3748203161) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 3748203161) { throw Error('Invalid prefix'); }
     let _poolId = sc_0.loadIntBig(257);
     let _roundId = sc_0.loadIntBig(257);
     let _quantity = sc_0.loadIntBig(257);
@@ -1854,8 +1494,8 @@ function dictValueParserBuyTicket(): DictionaryValue<BuyTicket> {
         },
         parse: (src) => {
             return loadBuyTicket(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type DrawWinningNumbers = {
@@ -1863,7 +1503,7 @@ export type DrawWinningNumbers = {
     poolId: bigint;
     roundId: bigint;
     latestTxHash: string;
-};
+}
 
 export function storeDrawWinningNumbers(src: DrawWinningNumbers) {
     return (builder: Builder) => {
@@ -1877,9 +1517,7 @@ export function storeDrawWinningNumbers(src: DrawWinningNumbers) {
 
 export function loadDrawWinningNumbers(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 3591482628) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 3591482628) { throw Error('Invalid prefix'); }
     let _poolId = sc_0.loadIntBig(257);
     let _roundId = sc_0.loadIntBig(257);
     let _latestTxHash = sc_0.loadStringRefTail();
@@ -1915,14 +1553,14 @@ function dictValueParserDrawWinningNumbers(): DictionaryValue<DrawWinningNumbers
         },
         parse: (src) => {
             return loadDrawWinningNumbers(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type SetAdmin = {
     $$type: 'SetAdmin';
     admin: Address;
-};
+}
 
 export function storeSetAdmin(src: SetAdmin) {
     return (builder: Builder) => {
@@ -1934,9 +1572,7 @@ export function storeSetAdmin(src: SetAdmin) {
 
 export function loadSetAdmin(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 3397822855) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 3397822855) { throw Error('Invalid prefix'); }
     let _admin = sc_0.loadAddress();
     return { $$type: 'SetAdmin' as const, admin: _admin };
 }
@@ -1964,14 +1600,14 @@ function dictValueParserSetAdmin(): DictionaryValue<SetAdmin> {
         },
         parse: (src) => {
             return loadSetAdmin(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type SetPublicKey = {
     $$type: 'SetPublicKey';
     publicKey: bigint;
-};
+}
 
 export function storeSetPublicKey(src: SetPublicKey) {
     return (builder: Builder) => {
@@ -1983,9 +1619,7 @@ export function storeSetPublicKey(src: SetPublicKey) {
 
 export function loadSetPublicKey(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 3279683070) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 3279683070) { throw Error('Invalid prefix'); }
     let _publicKey = sc_0.loadIntBig(257);
     return { $$type: 'SetPublicKey' as const, publicKey: _publicKey };
 }
@@ -2013,8 +1647,55 @@ function dictValueParserSetPublicKey(): DictionaryValue<SetPublicKey> {
         },
         parse: (src) => {
             return loadSetPublicKey(src.loadRef().beginParse());
-        },
+        }
+    }
+}
+
+export type SetClaimFeePercent = {
+    $$type: 'SetClaimFeePercent';
+    claimFeePercent: bigint;
+}
+
+export function storeSetClaimFeePercent(src: SetClaimFeePercent) {
+    return (builder: Builder) => {
+        let b_0 = builder;
+        b_0.storeUint(233252030, 32);
+        b_0.storeUint(src.claimFeePercent, 8);
     };
+}
+
+export function loadSetClaimFeePercent(slice: Slice) {
+    let sc_0 = slice;
+    if (sc_0.loadUint(32) !== 233252030) { throw Error('Invalid prefix'); }
+    let _claimFeePercent = sc_0.loadUintBig(8);
+    return { $$type: 'SetClaimFeePercent' as const, claimFeePercent: _claimFeePercent };
+}
+
+function loadTupleSetClaimFeePercent(source: TupleReader) {
+    let _claimFeePercent = source.readBigNumber();
+    return { $$type: 'SetClaimFeePercent' as const, claimFeePercent: _claimFeePercent };
+}
+
+function loadGetterTupleSetClaimFeePercent(source: TupleReader) {
+    let _claimFeePercent = source.readBigNumber();
+    return { $$type: 'SetClaimFeePercent' as const, claimFeePercent: _claimFeePercent };
+}
+
+function storeTupleSetClaimFeePercent(source: SetClaimFeePercent) {
+    let builder = new TupleBuilder();
+    builder.writeNumber(source.claimFeePercent);
+    return builder.build();
+}
+
+function dictValueParserSetClaimFeePercent(): DictionaryValue<SetClaimFeePercent> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeSetClaimFeePercent(src)).endCell());
+        },
+        parse: (src) => {
+            return loadSetClaimFeePercent(src.loadRef().beginParse());
+        }
+    }
 }
 
 export type PoolCreatedEvent = {
@@ -2029,7 +1710,7 @@ export type PoolCreatedEvent = {
     rounds: Dictionary<bigint, RoundConfig>;
     creator: Address;
     prizes: Dictionary<number, number>;
-};
+}
 
 export function storePoolCreatedEvent(src: PoolCreatedEvent) {
     return (builder: Builder) => {
@@ -2050,9 +1731,7 @@ export function storePoolCreatedEvent(src: PoolCreatedEvent) {
 
 export function loadPoolCreatedEvent(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 590692540) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 590692540) { throw Error('Invalid prefix'); }
     let _poolId = sc_0.loadIntBig(257);
     let _ticketPrice = sc_0.loadUintBig(32);
     let _initialRounds = sc_0.loadUintBig(8);
@@ -2063,19 +1742,7 @@ export function loadPoolCreatedEvent(slice: Slice) {
     let _rounds = Dictionary.load(Dictionary.Keys.BigInt(257), dictValueParserRoundConfig(), sc_0);
     let _creator = sc_0.loadAddress();
     let _prizes = Dictionary.load(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8), sc_0);
-    return {
-        $$type: 'PoolCreatedEvent' as const,
-        poolId: _poolId,
-        ticketPrice: _ticketPrice,
-        initialRounds: _initialRounds,
-        startTime: _startTime,
-        endTime: _endTime,
-        active: _active,
-        sequence: _sequence,
-        rounds: _rounds,
-        creator: _creator,
-        prizes: _prizes,
-    };
+    return { $$type: 'PoolCreatedEvent' as const, poolId: _poolId, ticketPrice: _ticketPrice, initialRounds: _initialRounds, startTime: _startTime, endTime: _endTime, active: _active, sequence: _sequence, rounds: _rounds, creator: _creator, prizes: _prizes };
 }
 
 function loadTuplePoolCreatedEvent(source: TupleReader) {
@@ -2086,26 +1753,10 @@ function loadTuplePoolCreatedEvent(source: TupleReader) {
     let _endTime = source.readBigNumber();
     let _active = source.readBoolean();
     let _sequence = source.readBigNumber();
-    let _rounds = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        dictValueParserRoundConfig(),
-        source.readCellOpt(),
-    );
+    let _rounds = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserRoundConfig(), source.readCellOpt());
     let _creator = source.readAddress();
     let _prizes = Dictionary.loadDirect(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8), source.readCellOpt());
-    return {
-        $$type: 'PoolCreatedEvent' as const,
-        poolId: _poolId,
-        ticketPrice: _ticketPrice,
-        initialRounds: _initialRounds,
-        startTime: _startTime,
-        endTime: _endTime,
-        active: _active,
-        sequence: _sequence,
-        rounds: _rounds,
-        creator: _creator,
-        prizes: _prizes,
-    };
+    return { $$type: 'PoolCreatedEvent' as const, poolId: _poolId, ticketPrice: _ticketPrice, initialRounds: _initialRounds, startTime: _startTime, endTime: _endTime, active: _active, sequence: _sequence, rounds: _rounds, creator: _creator, prizes: _prizes };
 }
 
 function loadGetterTuplePoolCreatedEvent(source: TupleReader) {
@@ -2116,26 +1767,10 @@ function loadGetterTuplePoolCreatedEvent(source: TupleReader) {
     let _endTime = source.readBigNumber();
     let _active = source.readBoolean();
     let _sequence = source.readBigNumber();
-    let _rounds = Dictionary.loadDirect(
-        Dictionary.Keys.BigInt(257),
-        dictValueParserRoundConfig(),
-        source.readCellOpt(),
-    );
+    let _rounds = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserRoundConfig(), source.readCellOpt());
     let _creator = source.readAddress();
     let _prizes = Dictionary.loadDirect(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8), source.readCellOpt());
-    return {
-        $$type: 'PoolCreatedEvent' as const,
-        poolId: _poolId,
-        ticketPrice: _ticketPrice,
-        initialRounds: _initialRounds,
-        startTime: _startTime,
-        endTime: _endTime,
-        active: _active,
-        sequence: _sequence,
-        rounds: _rounds,
-        creator: _creator,
-        prizes: _prizes,
-    };
+    return { $$type: 'PoolCreatedEvent' as const, poolId: _poolId, ticketPrice: _ticketPrice, initialRounds: _initialRounds, startTime: _startTime, endTime: _endTime, active: _active, sequence: _sequence, rounds: _rounds, creator: _creator, prizes: _prizes };
 }
 
 function storeTuplePoolCreatedEvent(source: PoolCreatedEvent) {
@@ -2147,19 +1782,9 @@ function storeTuplePoolCreatedEvent(source: PoolCreatedEvent) {
     builder.writeNumber(source.endTime);
     builder.writeBoolean(source.active);
     builder.writeNumber(source.sequence);
-    builder.writeCell(
-        source.rounds.size > 0
-            ? beginCell()
-                  .storeDictDirect(source.rounds, Dictionary.Keys.BigInt(257), dictValueParserRoundConfig())
-                  .endCell()
-            : null,
-    );
+    builder.writeCell(source.rounds.size > 0 ? beginCell().storeDictDirect(source.rounds, Dictionary.Keys.BigInt(257), dictValueParserRoundConfig()).endCell() : null);
     builder.writeAddress(source.creator);
-    builder.writeCell(
-        source.prizes.size > 0
-            ? beginCell().storeDictDirect(source.prizes, Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8)).endCell()
-            : null,
-    );
+    builder.writeCell(source.prizes.size > 0 ? beginCell().storeDictDirect(source.prizes, Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8)).endCell() : null);
     return builder.build();
 }
 
@@ -2170,8 +1795,8 @@ function dictValueParserPoolCreatedEvent(): DictionaryValue<PoolCreatedEvent> {
         },
         parse: (src) => {
             return loadPoolCreatedEvent(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type RoundCreated = {
@@ -2181,7 +1806,7 @@ export type RoundCreated = {
     ticketPrice: bigint;
     startTime: bigint;
     endTime: bigint;
-};
+}
 
 export function storeRoundCreated(src: RoundCreated) {
     return (builder: Builder) => {
@@ -2197,22 +1822,13 @@ export function storeRoundCreated(src: RoundCreated) {
 
 export function loadRoundCreated(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 3113542296) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 3113542296) { throw Error('Invalid prefix'); }
     let _roundId = sc_0.loadIntBig(257);
     let _poolId = sc_0.loadIntBig(257);
     let _ticketPrice = sc_0.loadUintBig(32);
     let _startTime = sc_0.loadUintBig(32);
     let _endTime = sc_0.loadUintBig(32);
-    return {
-        $$type: 'RoundCreated' as const,
-        roundId: _roundId,
-        poolId: _poolId,
-        ticketPrice: _ticketPrice,
-        startTime: _startTime,
-        endTime: _endTime,
-    };
+    return { $$type: 'RoundCreated' as const, roundId: _roundId, poolId: _poolId, ticketPrice: _ticketPrice, startTime: _startTime, endTime: _endTime };
 }
 
 function loadTupleRoundCreated(source: TupleReader) {
@@ -2221,14 +1837,7 @@ function loadTupleRoundCreated(source: TupleReader) {
     let _ticketPrice = source.readBigNumber();
     let _startTime = source.readBigNumber();
     let _endTime = source.readBigNumber();
-    return {
-        $$type: 'RoundCreated' as const,
-        roundId: _roundId,
-        poolId: _poolId,
-        ticketPrice: _ticketPrice,
-        startTime: _startTime,
-        endTime: _endTime,
-    };
+    return { $$type: 'RoundCreated' as const, roundId: _roundId, poolId: _poolId, ticketPrice: _ticketPrice, startTime: _startTime, endTime: _endTime };
 }
 
 function loadGetterTupleRoundCreated(source: TupleReader) {
@@ -2237,14 +1846,7 @@ function loadGetterTupleRoundCreated(source: TupleReader) {
     let _ticketPrice = source.readBigNumber();
     let _startTime = source.readBigNumber();
     let _endTime = source.readBigNumber();
-    return {
-        $$type: 'RoundCreated' as const,
-        roundId: _roundId,
-        poolId: _poolId,
-        ticketPrice: _ticketPrice,
-        startTime: _startTime,
-        endTime: _endTime,
-    };
+    return { $$type: 'RoundCreated' as const, roundId: _roundId, poolId: _poolId, ticketPrice: _ticketPrice, startTime: _startTime, endTime: _endTime };
 }
 
 function storeTupleRoundCreated(source: RoundCreated) {
@@ -2264,8 +1866,8 @@ function dictValueParserRoundCreated(): DictionaryValue<RoundCreated> {
         },
         parse: (src) => {
             return loadRoundCreated(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type TicketBoughtEvent = {
@@ -2275,7 +1877,7 @@ export type TicketBoughtEvent = {
     quantity: bigint;
     buyer: Address;
     tickets: string;
-};
+}
 
 export function storeTicketBoughtEvent(src: TicketBoughtEvent) {
     return (builder: Builder) => {
@@ -2293,23 +1895,14 @@ export function storeTicketBoughtEvent(src: TicketBoughtEvent) {
 
 export function loadTicketBoughtEvent(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 1249282626) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 1249282626) { throw Error('Invalid prefix'); }
     let _poolId = sc_0.loadIntBig(257);
     let _roundId = sc_0.loadIntBig(257);
     let _quantity = sc_0.loadIntBig(257);
     let sc_1 = sc_0.loadRef().beginParse();
     let _buyer = sc_1.loadAddress();
     let _tickets = sc_1.loadStringRefTail();
-    return {
-        $$type: 'TicketBoughtEvent' as const,
-        poolId: _poolId,
-        roundId: _roundId,
-        quantity: _quantity,
-        buyer: _buyer,
-        tickets: _tickets,
-    };
+    return { $$type: 'TicketBoughtEvent' as const, poolId: _poolId, roundId: _roundId, quantity: _quantity, buyer: _buyer, tickets: _tickets };
 }
 
 function loadTupleTicketBoughtEvent(source: TupleReader) {
@@ -2318,14 +1911,7 @@ function loadTupleTicketBoughtEvent(source: TupleReader) {
     let _quantity = source.readBigNumber();
     let _buyer = source.readAddress();
     let _tickets = source.readString();
-    return {
-        $$type: 'TicketBoughtEvent' as const,
-        poolId: _poolId,
-        roundId: _roundId,
-        quantity: _quantity,
-        buyer: _buyer,
-        tickets: _tickets,
-    };
+    return { $$type: 'TicketBoughtEvent' as const, poolId: _poolId, roundId: _roundId, quantity: _quantity, buyer: _buyer, tickets: _tickets };
 }
 
 function loadGetterTupleTicketBoughtEvent(source: TupleReader) {
@@ -2334,14 +1920,7 @@ function loadGetterTupleTicketBoughtEvent(source: TupleReader) {
     let _quantity = source.readBigNumber();
     let _buyer = source.readAddress();
     let _tickets = source.readString();
-    return {
-        $$type: 'TicketBoughtEvent' as const,
-        poolId: _poolId,
-        roundId: _roundId,
-        quantity: _quantity,
-        buyer: _buyer,
-        tickets: _tickets,
-    };
+    return { $$type: 'TicketBoughtEvent' as const, poolId: _poolId, roundId: _roundId, quantity: _quantity, buyer: _buyer, tickets: _tickets };
 }
 
 function storeTupleTicketBoughtEvent(source: TicketBoughtEvent) {
@@ -2361,8 +1940,8 @@ function dictValueParserTicketBoughtEvent(): DictionaryValue<TicketBoughtEvent> 
         },
         parse: (src) => {
             return loadTicketBoughtEvent(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
 export type ClaimedEvent = {
@@ -2371,7 +1950,7 @@ export type ClaimedEvent = {
     roundId: bigint;
     amount: bigint;
     receiver: Address;
-};
+}
 
 export function storeClaimedEvent(src: ClaimedEvent) {
     return (builder: Builder) => {
@@ -2386,20 +1965,12 @@ export function storeClaimedEvent(src: ClaimedEvent) {
 
 export function loadClaimedEvent(slice: Slice) {
     let sc_0 = slice;
-    if (sc_0.loadUint(32) !== 916403026) {
-        throw Error('Invalid prefix');
-    }
+    if (sc_0.loadUint(32) !== 916403026) { throw Error('Invalid prefix'); }
     let _poolId = sc_0.loadIntBig(257);
     let _roundId = sc_0.loadIntBig(257);
     let _amount = sc_0.loadCoins();
     let _receiver = sc_0.loadAddress();
-    return {
-        $$type: 'ClaimedEvent' as const,
-        poolId: _poolId,
-        roundId: _roundId,
-        amount: _amount,
-        receiver: _receiver,
-    };
+    return { $$type: 'ClaimedEvent' as const, poolId: _poolId, roundId: _roundId, amount: _amount, receiver: _receiver };
 }
 
 function loadTupleClaimedEvent(source: TupleReader) {
@@ -2407,13 +1978,7 @@ function loadTupleClaimedEvent(source: TupleReader) {
     let _roundId = source.readBigNumber();
     let _amount = source.readBigNumber();
     let _receiver = source.readAddress();
-    return {
-        $$type: 'ClaimedEvent' as const,
-        poolId: _poolId,
-        roundId: _roundId,
-        amount: _amount,
-        receiver: _receiver,
-    };
+    return { $$type: 'ClaimedEvent' as const, poolId: _poolId, roundId: _roundId, amount: _amount, receiver: _receiver };
 }
 
 function loadGetterTupleClaimedEvent(source: TupleReader) {
@@ -2421,13 +1986,7 @@ function loadGetterTupleClaimedEvent(source: TupleReader) {
     let _roundId = source.readBigNumber();
     let _amount = source.readBigNumber();
     let _receiver = source.readAddress();
-    return {
-        $$type: 'ClaimedEvent' as const,
-        poolId: _poolId,
-        roundId: _roundId,
-        amount: _amount,
-        receiver: _receiver,
-    };
+    return { $$type: 'ClaimedEvent' as const, poolId: _poolId, roundId: _roundId, amount: _amount, receiver: _receiver };
 }
 
 function storeTupleClaimedEvent(source: ClaimedEvent) {
@@ -2446,13 +2005,13 @@ function dictValueParserClaimedEvent(): DictionaryValue<ClaimedEvent> {
         },
         parse: (src) => {
             return loadClaimedEvent(src.loadRef().beginParse());
-        },
-    };
+        }
+    }
 }
 
-type Lottery_init_args = {
+ type Lottery_init_args = {
     $$type: 'Lottery_init_args';
-};
+}
 
 function initLottery_init_args(src: Lottery_init_args) {
     return (builder: Builder) => {
@@ -2461,12 +2020,8 @@ function initLottery_init_args(src: Lottery_init_args) {
 }
 
 async function Lottery_init() {
-    const __code = Cell.fromBase64(
-        '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',
-    );
-    const __system = Cell.fromBase64(
-        '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',
-    );
+    const __code = Cell.fromBase64('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');
+    const __system = Cell.fromBase64('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');
     let builder = beginCell();
     builder.storeRef(__system);
     builder.storeUint(0, 1);
@@ -2500,6 +2055,7 @@ const Lottery_errors: { [key: number]: { message: string } } = {
     135: { message: `Code of a contract was not found` },
     136: { message: `Invalid address` },
     137: { message: `Masterchain support is not enabled for this contract` },
+    10050: { message: `Invalid claim fee percent` },
     13687: { message: `Pool is not active` },
     20265: { message: `Winning numbers already drawn` },
     24801: { message: `Round is not open for ticket purchases` },
@@ -2510,6 +2066,7 @@ const Lottery_errors: { [key: number]: { message: string } } = {
     42342: { message: `Sequence must be positive` },
     47697: { message: `Round is not active` },
     48401: { message: `Invalid signature` },
+    50778: { message: `Round is still active` },
     52453: { message: `Initial rounds must be positive` },
     52657: { message: `Prizes must be set` },
     57401: { message: `Start time must be before end time` },
@@ -2517,426 +2074,123 @@ const Lottery_errors: { [key: number]: { message: string } } = {
     58383: { message: `Insufficient funds sent` },
     59272: { message: `Quantity must be positive` },
     61167: { message: `Invalid claim` },
-};
+}
 
 const Lottery_types: ABIType[] = [
-    {
-        name: 'StateInit',
-        header: null,
-        fields: [
-            { name: 'code', type: { kind: 'simple', type: 'cell', optional: false } },
-            { name: 'data', type: { kind: 'simple', type: 'cell', optional: false } },
-        ],
-    },
-    {
-        name: 'Context',
-        header: null,
-        fields: [
-            { name: 'bounced', type: { kind: 'simple', type: 'bool', optional: false } },
-            { name: 'sender', type: { kind: 'simple', type: 'address', optional: false } },
-            { name: 'value', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'raw', type: { kind: 'simple', type: 'slice', optional: false } },
-        ],
-    },
-    {
-        name: 'SendParameters',
-        header: null,
-        fields: [
-            { name: 'bounce', type: { kind: 'simple', type: 'bool', optional: false } },
-            { name: 'to', type: { kind: 'simple', type: 'address', optional: false } },
-            { name: 'value', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'mode', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'body', type: { kind: 'simple', type: 'cell', optional: true } },
-            { name: 'code', type: { kind: 'simple', type: 'cell', optional: true } },
-            { name: 'data', type: { kind: 'simple', type: 'cell', optional: true } },
-        ],
-    },
-    {
-        name: 'Deploy',
-        header: 2490013878,
-        fields: [{ name: 'queryId', type: { kind: 'simple', type: 'uint', optional: false, format: 64 } }],
-    },
-    {
-        name: 'DeployOk',
-        header: 2952335191,
-        fields: [{ name: 'queryId', type: { kind: 'simple', type: 'uint', optional: false, format: 64 } }],
-    },
-    {
-        name: 'FactoryDeploy',
-        header: 1829761339,
-        fields: [
-            { name: 'queryId', type: { kind: 'simple', type: 'uint', optional: false, format: 64 } },
-            { name: 'cashback', type: { kind: 'simple', type: 'address', optional: false } },
-        ],
-    },
-    {
-        name: 'ChangeOwner',
-        header: 2174598809,
-        fields: [
-            { name: 'queryId', type: { kind: 'simple', type: 'uint', optional: false, format: 64 } },
-            { name: 'newOwner', type: { kind: 'simple', type: 'address', optional: false } },
-        ],
-    },
-    {
-        name: 'ChangeOwnerOk',
-        header: 846932810,
-        fields: [
-            { name: 'queryId', type: { kind: 'simple', type: 'uint', optional: false, format: 64 } },
-            { name: 'newOwner', type: { kind: 'simple', type: 'address', optional: false } },
-        ],
-    },
-    {
-        name: 'Lottery$Data',
-        header: null,
-        fields: [
-            { name: 'owner', type: { kind: 'simple', type: 'address', optional: false } },
-            { name: 'admin', type: { kind: 'dict', key: 'address', value: 'bool' } },
-            { name: 'pools', type: { kind: 'dict', key: 'int', value: 'Pool', valueFormat: 'ref' } },
-            { name: 'nextPoolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'usersTicket', type: { kind: 'dict', key: 'int', value: 'RoundTicket', valueFormat: 'ref' } },
-            { name: 'rewardSettings', type: { kind: 'dict', key: 'int', value: 'int' } },
-            { name: 'result', type: { kind: 'dict', key: 'int', value: 'Result', valueFormat: 'ref' } },
-            { name: 'rewardPools', type: { kind: 'dict', key: 'int', value: 'int' } },
-            { name: 'publicKey', type: { kind: 'simple', type: 'int', optional: true, format: 257 } },
-            { name: 'claimData', type: { kind: 'dict', key: 'int', value: 'ClaimInfo', valueFormat: 'ref' } },
-        ],
-    },
-    {
-        name: 'Pool',
-        header: null,
-        fields: [
-            { name: 'poolId', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'creator', type: { kind: 'simple', type: 'address', optional: false } },
-            { name: 'rounds', type: { kind: 'dict', key: 'int', value: 'RoundConfig', valueFormat: 'ref' } },
-            { name: 'startTime', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'endTime', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'sequence', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'active', type: { kind: 'simple', type: 'bool', optional: false } },
-            { name: 'prizes', type: { kind: 'dict', key: 'uint', keyFormat: 8, value: 'uint', valueFormat: 8 } },
-        ],
-    },
-    {
-        name: 'RoundConfig',
-        header: null,
-        fields: [
-            { name: 'roundId', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'poolId', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'ticketPrice', type: { kind: 'simple', type: 'uint', optional: false, format: 'coins' } },
-            { name: 'startTime', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'endTime', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'active', type: { kind: 'simple', type: 'bool', optional: false } },
-        ],
-    },
-    {
-        name: 'TicketPayoutResponse',
-        header: null,
-        fields: [{ name: 'ticket', type: { kind: 'simple', type: 'string', optional: false } }],
-    },
-    {
-        name: 'RandomTicketResponse',
-        header: null,
-        fields: [
-            { name: 'ASCIINumber', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'ticket', type: { kind: 'simple', type: 'string', optional: false } },
-        ],
-    },
-    {
-        name: 'Ticket',
-        header: null,
-        fields: [
-            { name: 'ticket', type: { kind: 'simple', type: 'string', optional: false } },
-            { name: 'ticketNumber', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'owner', type: { kind: 'simple', type: 'address', optional: false } },
-        ],
-    },
-    {
-        name: 'UserTicket',
-        header: null,
-        fields: [
-            {
-                name: 'users',
-                type: { kind: 'dict', key: 'address', value: 'TicketPayoutResponse', valueFormat: 'ref' },
-            },
-        ],
-    },
-    {
-        name: 'RoundTicket',
-        header: null,
-        fields: [{ name: 'rounds', type: { kind: 'dict', key: 'int', value: 'UserTicket', valueFormat: 'ref' } }],
-    },
-    {
-        name: 'Winner',
-        header: null,
-        fields: [
-            { name: 'ticket', type: { kind: 'simple', type: 'string', optional: false } },
-            { name: 'owner', type: { kind: 'simple', type: 'address', optional: false } },
-            { name: 'prize', type: { kind: 'simple', type: 'uint', optional: false, format: 'coins' } },
-        ],
-    },
-    {
-        name: 'ClaimInfo',
-        header: null,
-        fields: [{ name: 'info', type: { kind: 'dict', key: 'int', value: 'UserClaim', valueFormat: 'ref' } }],
-    },
-    {
-        name: 'UserClaim',
-        header: null,
-        fields: [{ name: 'user', type: { kind: 'dict', key: 'address', value: 'bool' } }],
-    },
-    { name: 'Result', header: null, fields: [{ name: 'rounds', type: { kind: 'dict', key: 'int', value: 'int' } }] },
-    {
-        name: 'CreatePool',
-        header: 2095598070,
-        fields: [
-            { name: 'jettonWallet', type: { kind: 'simple', type: 'address', optional: false } },
-            { name: 'ticketPrice', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'initialRounds', type: { kind: 'simple', type: 'uint', optional: false, format: 8 } },
-            { name: 'startTime', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'endTime', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'sequence', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'active', type: { kind: 'simple', type: 'bool', optional: false } },
-            { name: 'prizes', type: { kind: 'dict', key: 'uint', keyFormat: 8, value: 'uint', valueFormat: 8 } },
-        ],
-    },
-    {
-        name: 'Claim',
-        header: 1449747896,
-        fields: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'roundId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'amount', type: { kind: 'simple', type: 'uint', optional: false, format: 'coins' } },
-            { name: 'receiver', type: { kind: 'simple', type: 'address', optional: false } },
-            { name: 'signature', type: { kind: 'simple', type: 'slice', optional: false } },
-        ],
-    },
-    {
-        name: 'WinningNumbersDrawnEvent',
-        header: 3552390527,
-        fields: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'roundId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'winningNumber', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-        ],
-    },
-    {
-        name: 'UpdatePizes',
-        header: 4133815729,
-        fields: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'prizes', type: { kind: 'dict', key: 'uint', keyFormat: 8, value: 'uint', valueFormat: 8 } },
-        ],
-    },
-    {
-        name: 'BuyTicket',
-        header: 3748203161,
-        fields: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'roundId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'quantity', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-        ],
-    },
-    {
-        name: 'DrawWinningNumbers',
-        header: 3591482628,
-        fields: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'roundId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'latestTxHash', type: { kind: 'simple', type: 'string', optional: false } },
-        ],
-    },
-    {
-        name: 'SetAdmin',
-        header: 3397822855,
-        fields: [{ name: 'admin', type: { kind: 'simple', type: 'address', optional: false } }],
-    },
-    {
-        name: 'SetPublicKey',
-        header: 3279683070,
-        fields: [{ name: 'publicKey', type: { kind: 'simple', type: 'int', optional: false, format: 257 } }],
-    },
-    {
-        name: 'PoolCreatedEvent',
-        header: 590692540,
-        fields: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'ticketPrice', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'initialRounds', type: { kind: 'simple', type: 'uint', optional: false, format: 8 } },
-            { name: 'startTime', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'endTime', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'active', type: { kind: 'simple', type: 'bool', optional: false } },
-            { name: 'sequence', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'rounds', type: { kind: 'dict', key: 'int', value: 'RoundConfig', valueFormat: 'ref' } },
-            { name: 'creator', type: { kind: 'simple', type: 'address', optional: false } },
-            { name: 'prizes', type: { kind: 'dict', key: 'uint', keyFormat: 8, value: 'uint', valueFormat: 8 } },
-        ],
-    },
-    {
-        name: 'RoundCreated',
-        header: 3113542296,
-        fields: [
-            { name: 'roundId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'ticketPrice', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'startTime', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-            { name: 'endTime', type: { kind: 'simple', type: 'uint', optional: false, format: 32 } },
-        ],
-    },
-    {
-        name: 'TicketBoughtEvent',
-        header: 1249282626,
-        fields: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'roundId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'quantity', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'buyer', type: { kind: 'simple', type: 'address', optional: false } },
-            { name: 'tickets', type: { kind: 'simple', type: 'string', optional: false } },
-        ],
-    },
-    {
-        name: 'ClaimedEvent',
-        header: 916403026,
-        fields: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'roundId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'amount', type: { kind: 'simple', type: 'uint', optional: false, format: 'coins' } },
-            { name: 'receiver', type: { kind: 'simple', type: 'address', optional: false } },
-        ],
-    },
-];
+    {"name":"StateInit","header":null,"fields":[{"name":"code","type":{"kind":"simple","type":"cell","optional":false}},{"name":"data","type":{"kind":"simple","type":"cell","optional":false}}]},
+    {"name":"Context","header":null,"fields":[{"name":"bounced","type":{"kind":"simple","type":"bool","optional":false}},{"name":"sender","type":{"kind":"simple","type":"address","optional":false}},{"name":"value","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"raw","type":{"kind":"simple","type":"slice","optional":false}}]},
+    {"name":"SendParameters","header":null,"fields":[{"name":"bounce","type":{"kind":"simple","type":"bool","optional":false}},{"name":"to","type":{"kind":"simple","type":"address","optional":false}},{"name":"value","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"mode","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"body","type":{"kind":"simple","type":"cell","optional":true}},{"name":"code","type":{"kind":"simple","type":"cell","optional":true}},{"name":"data","type":{"kind":"simple","type":"cell","optional":true}}]},
+    {"name":"Deploy","header":2490013878,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
+    {"name":"DeployOk","header":2952335191,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
+    {"name":"FactoryDeploy","header":1829761339,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"cashback","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"ChangeOwner","header":2174598809,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"newOwner","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"ChangeOwnerOk","header":846932810,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"newOwner","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"Lottery$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"admin","type":{"kind":"dict","key":"address","value":"bool"}},{"name":"pools","type":{"kind":"dict","key":"int","value":"Pool","valueFormat":"ref"}},{"name":"nextPoolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"usersTicket","type":{"kind":"dict","key":"int","value":"RoundTicket","valueFormat":"ref"}},{"name":"result","type":{"kind":"dict","key":"int","value":"Result","valueFormat":"ref"}},{"name":"rewardPools","type":{"kind":"dict","key":"int","value":"int"}},{"name":"publicKey","type":{"kind":"simple","type":"int","optional":true,"format":257}},{"name":"claimData","type":{"kind":"dict","key":"int","value":"ClaimInfo","valueFormat":"ref"}},{"name":"claimFeePercent","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
+    {"name":"Pool","header":null,"fields":[{"name":"poolId","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"creator","type":{"kind":"simple","type":"address","optional":false}},{"name":"rounds","type":{"kind":"dict","key":"int","value":"RoundConfig","valueFormat":"ref"}},{"name":"startTime","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"endTime","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"sequence","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"active","type":{"kind":"simple","type":"bool","optional":false}},{"name":"prizes","type":{"kind":"dict","key":"uint","keyFormat":8,"value":"uint","valueFormat":8}}]},
+    {"name":"RoundConfig","header":null,"fields":[{"name":"roundId","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"poolId","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"ticketPrice","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"startTime","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"endTime","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"active","type":{"kind":"simple","type":"bool","optional":false}}]},
+    {"name":"TicketPayoutResponse","header":null,"fields":[{"name":"ticket","type":{"kind":"simple","type":"string","optional":false}}]},
+    {"name":"RandomTicketResponse","header":null,"fields":[{"name":"ASCIINumber","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"ticket","type":{"kind":"simple","type":"string","optional":false}}]},
+    {"name":"Ticket","header":null,"fields":[{"name":"ticket","type":{"kind":"simple","type":"string","optional":false}},{"name":"ticketNumber","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"UserTicket","header":null,"fields":[{"name":"users","type":{"kind":"dict","key":"address","value":"TicketPayoutResponse","valueFormat":"ref"}}]},
+    {"name":"RoundTicket","header":null,"fields":[{"name":"rounds","type":{"kind":"dict","key":"int","value":"UserTicket","valueFormat":"ref"}}]},
+    {"name":"Winner","header":null,"fields":[{"name":"ticket","type":{"kind":"simple","type":"string","optional":false}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"prize","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
+    {"name":"ClaimInfo","header":null,"fields":[{"name":"info","type":{"kind":"dict","key":"int","value":"UserClaim","valueFormat":"ref"}}]},
+    {"name":"UserClaim","header":null,"fields":[{"name":"user","type":{"kind":"dict","key":"address","value":"bool"}}]},
+    {"name":"Result","header":null,"fields":[{"name":"rounds","type":{"kind":"dict","key":"int","value":"int"}}]},
+    {"name":"CreatePool","header":2095598070,"fields":[{"name":"jettonWallet","type":{"kind":"simple","type":"address","optional":false}},{"name":"ticketPrice","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"initialRounds","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"startTime","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"endTime","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"sequence","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"active","type":{"kind":"simple","type":"bool","optional":false}},{"name":"prizes","type":{"kind":"dict","key":"uint","keyFormat":8,"value":"uint","valueFormat":8}}]},
+    {"name":"Claim","header":1449747896,"fields":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"roundId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"receiver","type":{"kind":"simple","type":"address","optional":false}},{"name":"signature","type":{"kind":"simple","type":"slice","optional":false}}]},
+    {"name":"WinningNumbersDrawnEvent","header":3552390527,"fields":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"roundId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"winningNumber","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
+    {"name":"UpdatePizes","header":4133815729,"fields":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"prizes","type":{"kind":"dict","key":"uint","keyFormat":8,"value":"uint","valueFormat":8}}]},
+    {"name":"BuyTicket","header":3748203161,"fields":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"roundId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"quantity","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
+    {"name":"DrawWinningNumbers","header":3591482628,"fields":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"roundId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"latestTxHash","type":{"kind":"simple","type":"string","optional":false}}]},
+    {"name":"SetAdmin","header":3397822855,"fields":[{"name":"admin","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"SetPublicKey","header":3279683070,"fields":[{"name":"publicKey","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
+    {"name":"SetClaimFeePercent","header":233252030,"fields":[{"name":"claimFeePercent","type":{"kind":"simple","type":"uint","optional":false,"format":8}}]},
+    {"name":"PoolCreatedEvent","header":590692540,"fields":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"ticketPrice","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"initialRounds","type":{"kind":"simple","type":"uint","optional":false,"format":8}},{"name":"startTime","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"endTime","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"active","type":{"kind":"simple","type":"bool","optional":false}},{"name":"sequence","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"rounds","type":{"kind":"dict","key":"int","value":"RoundConfig","valueFormat":"ref"}},{"name":"creator","type":{"kind":"simple","type":"address","optional":false}},{"name":"prizes","type":{"kind":"dict","key":"uint","keyFormat":8,"value":"uint","valueFormat":8}}]},
+    {"name":"RoundCreated","header":3113542296,"fields":[{"name":"roundId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"ticketPrice","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"startTime","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"endTime","type":{"kind":"simple","type":"uint","optional":false,"format":32}}]},
+    {"name":"TicketBoughtEvent","header":1249282626,"fields":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"roundId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"quantity","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"buyer","type":{"kind":"simple","type":"address","optional":false}},{"name":"tickets","type":{"kind":"simple","type":"string","optional":false}}]},
+    {"name":"ClaimedEvent","header":916403026,"fields":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"roundId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"receiver","type":{"kind":"simple","type":"address","optional":false}}]},
+]
 
 const Lottery_getters: ABIGetter[] = [
-    { name: 'admins', arguments: [], returnType: { kind: 'dict', key: 'address', value: 'bool' } },
-    {
-        name: 'isAdmin',
-        arguments: [{ name: 'address', type: { kind: 'simple', type: 'address', optional: false } }],
-        returnType: { kind: 'simple', type: 'bool', optional: false },
-    },
-    { name: 'currentPool', arguments: [], returnType: { kind: 'dict', key: 'int', value: 'Pool', valueFormat: 'ref' } },
-    {
-        name: 'poolById',
-        arguments: [{ name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } }],
-        returnType: { kind: 'simple', type: 'Pool', optional: true },
-    },
-    {
-        name: 'usersTicket',
-        arguments: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'roundId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-        ],
-        returnType: { kind: 'simple', type: 'UserTicket', optional: false },
-    },
-    {
-        name: 'userTicketByAddress',
-        arguments: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'roundId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'user', type: { kind: 'simple', type: 'address', optional: false } },
-        ],
-        returnType: { kind: 'simple', type: 'TicketPayoutResponse', optional: true },
-    },
-    {
-        name: 'roundById',
-        arguments: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'roundId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-        ],
-        returnType: { kind: 'simple', type: 'RoundConfig', optional: true },
-    },
-    {
-        name: 'resultByRound',
-        arguments: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'roundId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-        ],
-        returnType: { kind: 'simple', type: 'int', optional: true, format: 257 },
-    },
-    {
-        name: 'resultByPool',
-        arguments: [{ name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } }],
-        returnType: { kind: 'simple', type: 'Result', optional: true },
-    },
-    { name: 'publicKey', arguments: [], returnType: { kind: 'simple', type: 'int', optional: true, format: 257 } },
-    {
-        name: 'claimData',
-        arguments: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'roundId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-        ],
-        returnType: { kind: 'simple', type: 'UserClaim', optional: true },
-    },
-    {
-        name: 'isClaim',
-        arguments: [
-            { name: 'poolId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'roundId', type: { kind: 'simple', type: 'int', optional: false, format: 257 } },
-            { name: 'receiver', type: { kind: 'simple', type: 'address', optional: false } },
-        ],
-        returnType: { kind: 'simple', type: 'bool', optional: false },
-    },
-    { name: 'owner', arguments: [], returnType: { kind: 'simple', type: 'address', optional: false } },
-];
+    {"name":"admins","arguments":[],"returnType":{"kind":"dict","key":"address","value":"bool"}},
+    {"name":"isAdmin","arguments":[{"name":"address","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"bool","optional":false}},
+    {"name":"currentPool","arguments":[],"returnType":{"kind":"dict","key":"int","value":"Pool","valueFormat":"ref"}},
+    {"name":"poolById","arguments":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}}],"returnType":{"kind":"simple","type":"Pool","optional":true}},
+    {"name":"usersTicket","arguments":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"roundId","type":{"kind":"simple","type":"int","optional":false,"format":257}}],"returnType":{"kind":"simple","type":"UserTicket","optional":false}},
+    {"name":"userTicketByAddress","arguments":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"roundId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"user","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"TicketPayoutResponse","optional":true}},
+    {"name":"roundById","arguments":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"roundId","type":{"kind":"simple","type":"int","optional":false,"format":257}}],"returnType":{"kind":"simple","type":"RoundConfig","optional":true}},
+    {"name":"resultByRound","arguments":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"roundId","type":{"kind":"simple","type":"int","optional":false,"format":257}}],"returnType":{"kind":"simple","type":"int","optional":true,"format":257}},
+    {"name":"resultByPool","arguments":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}}],"returnType":{"kind":"simple","type":"Result","optional":true}},
+    {"name":"publicKey","arguments":[],"returnType":{"kind":"simple","type":"int","optional":true,"format":257}},
+    {"name":"claimData","arguments":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"roundId","type":{"kind":"simple","type":"int","optional":false,"format":257}}],"returnType":{"kind":"simple","type":"UserClaim","optional":true}},
+    {"name":"isClaim","arguments":[{"name":"poolId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"roundId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"receiver","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"bool","optional":false}},
+    {"name":"contractBalance","arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"claimFeePercent","arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"owner","arguments":[],"returnType":{"kind":"simple","type":"address","optional":false}},
+]
 
 export const Lottery_getterMapping: { [key: string]: string } = {
-    admins: 'getAdmins',
-    isAdmin: 'getIsAdmin',
-    currentPool: 'getCurrentPool',
-    poolById: 'getPoolById',
-    usersTicket: 'getUsersTicket',
-    userTicketByAddress: 'getUserTicketByAddress',
-    roundById: 'getRoundById',
-    resultByRound: 'getResultByRound',
-    resultByPool: 'getResultByPool',
-    publicKey: 'getPublicKey',
-    claimData: 'getClaimData',
-    isClaim: 'getIsClaim',
-    owner: 'getOwner',
-};
+    'admins': 'getAdmins',
+    'isAdmin': 'getIsAdmin',
+    'currentPool': 'getCurrentPool',
+    'poolById': 'getPoolById',
+    'usersTicket': 'getUsersTicket',
+    'userTicketByAddress': 'getUserTicketByAddress',
+    'roundById': 'getRoundById',
+    'resultByRound': 'getResultByRound',
+    'resultByPool': 'getResultByPool',
+    'publicKey': 'getPublicKey',
+    'claimData': 'getClaimData',
+    'isClaim': 'getIsClaim',
+    'contractBalance': 'getContractBalance',
+    'claimFeePercent': 'getClaimFeePercent',
+    'owner': 'getOwner',
+}
 
 const Lottery_receivers: ABIReceiver[] = [
-    { receiver: 'internal', message: { kind: 'typed', type: 'CreatePool' } },
-    { receiver: 'internal', message: { kind: 'typed', type: 'BuyTicket' } },
-    { receiver: 'internal', message: { kind: 'typed', type: 'DrawWinningNumbers' } },
-    { receiver: 'internal', message: { kind: 'typed', type: 'SetAdmin' } },
-    { receiver: 'internal', message: { kind: 'typed', type: 'Claim' } },
-    { receiver: 'internal', message: { kind: 'typed', type: 'SetPublicKey' } },
-    { receiver: 'internal', message: { kind: 'typed', type: 'Deploy' } },
-];
+    {"receiver":"internal","message":{"kind":"typed","type":"CreatePool"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"BuyTicket"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"DrawWinningNumbers"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"SetAdmin"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"Claim"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"SetPublicKey"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"SetClaimFeePercent"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"Deploy"}},
+]
 
 export class Lottery implements Contract {
+    
     static async init() {
         return await Lottery_init();
     }
-
+    
     static async fromInit() {
         const init = await Lottery_init();
         const address = contractAddress(0, init);
         return new Lottery(address, init);
     }
-
+    
     static fromAddress(address: Address) {
         return new Lottery(address);
     }
-
-    readonly address: Address;
-    readonly init?: { code: Cell; data: Cell };
+    
+    readonly address: Address; 
+    readonly init?: { code: Cell, data: Cell };
     readonly abi: ContractABI = {
-        types: Lottery_types,
+        types:  Lottery_types,
         getters: Lottery_getters,
         receivers: Lottery_receivers,
         errors: Lottery_errors,
     };
-
-    private constructor(address: Address, init?: { code: Cell; data: Cell }) {
+    
+    private constructor(address: Address, init?: { code: Cell, data: Cell }) {
         this.address = address;
         this.init = init;
     }
-
-    async send(
-        provider: ContractProvider,
-        via: Sender,
-        args: { value: bigint; bounce?: boolean | null | undefined },
-        message: CreatePool | BuyTicket | DrawWinningNumbers | SetAdmin | Claim | SetPublicKey | Deploy,
-    ) {
+    
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: CreatePool | BuyTicket | DrawWinningNumbers | SetAdmin | Claim | SetPublicKey | SetClaimFeePercent | Deploy) {
+        
         let body: Cell | null = null;
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'CreatePool') {
             body = beginCell().store(storeCreatePool(message)).endCell();
@@ -2944,12 +2198,7 @@ export class Lottery implements Contract {
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'BuyTicket') {
             body = beginCell().store(storeBuyTicket(message)).endCell();
         }
-        if (
-            message &&
-            typeof message === 'object' &&
-            !(message instanceof Slice) &&
-            message.$$type === 'DrawWinningNumbers'
-        ) {
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'DrawWinningNumbers') {
             body = beginCell().store(storeDrawWinningNumbers(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'SetAdmin') {
@@ -2958,31 +2207,28 @@ export class Lottery implements Contract {
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Claim') {
             body = beginCell().store(storeClaim(message)).endCell();
         }
-        if (
-            message &&
-            typeof message === 'object' &&
-            !(message instanceof Slice) &&
-            message.$$type === 'SetPublicKey'
-        ) {
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'SetPublicKey') {
             body = beginCell().store(storeSetPublicKey(message)).endCell();
+        }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'SetClaimFeePercent') {
+            body = beginCell().store(storeSetClaimFeePercent(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Deploy') {
             body = beginCell().store(storeDeploy(message)).endCell();
         }
-        if (body === null) {
-            throw new Error('Invalid message type');
-        }
-
+        if (body === null) { throw new Error('Invalid message type'); }
+        
         await provider.internal(via, { ...args, body: body });
+        
     }
-
+    
     async getAdmins(provider: ContractProvider) {
         let builder = new TupleBuilder();
         let source = (await provider.get('admins', builder.build())).stack;
         let result = Dictionary.loadDirect(Dictionary.Keys.Address(), Dictionary.Values.Bool(), source.readCellOpt());
         return result;
     }
-
+    
     async getIsAdmin(provider: ContractProvider, address: Address) {
         let builder = new TupleBuilder();
         builder.writeAddress(address);
@@ -2990,14 +2236,14 @@ export class Lottery implements Contract {
         let result = source.readBoolean();
         return result;
     }
-
+    
     async getCurrentPool(provider: ContractProvider) {
         let builder = new TupleBuilder();
         let source = (await provider.get('currentPool', builder.build())).stack;
         let result = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserPool(), source.readCellOpt());
         return result;
     }
-
+    
     async getPoolById(provider: ContractProvider, poolId: bigint) {
         let builder = new TupleBuilder();
         builder.writeNumber(poolId);
@@ -3006,7 +2252,7 @@ export class Lottery implements Contract {
         const result = result_p ? loadTuplePool(result_p) : null;
         return result;
     }
-
+    
     async getUsersTicket(provider: ContractProvider, poolId: bigint, roundId: bigint) {
         let builder = new TupleBuilder();
         builder.writeNumber(poolId);
@@ -3015,7 +2261,7 @@ export class Lottery implements Contract {
         const result = loadGetterTupleUserTicket(source);
         return result;
     }
-
+    
     async getUserTicketByAddress(provider: ContractProvider, poolId: bigint, roundId: bigint, user: Address) {
         let builder = new TupleBuilder();
         builder.writeNumber(poolId);
@@ -3026,7 +2272,7 @@ export class Lottery implements Contract {
         const result = result_p ? loadTupleTicketPayoutResponse(result_p) : null;
         return result;
     }
-
+    
     async getRoundById(provider: ContractProvider, poolId: bigint, roundId: bigint) {
         let builder = new TupleBuilder();
         builder.writeNumber(poolId);
@@ -3036,7 +2282,7 @@ export class Lottery implements Contract {
         const result = result_p ? loadTupleRoundConfig(result_p) : null;
         return result;
     }
-
+    
     async getResultByRound(provider: ContractProvider, poolId: bigint, roundId: bigint) {
         let builder = new TupleBuilder();
         builder.writeNumber(poolId);
@@ -3045,7 +2291,7 @@ export class Lottery implements Contract {
         let result = source.readBigNumberOpt();
         return result;
     }
-
+    
     async getResultByPool(provider: ContractProvider, poolId: bigint) {
         let builder = new TupleBuilder();
         builder.writeNumber(poolId);
@@ -3054,14 +2300,14 @@ export class Lottery implements Contract {
         const result = result_p ? loadTupleResult(result_p) : null;
         return result;
     }
-
+    
     async getPublicKey(provider: ContractProvider) {
         let builder = new TupleBuilder();
         let source = (await provider.get('publicKey', builder.build())).stack;
         let result = source.readBigNumberOpt();
         return result;
     }
-
+    
     async getClaimData(provider: ContractProvider, poolId: bigint, roundId: bigint) {
         let builder = new TupleBuilder();
         builder.writeNumber(poolId);
@@ -3071,7 +2317,7 @@ export class Lottery implements Contract {
         const result = result_p ? loadTupleUserClaim(result_p) : null;
         return result;
     }
-
+    
     async getIsClaim(provider: ContractProvider, poolId: bigint, roundId: bigint, receiver: Address) {
         let builder = new TupleBuilder();
         builder.writeNumber(poolId);
@@ -3081,11 +2327,26 @@ export class Lottery implements Contract {
         let result = source.readBoolean();
         return result;
     }
-
+    
+    async getContractBalance(provider: ContractProvider) {
+        let builder = new TupleBuilder();
+        let source = (await provider.get('contractBalance', builder.build())).stack;
+        let result = source.readBigNumber();
+        return result;
+    }
+    
+    async getClaimFeePercent(provider: ContractProvider) {
+        let builder = new TupleBuilder();
+        let source = (await provider.get('claimFeePercent', builder.build())).stack;
+        let result = source.readBigNumber();
+        return result;
+    }
+    
     async getOwner(provider: ContractProvider) {
         let builder = new TupleBuilder();
         let source = (await provider.get('owner', builder.build())).stack;
         let result = source.readAddress();
         return result;
     }
+    
 }
