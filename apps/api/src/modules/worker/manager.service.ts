@@ -11,11 +11,14 @@ import {
   PoolRound,
   Prizes,
   Token,
+  TokenPrice,
   Transaction,
   UserTicket,
 } from '@/database/entities';
 
+import { TokenPriceService } from '../services/token_price.service';
 import { CrawlWorkerService } from './crawl.service';
+import { CrawlTokenPriceService } from './crawl_token_price.service';
 import { RoundPrizesService } from './round_prizes.service';
 
 @Injectable()
@@ -36,8 +39,12 @@ export class ManagerService {
     private readonly poolRepository: Repository<Pool>,
     @InjectRepository(Prizes)
     private readonly prizesRepository: Repository<Prizes>,
+    @InjectRepository(TokenPrice)
+    private readonly tokenPriceRepository: Repository<TokenPrice>,
+    private readonly tokenPriceService: TokenPriceService,
   ) {
     this.init();
+    this.crawlToken();
     cron.schedule('* * * * *', async () => {
       this.syncData();
     });
@@ -66,6 +73,23 @@ export class ManagerService {
       this.configService,
       this.userTicketRepository,
     );
+  }
+
+  async crawlToken() {
+    const tokens = await this.tokenRepository.findBy({
+      isActive: true,
+    });
+
+    await Promise.allSettled([
+      tokens.map(
+        (token) =>
+          new CrawlTokenPriceService(
+            token,
+            this.tokenPriceRepository,
+            this.tokenPriceService,
+          ),
+      ),
+    ]);
   }
 
   wait(timeout: number) {

@@ -9,22 +9,25 @@ const logger = getLogger('TokenPriceService');
 
 @Injectable()
 export class TokenPriceService {
-  BASE_GATE_IO_API = 'https://data.gateapi.io';
+  BASE_TON_IO_API = 'https://tonapi.io';
 
   constructor(private readonly httpService: HttpService) {}
 
-  async getPrice(fromSymbol: string, toSymbol: string): Promise<IMarketData> {
-    const pair = `${fromSymbol}_${toSymbol}`;
+  async getPrice<F extends string, T extends string>(
+    fromSymbol: F,
+    toSymbol: T,
+  ) {
+    const pair = `?tokens=${fromSymbol}&currencies=${toSymbol}`;
     try {
       const response = await firstValueFrom(
         this.httpService.get(
-          `${this.BASE_GATE_IO_API}/api/1/ticker/${pair.toLocaleLowerCase()}`,
+          `${this.BASE_TON_IO_API}/v2/rates${pair.toLocaleLowerCase()}`,
         ),
       );
-
-      return response.data as IMarketData;
+      return response.data as IMarketData<F, T>;
     } catch (error) {
-      throw new Error('[GATE.IO] Error while getting price:' + error);
+      logger.error(error);
+      throw new Error('[TONAPI.IO] Error while getting price:' + error);
     }
   }
 }
