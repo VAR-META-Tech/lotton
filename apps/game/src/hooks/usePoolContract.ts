@@ -6,6 +6,7 @@ import Pool from '@/contracts/pool';
 import { useMemo } from 'react';
 import { env } from '@/lib/const';
 import { useTonWallet } from '@tonconnect/ui-react';
+import { roundNumber } from '@/lib/common';
 
 interface IBuyTicket {
   poolId: number;
@@ -41,38 +42,46 @@ export function usePoolContract() {
   }, [client]);
 
   const buyTicket = async (data: IBuyTicket) => {
-    if (!provider || !wallet) return;
+    try {
+      if (!provider || !wallet) return;
 
-    const messageBody = beginCell()
-      .storeUint(3748203161, 32)
-      .storeInt(data?.poolId, 257) //poolId
-      .storeInt(data?.roundId, 257) //roundId
-      .storeInt(data?.quantity, 257) //quantity
-      .endCell();
+      const messageBody = beginCell()
+        .storeUint(3748203161, 32)
+        .storeInt(data?.poolId, 257) //poolId
+        .storeInt(data?.roundId, 257) //roundId
+        .storeInt(data?.quantity, 257) //quantity
+        .endCell();
 
-    return await poolContract?.buyTicket({
-      provider,
-      via: sender,
-      messageBody,
-      value: data?.quantity * data?.ticketPrice,
-    });
+      return await poolContract?.buyTicket({
+        provider,
+        via: sender,
+        messageBody,
+        value: roundNumber(Number(data?.quantity) * Number(data?.ticketPrice)),
+      });
+    } catch (error) {
+      throw new Error(error as string);
+    }
   };
 
   const claimPrize = async (data: IClaimPrize) => {
-    if (!provider || !wallet) return;
-    const encode = Buffer.from(data.signature, 'base64');
-    const signatureCell = beginCell().storeBuffer(encode).endCell();
+    try {
+      if (!provider || !wallet) return;
+      const encode = Buffer.from(data.signature, 'base64');
+      const signatureCell = beginCell().storeBuffer(encode).endCell();
 
-    const messageBody = beginCell()
-      .storeUint(1449747896, 257)
-      .storeInt(data.poolId, 257) //poolId
-      .storeInt(data.roundId, 32) //roundId
-      .storeCoins(data.amount) //amount
-      .storeAddress(Address.parse(data.receiver)) //receiver
-      .storeRef(signatureCell) //signature
-      .endCell();
+      const messageBody = beginCell()
+        .storeUint(1449747896, 257)
+        .storeInt(data.poolId, 257) //poolId
+        .storeInt(data.roundId, 32) //roundId
+        .storeCoins(data.amount) //amount
+        .storeAddress(Address.parse(data.receiver)) //receiver
+        .storeRef(signatureCell) //signature
+        .endCell();
 
-    return await poolContract?.claimPrize(provider, sender, messageBody);
+      return await poolContract?.claimPrize(provider, sender, messageBody);
+    } catch (error) {
+      throw new Error(error as string);
+    }
   };
 
   const getLastTx = () => {

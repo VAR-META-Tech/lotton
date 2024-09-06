@@ -3,7 +3,7 @@ import { IGetPoolDetailData, IGetPoolDetailRound } from '@/apis/pools';
 import { Icons } from '@/assets/icons';
 import { motion } from 'framer-motion';
 
-import { prettyNumber } from '@/lib/common';
+import { prettyNumber, roundNumber } from '@/lib/common';
 import { cn } from '@/lib/utils';
 import { HStack, VStack } from '@/components/ui/Utilities';
 
@@ -45,7 +45,7 @@ const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound 
                   <MatchItem
                     key={`${item?.id}-${index}`}
                     title={`Match first ${item?.matchNumber}`}
-                    value={`${prettyNumber(Number(value).toFixed(2))} ${currency?.symbol || ''}`}
+                    value={`${prettyNumber(roundNumber(value))} ${currency?.symbol || ''}`}
                     subValue={`~ ${prettyNumber(Number(0 * allocationRate).toFixed(2))} USD`}
                   />
                 );
@@ -63,7 +63,7 @@ const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound 
             <span className="text-white font-medium text-base">Prize Pot</span>
 
             <span>
-              <span className="text-2xl font-semibold text-primary">{`${prettyNumber(3953)} ${
+              <span className="text-2xl font-semibold text-primary">{`${prettyNumber(fromNano(roundActive?.totalPrizes || 0))} ${
                 currency?.symbol || ''
               }`}</span>{' '}
               <span className="text-sm text-gray-color">~ {prettyNumber(Number(10000).toFixed(2))} USD</span>
@@ -77,13 +77,15 @@ const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound 
         </VStack>
         <div className="grid grid-cols-2 gap-3">
           {poolPrizes?.map((item, index) => {
-            const allocationRate = Number(item?.allocation) / 100;
+            const allocationRate = Number(item?.allocation || 0) / 100;
+            const totalPrizes = Number(fromNano(roundActive?.totalPrizes || 0));
+            const value = totalPrizes * allocationRate;
             return (
               <MatchItem
                 key={`${item?.id}-${index}`}
                 title={`Match first ${item?.matchNumber}`}
-                value={`${prettyNumber(Number(2500 * allocationRate).toFixed(2))} ${currency?.symbol || ''}`}
-                subValue={`~ ${prettyNumber(Number(10000 * allocationRate).toFixed(2))} USD`}
+                value={`${prettyNumber(roundNumber(value))} ${currency?.symbol || ''}`}
+                subValue={`~ ${prettyNumber(Number(0 * allocationRate).toFixed(2))} USD`}
               >
                 <VStack spacing={2} className="mt-1">
                   <span className="text-xs">61.170005 TON each</span>
