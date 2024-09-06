@@ -1,5 +1,5 @@
 import { HStack, VStack } from '@/components/ui/Utilities';
-import { env } from '@/lib/const';
+import { usePoolContract } from '@/hooks/usePoolContract';
 import React, { FC } from 'react';
 
 interface Props {
@@ -21,6 +21,8 @@ const CollectTotal: FC<Props> = ({
   totalUsdValue,
   tokenSymbol,
 }) => {
+  const { claimFee } = usePoolContract();
+
   return (
     <VStack>
       <VStack className="border-t border-t-gray-color">
@@ -35,7 +37,7 @@ const CollectTotal: FC<Props> = ({
         </VStack>
 
         <VStack>
-          <span className="pt-4 font-bold">Claim Fees {env.CLAIM_FEE}%</span>
+          <span className="pt-4 font-bold">Claim Fees {claimFee}%</span>
 
           <HStack pos={'apart'} className="font-bold">
             <span className="text-primary text-2xl">{`${Number(feeValue || 0).toFixed(6)} ${tokenSymbol || ''}`}</span>

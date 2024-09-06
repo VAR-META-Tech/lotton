@@ -36,7 +36,7 @@ export default class Pool implements Contract {
     value: number;
   }) {
     const BigValue = Big(value);
-    const totalValue = BigValue.add(0.1); // send 0.05 TON for gas
+    const totalValue = BigValue.add(0.1); // send 0.1 TON for gas
 
     try {
       await provider.internal(via, {
@@ -57,5 +57,11 @@ export default class Pool implements Contract {
     } catch (error) {
       throw new Error(error as string);
     }
+  }
+
+  async getClaimFee(provider: ContractProvider) {
+    const { stack } = await provider.get('claimFeePercent', []);
+
+    return stack.readBigNumber();
   }
 }
