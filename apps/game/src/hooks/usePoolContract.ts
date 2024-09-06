@@ -11,6 +11,7 @@ interface IBuyTicket {
   poolId: number;
   roundId: number;
   quantity: number;
+  ticketPrice: number;
 }
 
 interface IClaimPrize {
@@ -49,7 +50,12 @@ export function usePoolContract() {
       .storeInt(data?.quantity, 257) //quantity
       .endCell();
 
-    return await poolContract?.buyTicket(provider, sender, messageBody);
+    return await poolContract?.buyTicket({
+      provider,
+      via: sender,
+      messageBody,
+      value: data?.quantity * data?.ticketPrice,
+    });
   };
 
   const claimPrize = async (data: IClaimPrize) => {

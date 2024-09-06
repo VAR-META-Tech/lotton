@@ -7,8 +7,10 @@ import { HStack } from '@/components/ui/Utilities';
 import { ChangeRoundAction } from './ChangeRoundAction';
 import { DrawTime } from './DrawTime';
 import { TicketDetailDrawer } from './TicketDetailDrawer';
-import { IGetPoolJoinedItem } from '@/apis/pools';
+import { IGetPoolDetailRound, IGetPoolJoinedItem } from '@/apis/pools';
 import BuyTicketDrawer from '@/modules/LandingPage/components/PoolList/BuyTicketDrawer';
+import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
+import { getRoundActiveNumber } from '@/lib/common';
 
 type Props = {
   pool: IGetPoolJoinedItem;
@@ -16,13 +18,14 @@ type Props = {
 
 export const PoolItem = ({ pool }: Props) => {
   const [activeRound, setActiveRound] = useState(0);
-  const rounds = pool?.rounds || [];
-  const roundActive = rounds[activeRound];
-  const roundActiveNumber = roundActive?.roundNumber;
 
-  const roundActiveNumberLabel = roundActive
-    ? `${roundActiveNumber < 10 ? `0${roundActiveNumber}` : roundActiveNumber}`
-    : '00';
+  const { pool: poolDetail } = useGetPoolDetail({
+    isActive: true,
+    poolId: pool?.id || 0,
+  });
+
+  const rounds = poolDetail?.rounds || [];
+  const roundActive = rounds[activeRound];
 
   const handleChangeRoundActive = (upRound: boolean) => {
     if (upRound) {
@@ -42,44 +45,44 @@ export const PoolItem = ({ pool }: Props) => {
 
       <div className="col-span-4 p-4 flex flex-col gap-4">
         <HStack pos={'apart'} spacing={16}>
-          <RoundNumber roundNumber={roundActiveNumberLabel} />
+          <RoundNumber roundActive={roundActive} />
 
           <ChangeRoundAction activeRound={activeRound} onClick={handleChangeRoundActive} rounds={rounds} />
         </HStack>
 
-        <DrawTime endTime={roundActive?.endTime} />
+        <DrawTime endTime={Number(roundActive?.endTime || 0)} />
 
-        <TicketDetailDrawer pool={pool} roundActiveNumber={roundActiveNumber}>
+        <TicketDetailDrawer pool={pool} roundActive={roundActive}>
           <Button className="mx-auto rounded-lg text-white">View your tickets</Button>
         </TicketDetailDrawer>
       </div>
 
-      <BuyTicketDrawer
-        poolId={pool?.id}
-        roundIdOnChain={roundActive?.roundIdOnChain}
-        poolIdOnChain={pool?.poolIdOnChain}
-      />
+      <BuyTicketDrawer pool={poolDetail} roundActive={roundActive} />
     </div>
   );
 };
 
-const RoundNumber = ({ roundNumber }: { roundNumber: string }) => (
-  <HStack spacing={16}>
-    <span className="font-medium">Round</span>
+const RoundNumber = ({ roundActive }: { roundActive: IGetPoolDetailRound }) => {
+  const roundActiveNumber = getRoundActiveNumber(roundActive?.roundNumber || 0);
 
-    <motion.div
-      key={roundNumber}
-      initial={{ x: '-10%', opacity: 0.5 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: '10%', opacity: 0 }}
-    >
-      <HStack
-        pos={'center'}
-        align={'center'}
-        className="min-w-[2.9375rem] text-center h-[1.75rem] bg-background-2 rounded-md"
+  return (
+    <HStack spacing={16}>
+      <span className="font-medium">Round</span>
+
+      <motion.div
+        key={roundActiveNumber}
+        initial={{ x: '-10%', opacity: 0.5 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: '10%', opacity: 0 }}
       >
-        {roundNumber}
-      </HStack>
-    </motion.div>
-  </HStack>
-);
+        <HStack
+          pos={'center'}
+          align={'center'}
+          className="min-w-[2.9375rem] text-center h-[1.75rem] bg-background-2 rounded-md"
+        >
+          {roundActiveNumber}
+        </HStack>
+      </motion.div>
+    </HStack>
+  );
+};

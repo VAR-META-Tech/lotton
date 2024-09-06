@@ -23,10 +23,20 @@ export default class Pool implements Contract {
     });
   }
 
-  async buyTicket(provider: ContractProvider, via: Sender, messageBody?: Maybe<string | Cell>) {
+  async buyTicket({
+    provider,
+    via,
+    messageBody,
+    value,
+  }: {
+    provider: ContractProvider;
+    via: Sender;
+    messageBody?: Maybe<string | Cell>;
+    value: number;
+  }) {
     try {
       await provider.internal(via, {
-        value: '0.05', // send 0.05 TON for gas
+        value: String(value + 0.05), // send 0.05 TON for gas
         body: messageBody,
       });
     } catch (error) {

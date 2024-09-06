@@ -44,6 +44,7 @@ export interface IGetPoolDetailData {
   endTime: string;
   sequency: number;
   totalRounds: number;
+  status: string;
   ticketPrice: string;
   currency: IGetPoolDetailCurrency;
   rounds: IGetPoolDetailRound[];
@@ -53,10 +54,10 @@ export interface IGetPoolDetailData {
 export interface IGetPoolDetailCurrency {
   createdAt: string;
   updatedAt: string;
-  deletedAt: any;
+  deletedAt: string | null;
   id: number;
   name: string;
-  icon: any;
+  icon: string | null;
   decimals: number;
   symbol: string;
   contractAddress: string;
@@ -74,13 +75,14 @@ export interface IGetPoolDetailRound {
   roundNumber: number;
   startTime: string;
   endTime: string;
-  winningCode: string | null;
+  winningCode?: string;
+  totalPrizes: string;
 }
 
 export interface IGetPoolDetailPoolPrize {
   createdAt: string;
   updatedAt: string;
-  deletedAt: any;
+  deletedAt: string | null;
   id: number;
   matchNumber: number;
   allocation: number;
