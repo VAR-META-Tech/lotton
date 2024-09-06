@@ -18,5 +18,8 @@ export class Prizes extends BaseTime {
   totalPrizes: number;
 
   @Column({ type: 'decimal', nullable: true })
+  winningPrizes: number;
+
+  @Column({ type: 'decimal', nullable: true })
   claimedPrizes: number;
 }

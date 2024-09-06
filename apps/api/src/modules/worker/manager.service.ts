@@ -8,6 +8,7 @@ import type { StellaConfig } from '@/configs';
 import {
   LatestBlock,
   Pool,
+  PoolPrize,
   PoolRound,
   Prizes,
   Token,
@@ -42,6 +43,8 @@ export class ManagerService {
     @InjectRepository(TokenPrice)
     private readonly tokenPriceRepository: Repository<TokenPrice>,
     private readonly tokenPriceService: TokenPriceService,
+    @InjectRepository(PoolPrize)
+    private readonly poolPrizeRepository: Repository<PoolPrize>,
   ) {
     this.init();
     this.crawlToken();
@@ -61,6 +64,7 @@ export class ManagerService {
         this.poolRoundRepository,
         this.poolRepository,
         this.prizesRepository,
+        this.poolPrizeRepository,
       ).doCrawlJob();
       await this.wait(10000); // 10 seconds
     }

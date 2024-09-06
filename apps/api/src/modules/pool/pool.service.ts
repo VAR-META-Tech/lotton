@@ -547,7 +547,7 @@ export class PoolService {
       const keyPair = await mnemonicToWalletKey(
         this.configService
           .get('contract.adminWalletPhrase', { infer: true })
-          .split(''),
+          .split(' '),
       );
       const signature = sign(signatureData.hash(), keyPair.secretKey).toString(
         'base64',

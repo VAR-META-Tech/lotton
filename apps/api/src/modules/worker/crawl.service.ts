@@ -1,20 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import type { Transaction } from '@ton/core';
+import type { Message, Transaction } from '@ton/core';
 import { Address, beginCell, toNano } from '@ton/core';
 import { TonClient } from '@ton/ton';
 import TonWeb from 'tonweb';
 import { Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
-import type { Pool, Token } from '@/database/entities';
 import {
+  Pool,
+  Token,
   LatestBlock,
   PoolRound,
   Prizes,
   Transaction as TransactionDB,
   UserTicket,
+  PoolPrize,
 } from '@/database/entities';
 import { EVENT_HEADER, PoolStatusEnum } from '@/shared/enums';
 
@@ -26,6 +28,7 @@ import {
   loadWinningNumbersDrawnEvent,
 } from './contract_funcs';
 import { calculatorMatch, splitTickets } from './func';
+import bigDecimal from 'js-big-decimal';
 
 @Injectable()
 export class CrawlWorkerService {
@@ -42,6 +45,7 @@ export class CrawlWorkerService {
     private readonly poolRoundRepository: Repository<PoolRound>,
     private readonly poolRepository: Repository<Pool>,
     private readonly prizesRepository: Repository<Prizes>,
+    private readonly poolPrizeRepository: Repository<PoolPrize>,
   ) {
     this.tonClient = new TonClient({
       endpoint: this.configService.get('contract.rpcEndpoint', {
@@ -66,7 +70,7 @@ export class CrawlWorkerService {
         .lt;
       console.log(+currentBlockNumber, +latestBlockNumber);
 
-      if (+currentBlockNumber >= +latestBlockNumber) return;
+      // if (+currentBlockNumber >= +latestBlockNumber) return;
 
       const transactions = await this.getTransactions(
         latestBlockNumber,
@@ -97,6 +101,9 @@ export class CrawlWorkerService {
             case EVENT_HEADER.DRAW_WINNING_NUMBER:
               await this.drawWinningNumber(tx);
               break;
+            case EVENT_HEADER.USER_CLAIM_PRIZE:
+              await this.userClaimPrize(tx);
+              break;
 
             default:
               break;
@@ -111,177 +118,232 @@ export class CrawlWorkerService {
     }
   }
 
+  async userClaimPrize(tx: Transaction) {
+    const outMsgsList = this.getBodyExternalOut(tx.outMessages.values());
+    const outMsgsFirst = outMsgsList[0];
+    const originalOutMsgBody = outMsgsFirst?.body.beginParse();
+    const payloadOutMsg = loadWinningNumbersDrawnEvent(originalOutMsgBody);
+  }
+
   async drawWinningNumber(tx: Transaction) {
-    try {
-      const outMsgsList = tx.outMessages
-        .values()
-        .filter((msg) => msg.info.type === 'external-out');
-      const outMsgsFirst = outMsgsList[0];
-      const originalOutMsgBody = outMsgsFirst?.body.beginParse();
-      const payloadOutMsg = loadWinningNumbersDrawnEvent(originalOutMsgBody);
+    const outMsgsList = this.getBodyExternalOut(tx.outMessages.values());
 
-      const tickets = splitTickets(payloadOutMsg.winningNumber.toString(), 1);
+    const outMsgsFirst = outMsgsList[0];
+    const originalOutMsgBody = outMsgsFirst?.body.beginParse();
+    const payloadOutMsg = loadWinningNumbersDrawnEvent(originalOutMsgBody);
 
-      // Set draw winning code for round
-      const roundExist = await this.poolRoundRepository.findOneBy({
-        roundIdOnChain: Number(payloadOutMsg.roundId),
-      });
-      if (!roundExist) return;
+    const tickets = splitTickets(payloadOutMsg.winningNumber.toString(), 1);
 
-      roundExist.winningCode = tickets?.[0];
-      await this.poolRoundRepository.save(roundExist);
+    // Set draw winning code for round
+    const roundExist = await this.poolRoundRepository.findOneBy({
+      roundIdOnChain: Number(payloadOutMsg.roundId),
+    });
 
-      // Set winning code for user ticket
-      const userTicketsExist = await this.userTicketRepository.findBy({
-        round: {
-          id: roundExist.id,
-        },
-      });
-      const userTicketsUpdate = userTicketsExist.map((ticket) => ({
-        ...ticket,
-        winningCode: tickets?.[0],
-        winningMatch: calculatorMatch(ticket.code, tickets?.[0] ?? ''),
-      }));
-      await this.userTicketRepository.save(userTicketsUpdate);
-    } catch (error) {
-      Logger.error(error);
+    if (!roundExist) return;
+
+    roundExist.winningCode = tickets?.[0];
+    await this.poolRoundRepository.save(roundExist);
+
+    // Set winning code for user ticket
+    const userTicketsExist = await this.userTicketRepository.findBy({
+      round: {
+        id: roundExist.id,
+      },
+    });
+    const userTicketsUpdate = userTicketsExist.map((ticket) => ({
+      ...ticket,
+      winningCode: tickets?.[0],
+      winningMatch: calculatorMatch(ticket.code, tickets?.[0] ?? ''),
+    }));
+    await this.userTicketRepository.save(userTicketsUpdate);
+
+    // Calculator round prize
+    const roundPrize = await this.prizesRepository.findOneBy({
+      poolIdOnChain: Number(payloadOutMsg.poolId),
+      roundIdOnChain: Number(payloadOutMsg.roundId),
+    });
+
+    if (!roundPrize) return;
+
+    const totalTicketsMatch = await this.getTotalTicketMatch(
+      Number(payloadOutMsg.roundId),
+    );
+
+    if (totalTicketsMatch.length === 0) {
+      roundPrize.winningPrizes = 0;
+      return await this.prizesRepository.save(roundPrize);
     }
+
+    const poolPrizes = await this.poolPrizeRepository.findBy({
+      pool: {
+        poolIdOnChain: Number(payloadOutMsg.poolId),
+      },
+    });
+
+    const totalWinningPrizes = poolPrizes.reduce((acc, prize) => {
+      const getTotalTickets = totalTicketsMatch.find(
+        (match) => match.winningMatch === prize.matchNumber,
+      );
+      if (!getTotalTickets) return acc;
+
+      const allocationDecimal = new bigDecimal(prize.allocation);
+      const totalTicketsDecimal = new bigDecimal(getTotalTickets.totalTickets);
+      const percentDecimal = new bigDecimal(100);
+
+      return acc.add(
+        totalTicketsDecimal.multiply(allocationDecimal).divide(percentDecimal),
+      );
+    }, new bigDecimal(0));
+
+    roundPrize.winningPrizes = +totalWinningPrizes.getValue();
+    await this.prizesRepository.save(roundPrize);
+  }
+
+  getTotalTicketMatch(roundId: number) {
+    return this.userTicketRepository
+      .createQueryBuilder('userTicket')
+      .leftJoin('userTicket.round', 'round')
+      .where(
+        'userTicket.winningMatch IS NOT NULL AND userTicket.winningMatch > 0',
+      )
+      .andWhere('round.roundIdOnChain = :roundId', {
+        roundId,
+      })
+      .select([
+        'COUNT(userTicket.id) as totalTickets',
+        'userTicket.winningMatch as winningMatch',
+      ])
+      .groupBy('userTicket.winningMatch')
+      .getRawMany();
   }
 
   async buyTicketsEvent(tx: Transaction) {
-    try {
-      const inMsgs = tx.inMessage;
-      const outMsgs = tx.outMessages
-        .values()
-        .filter((msg) => msg.info.type === 'external-out');
-      if (outMsgs.length === 0) return;
+    const inMsgs = tx.inMessage;
+    const outMsgs = this.getBodyExternalOut(tx.outMessages.values());
 
-      const originalOutMsgBody = outMsgs[0]?.body.beginParse();
-      const originalInMsgBody = inMsgs?.body.beginParse();
-      const payloadOutMsg = loadTicketBoughtEvent(originalOutMsgBody);
-      const payloadInMsg = loadBuyTicket(originalInMsgBody);
+    if (outMsgs.length === 0) return;
 
-      // Create transaction buy ticket
-      const txHash = tx.hash().toString('hex');
-      const token = await this.tokenRepository.findOneBy({ symbol: 'TON' });
+    const originalOutMsgBody = outMsgs[0]?.body.beginParse();
+    const originalInMsgBody = inMsgs?.body.beginParse();
+    const payloadOutMsg = loadTicketBoughtEvent(originalOutMsgBody);
+    const payloadInMsg = loadBuyTicket(originalInMsgBody);
 
-      const newTransaction: Partial<TransactionDB> = {
-        fromAddress: this.parseAddress(inMsgs.info.src.toString()),
-        toAddress: this.parseAddress(tx.inMessage.info.dest.toString()),
-        value: payloadInMsg.quantity.toString(),
-        blockTimestamp: tx.lt.toString(),
-        transactionHash: txHash,
-        token,
-        id: null,
-      };
+    // Create transaction buy ticket
+    const txHash = tx.hash().toString('hex');
+    const token = await this.tokenRepository.findOneBy({ symbol: 'TON' });
 
-      await this.transactionRepository
-        .createQueryBuilder()
-        .insert()
-        .into(TransactionDB)
-        .values(newTransaction)
-        .orUpdate(
-          ['fromAddress', 'toAddress', 'value', 'blockTimestamp'],
-          ['transactionHash'],
-        )
-        .execute();
+    const newTransaction: Partial<TransactionDB> = {
+      fromAddress: this.parseAddress(inMsgs.info.src.toString()),
+      toAddress: this.parseAddress(tx.inMessage.info.dest.toString()),
+      value: payloadInMsg.quantity.toString(),
+      blockTimestamp: tx.lt.toString(),
+      transactionHash: txHash,
+      token,
+      id: null,
+    };
 
-      const transaction = await this.transactionRepository.findOneBy({
-        transactionHash: txHash,
-      });
+    await this.transactionRepository
+      .createQueryBuilder()
+      .insert()
+      .into(TransactionDB)
+      .values(newTransaction)
+      .orUpdate(
+        ['fromAddress', 'toAddress', 'value', 'blockTimestamp'],
+        ['transactionHash'],
+      )
+      .execute();
 
-      const tickets = splitTickets(
-        payloadOutMsg.tickets,
-        Number(payloadInMsg.quantity),
-      );
+    const transaction = await this.transactionRepository.findOneBy({
+      transactionHash: txHash,
+    });
 
-      const roundExist = await this.poolRoundRepository.findOneBy({
-        roundIdOnChain: Number(payloadOutMsg.roundId),
-      });
+    const tickets = splitTickets(
+      payloadOutMsg.tickets,
+      Number(payloadInMsg.quantity),
+    );
 
-      if (!roundExist) return;
+    const roundExist = await this.poolRoundRepository.findOneBy({
+      roundIdOnChain: Number(payloadOutMsg.roundId),
+    });
 
-      // Create user tickets
-      await this.userTicketRepository
-        .createQueryBuilder()
-        .insert()
-        .into(UserTicket)
-        .values(
-          tickets.map((t) => ({
-            id: null,
-            userWallet: this.parseAddress(inMsgs.info.src.toString()),
-            round: roundExist,
-            code: t,
-            transaction: transaction,
-          })),
-        )
-        .orUpdate(['roundId'], ['transactionId', 'userWallet', 'code'])
-        .execute();
+    if (!roundExist) return;
 
-      // Sum total prizes
-      const totalTickets = await this.getTotalTicketOfRound(
-        roundExist.roundIdOnChain,
-      );
-      const poolExist = await this.getPool(Number(payloadOutMsg.poolId));
-      const totalPrizes = totalTickets * Number(poolExist.ticketPrice);
+    // Create user tickets
+    await this.userTicketRepository
+      .createQueryBuilder()
+      .insert()
+      .into(UserTicket)
+      .values(
+        tickets.map((t) => ({
+          id: null,
+          userWallet: this.parseAddress(inMsgs.info.src.toString()),
+          round: roundExist,
+          code: t,
+          transaction: transaction,
+        })),
+      )
+      .orUpdate(['roundId'], ['transactionId', 'userWallet', 'code'])
+      .execute();
 
-      // Set prize for round
-      const roundPrize: Partial<Prizes> = {
-        poolIdOnChain: Number(payloadOutMsg.poolId),
-        roundIdOnChain: Number(payloadOutMsg.roundId),
-        totalPrizes,
-        id: null,
-      };
-      await this.setPrizesRound(roundPrize);
-    } catch (error) {
-      console.log(error);
-    }
+    // Sum total prizes
+    const totalTickets = await this.getTotalTicketOfRound(
+      roundExist.roundIdOnChain,
+    );
+    const poolExist = await this.getPool(Number(payloadOutMsg.poolId));
+    if (!poolExist) return;
+    const totalPrizes = totalTickets * Number(poolExist.ticketPrice);
+
+    // Set prize for round
+    const roundPrize: Partial<Prizes> = {
+      poolIdOnChain: Number(payloadOutMsg.poolId),
+      roundIdOnChain: Number(payloadOutMsg.roundId),
+      totalPrizes,
+      id: null,
+    };
+    await this.setPrizesRound(roundPrize);
   }
 
   async createPoolEvent(tx: Transaction) {
-    try {
-      const outMsgs = tx.outMessages.values()[0];
-      const originalBody = outMsgs?.body.beginParse();
-      const payload = loadPoolCreatedEvent(originalBody);
+    const outMsgsList = this.getBodyExternalOut(tx.outMessages.values());
+    const outMsgs = outMsgsList?.[0];
+    const originalBody = outMsgs?.body?.beginParse();
+    const payload = loadPoolCreatedEvent(originalBody);
 
-      const pool = await this.poolRepository.findOneBy({
-        status: PoolStatusEnum.INACTIVE,
-        startTime: Number(payload.startTime),
-        sequency: Number(payload.sequence),
-      });
+    const pool = await this.poolRepository.findOneBy({
+      status: PoolStatusEnum.INACTIVE,
+      startTime: Number(payload.startTime),
+      sequency: Number(payload.sequence),
+    });
 
-      if (!pool) return;
-      pool.poolIdOnChain = Number(payload.poolId);
-      pool.totalRounds = payload.rounds.values().length;
-      pool.endTime = Number(payload.endTime);
-      pool.ticketPrice = Number(payload.ticketPrice);
-      pool.status = PoolStatusEnum.ACTIVE;
+    if (!pool) return;
+    pool.poolIdOnChain = Number(payload.poolId);
+    pool.totalRounds = payload.rounds.values().length;
+    pool.endTime = Number(payload.endTime);
+    pool.ticketPrice = Number(payload.ticketPrice);
+    pool.status = PoolStatusEnum.ACTIVE;
 
-      await this.poolRepository.save(pool);
-      const rounds = payload.rounds.values();
+    await this.poolRepository.save(pool);
+    const rounds = payload.rounds.values();
 
-      await this.poolRoundRepository
-        .createQueryBuilder()
-        .insert()
-        .into(PoolRound)
-        .values(
-          rounds.map((round) => ({
-            id: null,
-            pool: pool,
-            roundIdOnChain: Number(round.roundId),
-            roundNumber: Number(round.roundId),
-            startTime: Number(round.startTime),
-            endTime: Number(round.endTime),
-          })),
-        )
-        .orUpdate(
-          ['roundNumber', 'startTime', 'endTime'],
-          ['poolId', 'roundIdOnChain'],
-        )
-        .execute();
-    } catch (error) {
-      Logger.error(error);
-    }
+    await this.poolRoundRepository
+      .createQueryBuilder()
+      .insert()
+      .into(PoolRound)
+      .values(
+        rounds.map((round) => ({
+          id: null,
+          pool: pool,
+          roundIdOnChain: Number(round.roundId),
+          roundNumber: Number(round.roundId),
+          startTime: Number(round.startTime),
+          endTime: Number(round.endTime),
+        })),
+      )
+      .orUpdate(
+        ['roundNumber', 'startTime', 'endTime'],
+        ['poolId', 'roundIdOnChain'],
+      )
+      .execute();
   }
 
   async getPools() {
@@ -371,5 +433,8 @@ export class CrawlWorkerService {
     if (TonWeb.utils.Address.isValid(address))
       return Address.parse(address).toRawString();
     return address;
+  }
+  getBodyExternalOut(body: Message[]) {
+    return body.filter((msg) => msg.info.type === 'external-out');
   }
 }
