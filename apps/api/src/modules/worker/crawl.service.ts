@@ -264,6 +264,9 @@ export class CrawlWorkerService {
 
     const roundExist = await this.poolRoundRepository.findOneBy({
       roundIdOnChain: Number(payloadOutMsg.roundId),
+      pool: {
+        poolIdOnChain: Number(payloadOutMsg.poolId),
+      },
     });
 
     if (!roundExist) return;
@@ -288,6 +291,7 @@ export class CrawlWorkerService {
     // Sum total prizes
     const totalTickets = await this.getTotalTicketOfRound(
       roundExist.roundIdOnChain,
+      Number(payloadOutMsg.poolId),
     );
     const poolExist = await this.getPool(Number(payloadOutMsg.poolId));
     if (!poolExist) return;
@@ -401,10 +405,13 @@ export class CrawlWorkerService {
     });
   }
 
-  getTotalTicketOfRound(roundIdOnChain: number) {
+  getTotalTicketOfRound(roundIdOnChain: number, poolIdOnChain: number) {
     return this.userTicketRepository.countBy({
       round: {
         roundIdOnChain,
+        pool: {
+          poolIdOnChain,
+        },
       },
     });
   }

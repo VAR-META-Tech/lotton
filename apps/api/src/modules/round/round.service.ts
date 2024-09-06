@@ -131,7 +131,7 @@ export class RoundService {
   }
 
   async totalTickets(roundId: number, user: User) {
-    const [_, total] = await this.userTicketRepository.findAndCountBy({
+    const [, total] = await this.userTicketRepository.findAndCountBy({
       round: {
         id: roundId,
       },

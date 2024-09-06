@@ -18,7 +18,7 @@ function processResponseData(data: any, statusCode?: number): any {
       code: data?.statusCode || statusCode,
       message: data?.message || 'Successful',
     },
-    data: data?.results || data || {},
+    data: data?.results || data,
   };
 }
 
