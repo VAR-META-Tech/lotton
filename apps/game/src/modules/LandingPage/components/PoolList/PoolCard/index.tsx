@@ -2,7 +2,6 @@
 
 import React, { FC, HTMLAttributes, useCallback, useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { MIN_ROUND } from '@/modules/LandingPage/utils/const';
 
 import { cn } from '@/lib/utils';
 import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
@@ -24,22 +23,18 @@ interface Props extends HTMLAttributes<HTMLDivElement> {
 
 const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, ...props }) => {
   const forceUpdate = useForceUpdate();
-
   const [currentRound, setCurrentRound] = useState<number>(0);
 
-  const { pool, rounds, poolPrizes, currency } = useGetPoolDetail({ poolId: poolId || 0, isActive });
+  const { pool, rounds, refetch } = useGetPoolDetail({ poolId: poolId || 0, isActive });
   const roundActive = rounds[currentRound];
-  const roundActiveNumber = roundActive
-    ? `${roundActive.roundNumber < 10 ? `0${roundActive.roundNumber}` : roundActive.roundNumber}`
-    : '00';
 
   const getIsEndRound = () => {
-    if (!rounds) return false;
+    if (!rounds || !roundActive?.endTime) return false;
 
-    const roundEndtime = new Date(Number(roundActive?.endTime) * 1000).getTime();
+    const roundEndTime = new Date(Number(roundActive?.endTime) * 1000).getTime();
     const now = new Date().getTime();
 
-    if (now > roundEndtime) {
+    if (now > roundEndTime) {
       return true;
     }
 
@@ -49,15 +44,15 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
   const getCurrentRound = useCallback(() => {
     const now = new Date().getTime();
 
-    return rounds.findIndex((round) => {
-      const startTime = new Date(Number(round.startTime) * 1000).getTime();
-      const endTime = new Date(Number(round.endTime) * 1000).getTime();
+    return rounds?.findIndex((round) => {
+      const startTime = new Date(Number(round?.startTime) * 1000).getTime();
+      const endTime = new Date(Number(round?.endTime) * 1000).getTime();
       return now >= startTime && now <= endTime;
     });
   }, [rounds]);
 
   const isBeforeRoundEnd = useMemo(() => {
-    if (!rounds || rounds.length === 0) return false;
+    if (!rounds || rounds?.length === 0) return false;
 
     const currentActiveRound = getCurrentRound();
 
@@ -74,6 +69,14 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
     forceUpdate();
   }, [forceUpdate]);
 
+  useEffect(() => {
+    const refetchInterval = setInterval(() => {
+      refetch();
+    }, 5000);
+
+    return () => clearInterval(refetchInterval);
+  }, [refetch]);
+
   return (
     <div {...props} className={cn('w-full rounded-xl overflow-hidden relative', className)}>
       <div className="bg-navigate-tab py-1.5 h-[4.25rem]">
@@ -82,38 +85,24 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
         <PoolCountDown date={Number(roundActive?.endTime || 0)} onForceUpdate={handleForceUpdate} />
       </div>
 
-      <RoundAction
-        minRound={MIN_ROUND}
-        maxRound={rounds?.length || 0}
-        currentRound={roundActiveNumber}
-        setCurrentRound={setCurrentRound}
-      />
+      <RoundAction roundActive={roundActive} maxRound={rounds?.length || 0} setCurrentRound={setCurrentRound} />
 
       <div className="border-x-navigate-tab border-x">
-        <PoolRound
-          rounds={rounds}
-          currentRound={roundActiveNumber}
-          date={Number(roundActive?.endTime || 0)}
-          isEndRound={getIsEndRound()}
-        />
+        <PoolRound rounds={rounds} roundActive={roundActive} isEndRound={getIsEndRound()} />
 
         <PoolPrizePot
-          currentRound={roundActiveNumber}
-          poolId={poolId || 0}
-          currency={currency}
+          pool={pool}
+          roundActive={roundActive}
           isEndRound={getIsEndRound()}
-          poolIdOnChain={pool?.poolIdOnChain || 0}
-          roundIdOnChain={roundActive?.roundIdOnChain}
           isBeforeRoundEnd={isBeforeRoundEnd}
-          winCode={roundActive?.winningCode || '    '}
         />
       </div>
 
       <PoolInfo
+        pool={pool}
+        roundActive={roundActive}
         isShow={isShow}
         setIsShow={setIsShow}
-        poolPrizes={poolPrizes}
-        currency={currency}
         isEndRound={getIsEndRound()}
       />
     </div>

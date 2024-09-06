@@ -6,6 +6,7 @@ export const buyTicketSchema = z.object({
 
     return true;
   }, 'This amount is required'),
+  balance: z.number(),
 });
 
 export type BuyTicketType = z.infer<typeof buyTicketSchema>;

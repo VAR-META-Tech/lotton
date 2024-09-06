@@ -1,5 +1,5 @@
 import React, { FC, memo, useMemo } from 'react';
-import { IGetPoolDetailCurrency, IGetPoolDetailPoolPrize } from '@/apis/pools';
+import { IGetPoolDetailData, IGetPoolDetailRound } from '@/apis/pools';
 import { Icons } from '@/assets/icons';
 import { motion } from 'framer-motion';
 
@@ -8,16 +8,20 @@ import { cn } from '@/lib/utils';
 import { HStack, VStack } from '@/components/ui/Utilities';
 
 import MatchItem from './MatchItem';
+import { fromNano } from '@ton/core';
 
 interface Props {
+  pool: IGetPoolDetailData | undefined;
   isShow: boolean;
   setIsShow: React.Dispatch<React.SetStateAction<boolean>>;
-  poolPrizes: IGetPoolDetailPoolPrize[];
   isEndRound?: boolean;
-  currency: IGetPoolDetailCurrency | undefined;
+  roundActive: IGetPoolDetailRound;
 }
 
-const PoolInfo: FC<Props> = ({ isShow, setIsShow, poolPrizes, isEndRound = false, currency }) => {
+const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound = false }) => {
+  const currency = pool?.currency;
+  const poolPrizes = pool?.poolPrizes;
+
   const toggleShow = () => {
     setIsShow(!isShow);
   };
@@ -33,13 +37,16 @@ const PoolInfo: FC<Props> = ({ isShow, setIsShow, poolPrizes, isEndRound = false
 
             <div className="grid grid-cols-2 gap-3">
               {poolPrizes?.map((item, index) => {
-                const allocationRate = Number(item?.allocation) / 100;
+                const allocationRate = Number(item?.allocation || 0) / 100;
+                const totalPrizes = Number(fromNano(roundActive?.totalPrizes || 0));
+                const value = totalPrizes * allocationRate;
+
                 return (
                   <MatchItem
                     key={`${item?.id}-${index}`}
                     title={`Match first ${item?.matchNumber}`}
-                    value={`${prettyNumber(Number(2500 * allocationRate).toFixed(2))} ${currency?.symbol || ''}`}
-                    subValue={`~ ${prettyNumber(Number(10000 * allocationRate).toFixed(2))} USD`}
+                    value={`${prettyNumber(Number(value).toFixed(2))} ${currency?.symbol || ''}`}
+                    subValue={`~ ${prettyNumber(Number(0 * allocationRate).toFixed(2))} USD`}
                   />
                 );
               })}
@@ -88,7 +95,7 @@ const PoolInfo: FC<Props> = ({ isShow, setIsShow, poolPrizes, isEndRound = false
         </div>
       </VStack>
     );
-  }, [currency?.symbol, isEndRound, poolPrizes]);
+  }, [currency?.symbol, isEndRound, poolPrizes, roundActive?.totalPrizes]);
 
   return (
     <div>

@@ -180,3 +180,11 @@ export const checkIsSameDay = (date1: Date, date2: Date): boolean => {
     date1.getDate() === date2.getDate()
   );
 };
+
+export const delay = async (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const getRoundActiveNumber = (value: number): string => {
+  return value ? `${value < 10 ? `0${value}` : value}` : '00';
+};
