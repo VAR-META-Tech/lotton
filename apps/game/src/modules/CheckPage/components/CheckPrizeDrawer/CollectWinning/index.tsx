@@ -7,6 +7,8 @@ import CollectTotal from './CollectTotal';
 import ClaimAction from './ClaimAction';
 import { fromNano } from '@ton/core';
 import { usePoolContract } from '@/hooks/usePoolContract';
+import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
+import { useGetTokenPrice } from '@/hooks/useGetTokenPrice';
 
 interface Props {
   poolId: number;
@@ -16,6 +18,13 @@ interface Props {
 const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
   const { claimFee } = usePoolContract();
   const { items } = useGetPoolsCollectPrize(999999999999999, poolId, roundId);
+
+  const { currency } = useGetPoolDetail({
+    poolId: poolId,
+    isActive: true,
+  });
+
+  const { price } = useGetTokenPrice(currency?.id || 0);
 
   const totalRewardValue = useMemo(() => {
     const total = items?.reduce((acc, item) => {
@@ -37,14 +46,16 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
     <VStack className="container">
       <VStack>
         {items?.map((item, index) => {
+          const winningPrize = Number(fromNano(item?.winningPrize || 0));
+          const winningPrizeUsd = winningPrize * price;
           return (
             <CollectItem
               key={`${item?.poolId}-${index}`}
               code={item?.ticketCode}
-              value={Number(fromNano(item?.winningPrize || 0))}
-              roundNumber={item?.roundNumber}
+              value={winningPrize}
+              roundClaimNumber={item?.roundNumber}
               tokenSymbol={item?.currencySymbol}
-              usdValue={0}
+              usdValue={winningPrizeUsd}
             />
           );
         })}
@@ -55,9 +66,9 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
         feeValue={feeValue}
         totalValue={totalValue}
         tokenSymbol={items[0]?.currencySymbol}
-        usdValue={0}
-        feeUsdValue={0}
-        totalUsdValue={0}
+        usdValue={totalRewardValue * price}
+        feeUsdValue={feeValue * price}
+        totalUsdValue={totalValue * price}
       />
 
       <ClaimAction poolId={poolId} roundId={roundId} />

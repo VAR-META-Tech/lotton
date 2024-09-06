@@ -1,7 +1,7 @@
 import React, { FC, useMemo } from 'react';
 import Image from 'next/image';
 
-import { getRoundActiveNumber, prettyNumber } from '@/lib/common';
+import { getRoundActiveNumber, prettyNumber, roundNumber } from '@/lib/common';
 import { HStack, VStack } from '@/components/ui/Utilities';
 
 import PoolAction from './PoolAction';
@@ -12,6 +12,7 @@ import UserTicketCount from './UserTicketCount';
 import { IGetPoolDetailData, IGetPoolDetailRound } from '@/apis/pools';
 import { fromNano } from '@ton/core';
 import { useGetTotalTickets } from '@/hooks/useGetTotalTickets';
+import { useGetTokenPrice } from '@/hooks/useGetTokenPrice';
 
 interface Props {
   pool: IGetPoolDetailData | undefined;
@@ -25,7 +26,17 @@ const PoolPrizePot: FC<Props> = ({ pool, roundActive, isEndRound = false, isBefo
   const currency = pool?.currency;
   const tokenSymbol = currency?.symbol || '';
 
+  const { data: tokenPriceData } = useGetTokenPrice(Number(currency?.id || 0));
+
   const { data } = useGetTotalTickets(roundActive?.id);
+
+  const totalPrize = useMemo(() => {
+    return Number(fromNano(roundActive?.totalPrizes || 0));
+  }, [roundActive?.totalPrizes]);
+
+  const totalPrizeUsd = useMemo(() => {
+    return Number(tokenPriceData?.price) * totalPrize;
+  }, [tokenPriceData, totalPrize]);
 
   const prizePot = useMemo(() => {
     return (
@@ -38,10 +49,10 @@ const PoolPrizePot: FC<Props> = ({ pool, roundActive, isEndRound = false, isBefo
 
                 <HStack pos={'center'} spacing={8}>
                   <Image src={'/images/tokens/ton_symbol.webp'} width={30} height={30} alt="ton" />
-                  <span className="text-primary text-2xl font-semibold">{`${prettyNumber(fromNano(roundActive?.totalPrizes || 0))} ${tokenSymbol}`}</span>
+                  <span className="text-primary text-2xl font-semibold">{`${prettyNumber(roundNumber(totalPrize))} ${tokenSymbol}`}</span>
                 </HStack>
 
-                <div className="text-xs text-gray-color text-center">{`~ ${prettyNumber(10000)} USD`}</div>
+                <div className="text-xs text-gray-color text-center">{`~ ${prettyNumber(roundNumber(totalPrizeUsd))} USD`}</div>
               </div>
 
               <PoolAction
@@ -55,7 +66,7 @@ const PoolPrizePot: FC<Props> = ({ pool, roundActive, isEndRound = false, isBefo
         </AnimatePresence>
       </div>
     );
-  }, [data, isBeforeRoundEnd, pool, roundActive, roundActiveNumber, tokenSymbol]);
+  }, [data, isBeforeRoundEnd, pool, roundActive, roundActiveNumber, tokenSymbol, totalPrize, totalPrizeUsd]);
 
   const prizePotWinningNumber = useMemo(() => {
     return (

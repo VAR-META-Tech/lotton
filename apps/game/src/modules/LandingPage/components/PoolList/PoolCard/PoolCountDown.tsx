@@ -72,7 +72,8 @@ const PoolCountDown: FC<Props> = ({ date, isBeforeRoundEnd, onForceUpdate }) => 
       <span>d</span> <TimeItem value={timeLeft.hours} />
       <span>h</span> <TimeItem value={timeLeft.minutes} />
       <span>m</span> <TimeItem value={timeLeft.seconds} />
-      <span>s until the draw</span>
+      <span>s</span>
+      {/* <span>s until the draw</span> */}
     </div>
   );
 };
@@ -80,5 +81,5 @@ const PoolCountDown: FC<Props> = ({ date, isBeforeRoundEnd, onForceUpdate }) => 
 export default memo(PoolCountDown);
 
 const TimeItem = ({ value }: { value: number }) => {
-  return <span className="text-primary h-6">{String(value).padStart(2, '0')}</span>;
+  return <span className="h-6">{String(value).padStart(2, '0')}</span>;
 };

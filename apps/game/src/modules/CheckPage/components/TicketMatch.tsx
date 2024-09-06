@@ -20,7 +20,7 @@ const TicketMatch: FCC<ITicketMatchProps> = ({ code, ticketNumber, matched = 0 }
 
   return (
     <div className="grid grid-cols-10 gap-[.625rem] items-center">
-      <div className="col-span-2">{`Ticket ${ticketNumber}`}</div>
+      <div className="col-span-2 text-nowrap">{`Ticket ${ticketNumber}`}</div>
       <div className="col-span-7">
         <HStack
           pos={'apart'}

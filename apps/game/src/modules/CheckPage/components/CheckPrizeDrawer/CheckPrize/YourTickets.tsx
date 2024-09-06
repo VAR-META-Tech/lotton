@@ -55,7 +55,7 @@ const YourTickets: FC<IYourTicketsProps> = ({ round }) => {
             <TicketMatch
               key={`${item?.id}-${index}`}
               code={item?.code}
-              ticketNumber={item?.id}
+              ticketNumber={index + 1}
               matched={getMatch(item?.code)}
             />
           );

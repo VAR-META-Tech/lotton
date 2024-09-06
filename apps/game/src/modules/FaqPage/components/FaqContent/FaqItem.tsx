@@ -5,8 +5,6 @@ import { Icons } from '@/assets/icons';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
-import { FAQ_VALUE } from '../utils/const';
-
 interface Props {
   value: string;
   title: string;
@@ -17,19 +15,19 @@ const FaqItem: FC<Props> = ({ value, title, content }) => {
   const [currentValue, setValue] = useState('');
 
   const renderSuffix = useMemo(() => {
-    if (currentValue === FAQ_VALUE.TICKET_VALUES_SOURCE) return <Icons.minus className="text-white" />;
+    if (currentValue === value) return <Icons.minus className="text-white min-w-6" />;
 
-    return <Icons.plus className="text-white" />;
-  }, [currentValue]);
+    return <Icons.plus className="text-white min-w-6" />;
+  }, [currentValue, value]);
 
   return (
     <Accordion value={currentValue} onValueChange={setValue} type="single" collapsible className="w-full text-white">
       <AccordionItem value={value} className="border-gray-color">
-        <AccordionTrigger className="py-1.5 text-sm font-normal text-left container" suffix={renderSuffix}>
+        <AccordionTrigger className="py-1.5 text-sm font-normal text-left container mx-2" suffix={renderSuffix}>
           {title}
         </AccordionTrigger>
 
-        <AccordionContent>{content}</AccordionContent>
+        <AccordionContent className="mx-2 break-words">{content}</AccordionContent>
       </AccordionItem>
     </Accordion>
   );
