@@ -1,9 +1,9 @@
 # TACT Compilation Report
 Contract: Lottery
-BOC Size: 4793 bytes
+BOC Size: 4889 bytes
 
 # Types
-Total Types: 32
+Total Types: 33
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -117,6 +117,10 @@ Signature: `SetAdmin{admin:address}`
 TLB: `set_public_key#c37bfdfe publicKey:int257 = SetPublicKey`
 Signature: `SetPublicKey{publicKey:int257}`
 
+## SetClaimFeePercent
+TLB: `set_claim_fee_percent#0de724be claimFeePercent:uint8 = SetClaimFeePercent`
+Signature: `SetClaimFeePercent{claimFeePercent:uint8}`
+
 ## PoolCreatedEvent
 TLB: `pool_created_event#233540bc poolId:int257 ticketPrice:uint32 initialRounds:uint8 startTime:uint32 endTime:uint32 active:bool sequence:uint32 rounds:dict<int, ^RoundConfig{roundId:uint32,poolId:uint32,ticketPrice:coins,startTime:uint32,endTime:uint32,active:bool}> creator:address prizes:dict<uint8, uint8> = PoolCreatedEvent`
 Signature: `PoolCreatedEvent{poolId:int257,ticketPrice:uint32,initialRounds:uint8,startTime:uint32,endTime:uint32,active:bool,sequence:uint32,rounds:dict<int, ^RoundConfig{roundId:uint32,poolId:uint32,ticketPrice:coins,startTime:uint32,endTime:uint32,active:bool}>,creator:address,prizes:dict<uint8, uint8>}`
@@ -134,7 +138,7 @@ TLB: `claimed_event#369f3352 poolId:int257 roundId:int257 amount:coins receiver:
 Signature: `ClaimedEvent{poolId:int257,roundId:int257,amount:coins,receiver:address}`
 
 # Get Methods
-Total Get Methods: 13
+Total Get Methods: 15
 
 ## admins
 
@@ -177,6 +181,10 @@ Argument: poolId
 Argument: roundId
 Argument: receiver
 
+## contractBalance
+
+## claimFeePercent
+
 ## owner
 
 # Error Codes
@@ -204,6 +212,7 @@ Argument: receiver
 135: Code of a contract was not found
 136: Invalid address
 137: Masterchain support is not enabled for this contract
+10050: Invalid claim fee percent
 13687: Pool is not active
 20265: Winning numbers already drawn
 24801: Round is not open for ticket purchases
@@ -214,6 +223,7 @@ Argument: receiver
 42342: Sequence must be positive
 47697: Round is not active
 48401: Invalid signature
+50778: Round is still active
 52453: Initial rounds must be positive
 52657: Prizes must be set
 57401: Start time must be before end time

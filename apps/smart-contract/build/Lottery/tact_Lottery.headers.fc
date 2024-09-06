@@ -234,6 +234,9 @@ cell $WinningNumbersDrawnEvent$_store_cell((int, int, int) v) inline;
 ;; $SetPublicKey$_load
 (slice, ((int))) $SetPublicKey$_load(slice sc_0) inline;
 
+;; $SetClaimFeePercent$_load
+(slice, ((int))) $SetClaimFeePercent$_load(slice sc_0) inline;
+
 ;; $PoolCreatedEvent$_store
 builder $PoolCreatedEvent$_store(builder build_0, (int, int, int, int, int, int, int, cell, slice, cell) v) inline_ref;
 
@@ -253,10 +256,10 @@ builder $ClaimedEvent$_store(builder build_0, (int, int, int, slice) v) inline;
 cell $ClaimedEvent$_store_cell((int, int, int, slice) v) inline;
 
 ;; $Lottery$_store
-builder $Lottery$_store(builder build_0, (slice, cell, cell, int, cell, cell, cell, cell, int, cell) v) inline;
+builder $Lottery$_store(builder build_0, (slice, cell, cell, int, cell, cell, cell, int, cell, int) v) inline;
 
 ;; $Lottery$_load
-(slice, ((slice, cell, cell, int, cell, cell, cell, cell, int, cell))) $Lottery$_load(slice sc_0) inline;
+(slice, ((slice, cell, cell, int, cell, cell, cell, int, cell, int))) $Lottery$_load(slice sc_0) inline;
 
 ;; $StateInit$_not_null
 ((cell, cell)) $StateInit$_not_null(tuple v) inline;
@@ -355,13 +358,13 @@ tuple $Result$_to_opt_tuple(tuple v) inline;
 tuple $Result$_to_opt_external(tuple v) inline;
 
 ;; $Lottery$_contract_init
-(slice, cell, cell, int, cell, cell, cell, cell, int, cell) $Lottery$_contract_init() impure inline_ref;
+(slice, cell, cell, int, cell, cell, cell, int, cell, int) $Lottery$_contract_init() impure inline_ref;
 
 ;; $Lottery$_contract_load
-(slice, cell, cell, int, cell, cell, cell, cell, int, cell) $Lottery$_contract_load() impure inline_ref;
+(slice, cell, cell, int, cell, cell, cell, int, cell, int) $Lottery$_contract_load() impure inline_ref;
 
 ;; $Lottery$_contract_store
-() $Lottery$_contract_store((slice, cell, cell, int, cell, cell, cell, cell, int, cell) v) impure inline;
+() $Lottery$_contract_store((slice, cell, cell, int, cell, cell, cell, int, cell, int) v) impure inline;
 
 ;; $global_random
 int $global_random(int $min, int $max) impure inline;
@@ -373,13 +376,13 @@ int $global_random(int $min, int $max) impure inline;
 () $global_emit(cell $body) impure inline;
 
 ;; $Lottery$_fun_isAdmin
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), int) $Lottery$_fun_isAdmin((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, slice $address) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_isAdmin((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, slice $address) impure inline_ref;
 
 ;; $Lottery$_fun_requireOwnerOrAdmin
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), ()) $Lottery$_fun_requireOwnerOrAdmin((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_requireOwnerOrAdmin((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref;
 
 ;; $Lottery$_fun_setAdmin
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), ()) $Lottery$_fun_setAdmin((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, slice $admin) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_setAdmin((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, slice $admin) impure inline_ref;
 
 ;; $Pool$_constructor_poolId_creator_rounds_startTime_endTime_sequence_active_prizes
 ((int, slice, cell, int, int, int, int, cell)) $Pool$_constructor_poolId_creator_rounds_startTime_endTime_sequence_active_prizes(int $poolId, slice $creator, cell $rounds, int $startTime, int $endTime, int $sequence, int $active, cell $prizes) inline;
@@ -397,19 +400,28 @@ int $global_random(int $min, int $max) impure inline;
 ((int, int, int, int, int, int, int, cell, slice, cell)) $PoolCreatedEvent$_constructor_poolId_ticketPrice_initialRounds_startTime_endTime_active_sequence_rounds_creator_prizes(int $poolId, int $ticketPrice, int $initialRounds, int $startTime, int $endTime, int $active, int $sequence, cell $rounds, slice $creator, cell $prizes) inline;
 
 ;; $Lottery$_fun_verifyPoolPrizes
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), int) $Lottery$_fun_verifyPoolPrizes((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, cell $prizes) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_verifyPoolPrizes((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, cell $prizes) impure inline_ref;
+
+;; $SendParameters$_constructor_bounce_to_value_mode_body_code_data
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_bounce_to_value_mode_body_code_data(int $bounce, slice $to, int $value, int $mode, cell $body, cell $code, cell $data) inline;
+
+;; $Lottery$_fun_forward
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_forward((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, slice $to, cell $body, int $bounce, tuple $init) impure inline_ref;
+
+;; $Lottery$_fun_reply
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_reply((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, cell $body) impure inline;
 
 ;; $Lottery$_fun_createPool
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), ()) $Lottery$_fun_createPool((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $initialRounds, int $sequence, (int, int, int, int, int, int) $config, cell $prizes) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_createPool((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $initialRounds, int $sequence, (int, int, int, int, int, int) $config, cell $prizes) impure inline_ref;
 
 ;; $Lottery$_fun_asciiToChar
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), slice) $Lottery$_fun_asciiToChar((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $ascii) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), slice) $Lottery$_fun_asciiToChar((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $ascii) impure inline_ref;
 
 ;; $RandomTicketResponse$_constructor_ASCIINumber_ticket
 ((int, slice)) $RandomTicketResponse$_constructor_ASCIINumber_ticket(int $ASCIINumber, slice $ticket) inline;
 
 ;; $Lottery$_fun_generateRandomASCIIString
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), (int, slice)) $Lottery$_fun_generateRandomASCIIString((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $length) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), (int, slice)) $Lottery$_fun_generateRandomASCIIString((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $length) impure inline_ref;
 
 ;; $Ticket$_constructor_ticket_ticketNumber_owner
 ((slice, int, slice)) $Ticket$_constructor_ticket_ticketNumber_owner(slice $ticket, int $ticketNumber, slice $owner) inline;
@@ -418,7 +430,7 @@ int $global_random(int $min, int $max) impure inline;
 ((slice)) $TicketPayoutResponse$_constructor_ticket(slice $ticket) inline;
 
 ;; $Lottery$_fun_createTicket
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), slice) $Lottery$_fun_createTicket((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, slice $user, int $poolId, int $roundId, int $quantity) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), slice) $Lottery$_fun_createTicket((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, slice $user, int $poolId, int $roundId, int $quantity) impure inline_ref;
 
 ;; $SendParameters$_constructor_to_value_mode
 ((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline;
@@ -427,7 +439,7 @@ int $global_random(int $min, int $max) impure inline;
 ((int, int, int, slice, slice)) $TicketBoughtEvent$_constructor_roundId_poolId_quantity_buyer_tickets(int $roundId, int $poolId, int $quantity, slice $buyer, slice $tickets) inline;
 
 ;; $Lottery$_fun_buyTicket
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), ()) $Lottery$_fun_buyTicket((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $poolId, int $roundId, int $quantity) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_buyTicket((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, int $quantity) impure inline_ref;
 
 ;; $Result$_constructor_rounds
 ((cell)) $Result$_constructor_rounds(cell $rounds) inline;
@@ -436,13 +448,13 @@ int $global_random(int $min, int $max) impure inline;
 ((int, int, int)) $WinningNumbersDrawnEvent$_constructor_poolId_roundId_winningNumber(int $poolId, int $roundId, int $winningNumber) inline;
 
 ;; $Lottery$_fun_roundById
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), tuple) $Lottery$_fun_roundById((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $poolId, int $roundId) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_roundById((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId) impure inline_ref;
 
 ;; $Lottery$_fun_drawWinningNumbers
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), ()) $Lottery$_fun_drawWinningNumbers((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $poolId, int $roundId, slice $latestTxHash) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_drawWinningNumbers((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, slice $latestTxHash) impure inline_ref;
 
 ;; $Lottery$_fun_getMessageHash
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), int) $Lottery$_fun_getMessageHash((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $poolId, int $roundId, int $amount, slice $receiver) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_getMessageHash((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, int $amount, slice $receiver) impure inline_ref;
 
 ;; $UserClaim$_constructor_user
 ((cell)) $UserClaim$_constructor_user(cell $user) inline;
@@ -454,49 +466,49 @@ int $global_random(int $min, int $max) impure inline;
 ((int, int, int, slice)) $ClaimedEvent$_constructor_poolId_roundId_amount_receiver(int $poolId, int $roundId, int $amount, slice $receiver) inline;
 
 ;; $Lottery$_fun_isClaim
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), int) $Lottery$_fun_isClaim((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $poolId, int $roundId, slice $receiver) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_isClaim((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, slice $receiver) impure inline_ref;
 
 ;; $Lottery$_fun_claimPrize
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), ()) $Lottery$_fun_claimPrize((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, (int, int, int, slice, slice) $msg) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_claimPrize((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, (int, int, int, slice, slice) $msg) impure inline_ref;
 
 ;; $Lottery$_fun_admins
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), cell) $Lottery$_fun_admins((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), cell) $Lottery$_fun_admins((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref;
 
 ;; $Lottery$_fun_currentPool
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), cell) $Lottery$_fun_currentPool((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), cell) $Lottery$_fun_currentPool((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref;
 
 ;; $Lottery$_fun_poolById
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), tuple) $Lottery$_fun_poolById((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $poolId) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_poolById((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId) impure inline_ref;
 
 ;; $Lottery$_fun_usersTicket
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), (cell)) $Lottery$_fun_usersTicket((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $poolId, int $roundId) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), (cell)) $Lottery$_fun_usersTicket((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId) impure inline_ref;
 
 ;; $Lottery$_fun_userTicketByAddress
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), tuple) $Lottery$_fun_userTicketByAddress((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $poolId, int $roundId, slice $user) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_userTicketByAddress((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, slice $user) impure inline_ref;
 
 ;; $Lottery$_fun_resultByRound
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), int) $Lottery$_fun_resultByRound((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $poolId, int $roundId) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_resultByRound((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId) impure inline_ref;
 
 ;; $Lottery$_fun_resultByPool
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), tuple) $Lottery$_fun_resultByPool((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $poolId) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_resultByPool((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId) impure inline_ref;
 
 ;; $Lottery$_fun_publicKey
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), int) $Lottery$_fun_publicKey((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_publicKey((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref;
 
 ;; $Lottery$_fun_claimData
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), tuple) $Lottery$_fun_claimData((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, int $poolId, int $roundId) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_claimData((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId) impure inline_ref;
 
-;; $SendParameters$_constructor_bounce_to_value_mode_body_code_data
-((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_bounce_to_value_mode_body_code_data(int $bounce, slice $to, int $value, int $mode, cell $body, cell $code, cell $data) inline;
+;; $Lottery$_fun_contractBalance
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_contractBalance((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref;
 
-;; $Lottery$_fun_forward
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), ()) $Lottery$_fun_forward((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, slice $to, cell $body, int $bounce, tuple $init) impure inline_ref;
+;; $Lottery$_fun_claimFeePercent
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_claimFeePercent((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref;
 
 ;; $Lottery$_fun_notify
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), ()) $Lottery$_fun_notify((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self, cell $body) impure inline;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_notify((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, cell $body) impure inline;
 
 ;; $Lottery$_fun_owner
-((slice, cell, cell, int, cell, cell, cell, cell, int, cell), slice) $Lottery$_fun_owner((slice, cell, cell, int, cell, cell, cell, cell, int, cell) $self) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), slice) $Lottery$_fun_owner((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref;
 
 ;; $DeployOk$_constructor_queryId
 ((int)) $DeployOk$_constructor_queryId(int $queryId) inline;
