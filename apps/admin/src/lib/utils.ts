@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { Address, Builder } from "@ton/core";
+import { Address, Builder, Dictionary } from "@ton/core";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -42,6 +42,7 @@ export type CreatePool = {
   endTime: bigint;
   sequence: bigint;
   active: boolean;
+  prizes: Dictionary<number, number>;
 };
 
 export type CreatePoolWithoutType = Omit<CreatePool, '$$type'>;
@@ -57,5 +58,6 @@ export function storeCreatePool(src: CreatePool) {
     b_0.storeUint(src.endTime, 32);
     b_0.storeUint(src.sequence, 32);
     b_0.storeBit(src.active);
+    b_0.storeDict(src.prizes, Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8));
   };
 }

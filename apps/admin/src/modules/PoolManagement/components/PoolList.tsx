@@ -54,14 +54,14 @@ const PoolList = ({pools, isFetching, handlePageChange, paramsQuery}: Props) => 
                 <TableCell className="text-center border border-[#D4D4D4]">{pool?.totalRounds}</TableCell>
 
                 <TableCell className="text-center border border-[#D4D4D4]">
-                  {pool?.startTime ? format(convertToTimestamp(pool?.startTime), 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
+                  {pool?.startTime ? format(Number(pool?.startTime) * 1000, 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
                 </TableCell>
                 <TableCell className="text-center border border-[#D4D4D4]">
-                  {pool?.endTime ? format(convertToTimestamp(pool?.endTime), 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
+                  {pool?.endTime ? format(Number(pool?.endTime) * 1000, 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
                 </TableCell>
 
                 <TableCell className="text-center border border-[#D4D4D4]">
-                  <Status endTime={pool?.endTime} startTime={pool?.startTime} />
+                  <Status endTime={Number(pool?.endTime)} startTime={Number(pool?.startTime)} />
                 </TableCell>
                 
                 <TableCell className="text-center border border-[#D4D4D4]">

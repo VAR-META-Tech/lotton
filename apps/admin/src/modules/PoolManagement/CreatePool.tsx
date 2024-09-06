@@ -18,7 +18,8 @@ import { HStack, VStack } from '@/components/ui/Utilities';
 import { poolSchema, PoolSchema } from './components/types';
 import { ROUTES } from '@/lib/routes';
 import { useCounterContract } from '@/hooks/useCounterContract';
-import { Address } from '@ton/core';
+import { Address, Dictionary } from '@ton/core';
+import { parseUnits } from 'viem';
 
 export const SEQUENCY_OPTIONS = [
   { label: '1 day', value: '1' },
@@ -33,6 +34,7 @@ export const SEQUENCY_OPTIONS = [
 
 export const CreatePool = () => {
   const route = useRouter();
+  const queryClient = useQueryClient();
   const { createPool, getLastTx } = useCounterContract();
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -50,8 +52,18 @@ export const CreatePool = () => {
     }));
   }, [tokenList]);
 
-  const { mutate: createPoolMutate, isPending: isPendingCreate } = useCreatePool();
-  const queryClient = useQueryClient();
+  const { mutate: createPoolMutate, isPending: isPendingCreate } = useCreatePool({
+    onSuccess: () => {
+      setLoading(false)
+      queryClient.invalidateQueries({ queryKey: ['/pools'] });
+      route.push(ROUTES.POOL);
+      toast.success('Create new pool successfully!');
+    },
+    onError: (error) => {
+      setLoading(false)
+      toast.error(`${error.message}`);
+    },
+  });
 
   // const testLastTx = async () => {
   //   try {
@@ -62,44 +74,86 @@ export const CreatePool = () => {
   //     console.log(error)
   //   }
   // }
+
+  // const testCreate = async () => {
+  //   const mockData = {
+  //     currency: '1',
+  //     sequency: '300',
+  //     totalRounds: '10',
+  //     match1: '10',
+  //     match2: '20',
+  //     match3: '30',
+  //     match4: '40',
+  //     name: 'Test 5 minutes',
+  //     startTime: new Date().valueOf().toString().slice(0, -3),
+  //     ticketPrice: parseUnits('1', 9),
+  //   };
+
+  //   let prizes = Dictionary.empty(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8));
+  //   prizes.set(1, +mockData.match1);
+  //   prizes.set(2, +mockData.match2);
+  //   prizes.set(3, +mockData.match3);
+  //   prizes.set(4, +mockData.match4);
+
+  //   await createPool({
+  //     jettonWallet: Address.parse('0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP'),
+  //     ticketPrice: BigInt(mockData.ticketPrice),
+  //     initialRounds: BigInt(mockData.totalRounds),
+  //     startTime: BigInt(mockData.startTime),
+  //     endTime: BigInt(+mockData.startTime + +mockData.sequency * +mockData.totalRounds),
+  //     sequence: BigInt(mockData.sequency),
+  //     active: true,
+  //     prizes,
+  //   });
+  // }
+
   
   const handleSubmit = async (values: PoolSchema) => {
     setLoading(true);
     const lastTx = await getLastTx();
     const lastTxHash = lastTx?.[0].hash().toString('base64');
-    
+
+    let prizes = Dictionary.empty(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8));
+    prizes.set(1, Number(values.match1));
+    prizes.set(2, Number(values.match2));
+    prizes.set(3, Number(values.match3));
+    prizes.set(4, Number(values.match4));
+
     await createPool({
       jettonWallet: Address.parse(
         '0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP',
       ),
-      ticketPrice: BigInt(Number(values.ticketPrice)),
+      ticketPrice: BigInt(parseUnits(values.ticketPrice, 9)),
       initialRounds: BigInt(Number(values.totalRounds)),
       startTime: BigInt(new Date(values.startTime).getTime() / 1000),
       endTime: BigInt(new Date(values.endTime).getTime() / 1000),
       sequence: BigInt(Number(values.sequency) * 86400),
       active: true,
-    })
+      prizes,
+    });
 
     let newLastTxHash = lastTxHash;
     while (newLastTxHash === lastTxHash) {
       await new Promise((resolve) => setTimeout(resolve, 5000));
       const updatedLastTx = await getLastTx();
-      // const isAbortedTx = updatedLastTx?.[0]?.description?.aborted;
+      const isAbortedTx = (updatedLastTx?.[0]?.description as any)?.aborted;
 
-      // if (isAbortedTx) {
-      //   toast.error('Something went wrong!');
-      //   return;
-      // }
+      if (isAbortedTx) {
+        toast.error('Something went wrong!');
+        setLoading(false);
+        return;
+      }
       newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
     }
 
+    setLoading(false);
     createPoolMutate(
       {
         name: values.name,
         currency: Number(values.currency),
         sequency: Number(values.sequency) * 86400,
         totalRounds: Number(values.totalRounds),
-        startTime: new Date(values.startTime).toISOString(),
+        startTime: String(new Date(values.startTime).getTime() / 1000),
         ticketPrice: Number(values.ticketPrice),
         poolPrizes: [
           {
@@ -120,18 +174,6 @@ export const CreatePool = () => {
           },
         ],
       },
-      {
-        onSuccess: () => {
-          setLoading(false)
-          queryClient.invalidateQueries({ queryKey: ['/pools'] });
-          route.push(ROUTES.POOL);
-          toast.success('Create new pool successfully!');
-        },
-        onError: (error) => {
-          setLoading(false)
-          toast.error(`${error.message}`);
-        },
-      }
     );
   };
 
@@ -155,8 +197,9 @@ export const CreatePool = () => {
   }, [startTime, sequency, totalRound]);
   
   return (
-    <VStack className="mx-10 mb-24 bg-white rounded-sm min-h-[12.5rem] px-24 py-12">
+    <VStack className="mx-4 md:mx-10 mb-24 bg-white rounded-sm min-h-[12.5rem] p-8 md:px-24 md:py-12">
       {/* <Button onClick={testLastTx}>Test get last TX</Button> */}
+      {/* <Button onClick={testCreate}>Test Create</Button> */}
       <div>
         <FormWrapper methods={methods} onSubmit={handleSubmit}>
           <VStack>
