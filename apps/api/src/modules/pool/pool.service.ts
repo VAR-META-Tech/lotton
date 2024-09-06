@@ -16,7 +16,11 @@ import { Pool, PoolPrize, PoolRound, Prizes, Token } from '@/database/entities';
 import type { QueryPaginationDto } from '@/shared/dto/pagination.query';
 import { PoolRoundStatusEnum, PoolStatusEnum } from '@/shared/enums';
 import type { FetchResult } from '@/utils/paginate';
-import { FetchType, paginateEntities } from '@/utils/paginate';
+import {
+  FetchType,
+  generatePagination,
+  paginateEntities,
+} from '@/utils/paginate';
 
 import { PoolRoundService } from '../poolRound/poolRound.service';
 import type { CreatePoolDto, PoolPrizes } from './dto/create-pool.dto';
@@ -356,33 +360,58 @@ export class PoolService {
   ): Promise<FetchResult<Pool>> {
     try {
       const { type = UserPoolType.JOINED } = query;
+      const { page = 1, pageSizes } = pagination;
+      const take = pageSizes > 50 || !pageSizes ? 50 : pageSizes;
+      const skip = (page - 1) * take || 0;
+
+      const subQuery = this.poolRepository
+        .createQueryBuilder('poolSub')
+        .leftJoin('poolSub.rounds', 'roundsSub')
+        .leftJoin('roundsSub.ticket', 'ticketSub')
+        .where('ticketSub.userWallet = :userWallet', {
+          userWallet: user.wallet,
+        });
+      if (type == UserPoolType.WINNER) {
+        subQuery.andWhere('ticketSub.winningMatch >= :winningMatch', {
+          winningMatch: 1,
+        });
+      }
+
+      const [pools, totalItems] = await subQuery
+        .clone()
+        .skip(skip)
+        .take(take)
+        .getManyAndCount();
+
+      if (pools.length == 0)
+        return generatePagination<Pool>(totalItems, pools, page, take);
+
       const queryBuilder = this.poolRepository
         .createQueryBuilder('pool')
         .leftJoinAndSelect('pool.rounds', 'rounds')
         .leftJoinAndSelect('rounds.ticket', 'ticket')
-        .andWhere('ticket.userWallet = :userWallet', {
-          userWallet: user.wallet,
+        .where('pool.id IN (:...poolIds)', {
+          poolIds: pools.map((pool) => pool?.id ?? 0),
         });
-
-      const count = await queryBuilder
-        .clone()
-        .groupBy('rounds.id')
-        .select(['count(ticket.id) as totalTicket', 'rounds.id as roundId'])
-        .getRawMany();
-
-      console.log(count);
-
       if (type == UserPoolType.WINNER) {
-        queryBuilder.andWhere('ticket.winningMatch > 0');
+        queryBuilder.andWhere('ticket.winningMatch >= :winningMatch', {
+          winningMatch: 1,
+        });
       }
 
+      const [items, countTicket] = await Promise.all([
+        queryBuilder.clone().having('ticket.id IS NOT NULL').getMany(),
+        queryBuilder
+          .clone()
+          .select(['count(ticket.id) as totalTicket', 'rounds.id as roundId'])
+          .having('totalTicket > 0')
+          .groupBy('rounds.id')
+          .getRawMany(),
+      ]);
+
       return this.mapTicket(
-        await paginateEntities<Pool>(
-          queryBuilder,
-          pagination,
-          FetchType.MANAGED,
-        ),
-        count,
+        generatePagination<Pool>(totalItems, items, page, take),
+        countTicket,
       );
     } catch (error) {
       console.log({ error });
