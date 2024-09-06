@@ -72,7 +72,7 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
   useEffect(() => {
     const refetchInterval = setInterval(() => {
       refetch();
-    }, 5000);
+    }, 10000);
 
     return () => clearInterval(refetchInterval);
   }, [refetch]);
@@ -82,7 +82,11 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
       <div className="bg-navigate-tab py-1.5 h-[4.25rem]">
         <div className="text-primary text-2xl font-semibold text-center">{pool?.name}</div>
 
-        <PoolCountDown date={Number(roundActive?.endTime || 0)} onForceUpdate={handleForceUpdate} />
+        <PoolCountDown
+          date={Number(roundActive?.endTime || 0)}
+          isBeforeRoundEnd={isBeforeRoundEnd}
+          onForceUpdate={handleForceUpdate}
+        />
       </div>
 
       <RoundAction roundActive={roundActive} maxRound={rounds?.length || 0} setCurrentRound={setCurrentRound} />

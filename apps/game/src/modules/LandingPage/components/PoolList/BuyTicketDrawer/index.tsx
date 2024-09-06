@@ -18,19 +18,15 @@ const BuyTicketDrawer: FCC<Props> = ({ pool, roundActive, children }) => {
   const currentPoolId = useBuyTicketStore.use.poolId();
   const setPoolId = useBuyTicketStore.use.setPoolId();
 
-  const handleClose = () => {
-    setPoolId(undefined);
-  };
-
   return (
-    <Drawer open={currentPoolId === pool?.id} onClose={handleClose}>
+    <Drawer open={pool?.id ? currentPoolId === pool?.id : false} onClose={() => setPoolId(undefined)}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent>
         <div className="w-full">
           <DrawerHeader className="flex justify-between container">
             <DrawerTitle className="text-white text-2xl font-semibold">Buy Tickets</DrawerTitle>
 
-            <button onClick={handleClose}>
+            <button onClick={() => setPoolId(undefined)}>
               <Icons.x className="text-gray-color" />
             </button>
           </DrawerHeader>

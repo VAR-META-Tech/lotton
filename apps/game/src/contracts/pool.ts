@@ -15,7 +15,7 @@ export default class Pool implements Contract {
     readonly address: Address,
     // eslint-disable-next-line no-unused-vars
     readonly init?: { code: Cell; data: Cell }
-  ) { }
+  ) {}
 
   async sendDeploy(provider: ContractProvider, via: Sender) {
     await provider.internal(via, {

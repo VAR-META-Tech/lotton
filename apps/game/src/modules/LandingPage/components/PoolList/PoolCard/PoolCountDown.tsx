@@ -2,6 +2,7 @@ import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 
 interface Props {
   date: number;
+  isBeforeRoundEnd: boolean;
   onForceUpdate: () => void;
 }
 
@@ -19,7 +20,7 @@ const getDefaultTimeLeft = (): TimeLeft => ({
   seconds: 0,
 });
 
-const PoolCountDown: FC<Props> = ({ date, onForceUpdate }) => {
+const PoolCountDown: FC<Props> = ({ date, isBeforeRoundEnd, onForceUpdate }) => {
   const calculateTimeLeft = useCallback((): TimeLeft => {
     if (!date) return getDefaultTimeLeft();
 
@@ -62,6 +63,8 @@ const PoolCountDown: FC<Props> = ({ date, onForceUpdate }) => {
   }, [date, calculateTimeLeft, onForceUpdate]);
 
   if (timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0) return <></>;
+
+  if (!isBeforeRoundEnd) return <div className="text-white text-center font-medium">Upcoming</div>;
 
   return (
     <div className="text-white text-center font-medium">
