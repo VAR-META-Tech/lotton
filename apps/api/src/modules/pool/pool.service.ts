@@ -12,7 +12,14 @@ import { parseUnits } from 'viem';
 import { Causes } from '@/common/exceptions/causes';
 import type { StellaConfig } from '@/configs';
 import type { User } from '@/database/entities';
-import { Pool, PoolPrize, PoolRound, Prizes, Token } from '@/database/entities';
+import {
+  Pool,
+  PoolPrize,
+  PoolRound,
+  Prizes,
+  Token,
+  UserTicket,
+} from '@/database/entities';
 import type { QueryPaginationDto } from '@/shared/dto/pagination.query';
 import { PoolRoundStatusEnum, PoolStatusEnum } from '@/shared/enums';
 import type { FetchResult } from '@/utils/paginate';
@@ -45,6 +52,8 @@ export class PoolService {
     private readonly configService: ConfigService<StellaConfig>,
     @InjectRepository(Prizes)
     private readonly prizesRepository: Repository<Prizes>,
+    @InjectRepository(UserTicket)
+    private readonly userTicketRepository: Repository<UserTicket>,
   ) {}
   async create(createPoolDto: CreatePoolDto) {
     try {
@@ -279,16 +288,38 @@ export class PoolService {
         .where('pool.id = :poolId', { poolId: id })
         .getOne();
 
-      pool.rounds = pool.rounds.map((round) => ({
-        ...round,
-        totalPrizes:
-          prizes.find((prize) => prize.roundIdOnChain === round.roundIdOnChain)
-            ?.totalPrizes ?? '0',
-      }));
+      pool.rounds = await Promise.all(
+        pool.rounds.map(async (round) => ({
+          ...round,
+          totalPrizes:
+            prizes.find(
+              (prize) => prize.roundIdOnChain === round.roundIdOnChain,
+            )?.totalPrizes ?? '0',
+          winners: await this.getWinners(round.id),
+        })),
+      );
       return pool;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  getWinners(roundId: number) {
+    return this.userTicketRepository
+      .createQueryBuilder('userTicket')
+      .leftJoin('userTicket.round', 'round')
+      .where(
+        'userTicket.winningMatch IS NOT NULL AND userTicket.winningMatch > 0',
+      )
+      .andWhere('round.id = :roundId', {
+        roundId,
+      })
+      .select([
+        'COUNT(userTicket.userWallet) as totalWinning',
+        'userTicket.winningMatch as winningMatch',
+      ])
+      .groupBy('userTicket.winningMatch')
+      .getRawMany();
   }
 
   async deleteOne(poolId: number) {
@@ -532,16 +563,13 @@ export class PoolService {
 
       if (!token) throw Causes.NOT_FOUND('Token');
 
-      const prizesToClaim = prizesToClaimDecimal.getValue();
-      const prizesToClaimAmount = parseUnits(prizesToClaim, token.decimals);
-
-      console.log(roundExits);
+      const prizesToClaim = +prizesToClaimDecimal.getValue();
 
       const signatureData = beginCell()
         .storeInt(roundExits.poolIdOnChain, 32)
         .storeInt(roundExits.roundIdOnChain, 32)
         .storeAddress(Address.parse(user.wallet))
-        .storeCoins(prizesToClaimAmount)
+        .storeCoins(BigInt(prizesToClaim))
         .endCell();
 
       const keyPair = await mnemonicToWalletKey(
@@ -558,7 +586,7 @@ export class PoolService {
         prizesToClaim,
         token,
         roundExits,
-        unitPrizes: prizesToClaimAmount.toString(),
+        unitPrizes: prizesToClaim,
       };
     } catch (error) {
       throw new BadRequestException(error);
@@ -605,8 +633,8 @@ export class PoolService {
     try {
       return await this.poolRepository
         .createQueryBuilder('pool')
-        .leftJoin('pool.rounds', 'rounds')
-        .leftJoin(
+        .innerJoin('pool.rounds', 'rounds')
+        .innerJoin(
           Prizes,
           'prizes',
           'pool.poolIdOnChain = prizes.poolIdOnChain AND rounds.roundIdOnChain = prizes.roundIdOnChain',

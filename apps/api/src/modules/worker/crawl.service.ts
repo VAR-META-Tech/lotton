@@ -180,6 +180,7 @@ export class CrawlWorkerService {
       },
     });
 
+    const totalPrizesDecimal = new bigDecimal(roundPrize.totalPrizes);
     const totalWinningPrizes = poolPrizes.reduce((acc, prize) => {
       const getTotalTickets = totalTicketsMatch.find(
         (match) => match.winningMatch === prize.matchNumber,
@@ -191,7 +192,10 @@ export class CrawlWorkerService {
       const percentDecimal = new bigDecimal(100);
 
       return acc.add(
-        totalTicketsDecimal.multiply(allocationDecimal).divide(percentDecimal),
+        totalPrizesDecimal
+          .multiply(allocationDecimal)
+          .divide(percentDecimal)
+          .divide(totalTicketsDecimal),
       );
     }, new bigDecimal(0));
 
