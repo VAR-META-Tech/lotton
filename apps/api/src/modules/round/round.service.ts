@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { PoolPrize, PoolRound } from '@/database/entities';
+import { PoolPrize, PoolRound, User, UserTicket } from '@/database/entities';
 import type { QueryPaginationDto } from '@/shared/dto/pagination.query';
 import { PoolRoundStatusEnum } from '@/shared/enums';
 import { FetchType, paginateEntities } from '@/utils/paginate';
@@ -14,8 +14,8 @@ export class RoundService {
   constructor(
     @InjectRepository(PoolRound)
     private readonly roundRepository: Repository<PoolRound>,
-    @InjectRepository(PoolPrize)
-    private readonly poolPrizeRepository: Repository<PoolPrize>,
+    @InjectRepository(UserTicket)
+    private readonly userTicketRepository: Repository<UserTicket>,
   ) {}
   async findRounds(query: RoundQueryDto, pagination: QueryPaginationDto) {
     try {
@@ -111,5 +111,15 @@ export class RoundService {
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  async totalTickets(roundId: number, user: User) {
+    const [_, total] = await this.userTicketRepository.findAndCountBy({
+      round: {
+        id: roundId,
+      },
+      userWallet: user.wallet,
+    });
+    return total;
   }
 }
