@@ -296,12 +296,22 @@ export class PoolService {
               (prize) => prize.roundIdOnChain === round.roundIdOnChain,
             )?.totalPrizes ?? '0',
           winners: await this.getWinners(round.id),
+          totalTickets: await this.getTotalTickets(round.id),
         })),
       );
       return pool;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  async getTotalTickets(roundId: number) {
+    const [, total] = await this.userTicketRepository.findAndCountBy({
+      round: {
+        id: roundId,
+      },
+    });
+    return total;
   }
 
   getWinners(roundId: number) {
