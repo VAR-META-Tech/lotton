@@ -241,7 +241,7 @@ export class PoolService {
       return await paginateEntities<Pool>(
         queryBuilder,
         pagination,
-        FetchType.RAW,
+        FetchType.MANAGED,
       );
     } catch (error) {
       throw new BadRequestException(error.message);
