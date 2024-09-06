@@ -1,5 +1,6 @@
 import { Contract, ContractProvider, Sender, Address, Cell, contractAddress, beginCell } from '@ton/core';
 import { Maybe } from '@ton/core/dist/utils/maybe';
+import Big from 'big.js';
 
 export default class Pool implements Contract {
   static createForDeploy(code: Cell, initialPoolValue: number): Pool {
@@ -14,7 +15,7 @@ export default class Pool implements Contract {
     readonly address: Address,
     // eslint-disable-next-line no-unused-vars
     readonly init?: { code: Cell; data: Cell }
-  ) {}
+  ) { }
 
   async sendDeploy(provider: ContractProvider, via: Sender) {
     await provider.internal(via, {
@@ -34,13 +35,16 @@ export default class Pool implements Contract {
     messageBody?: Maybe<string | Cell>;
     value: number;
   }) {
+    const BigValue = Big(value);
+    const totalValue = BigValue.add(0.1); // send 0.05 TON for gas
+
     try {
       await provider.internal(via, {
-        value: String(value + 0.05), // send 0.05 TON for gas
+        value: String(totalValue),
         body: messageBody,
       });
     } catch (error) {
-      console.error(error);
+      throw new Error(error as string);
     }
   }
 
@@ -51,7 +55,7 @@ export default class Pool implements Contract {
         body: messageBody,
       });
     } catch (error) {
-      console.error(error);
+      throw new Error(error as string);
     }
   }
 }

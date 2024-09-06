@@ -9,12 +9,12 @@ import { FCC } from '@/types';
 import TicketInfo from '../TicketInfo';
 import { HStack } from '@/components/ui/Utilities';
 import { Button } from '@/components/ui/button';
-import { IGetPoolDetailRound, IGetPoolJoinedItem } from '@/apis/pools';
+import { IGetPoolJoinedItem, IGetPoolJoinedItemRound } from '@/apis/pools';
 import { useBuyTicketStore } from '@/stores/BuyTicketStore';
 
 type Props = {
   pool: IGetPoolJoinedItem;
-  roundActive: IGetPoolDetailRound;
+  roundActive: IGetPoolJoinedItemRound;
 };
 
 export const TicketDetailDrawer: FCC<Props> = ({ children, pool, roundActive }) => {

@@ -5,7 +5,7 @@ import { MAX_TICKET, MIN_TICKET } from '@/modules/LandingPage/utils/const';
 import { FCC } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { delay, onMutateError, prettyNumber } from '@/lib/common';
+import { delay, onMutateError, prettyNumber, roundNumber } from '@/lib/common';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { HStack, VStack } from '@/components/ui/Utilities';
@@ -195,7 +195,7 @@ const BuyTicketForm: FC<Props> = ({ pool, roundActive }) => {
             <HStack spacing={8}>
               <Image src={currency?.icon || '/images/tokens/ton_symbol.webp'} width={24} height={24} alt="ton" />
 
-              <span className="text-2xl">{`${prettyNumber(totalAmount)} ${tokenSymbol}`}</span>
+              <span className="text-2xl">{`${prettyNumber(roundNumber(totalAmount))} ${tokenSymbol}`}</span>
             </HStack>
           </HStack>
           <HStack pos={'apart'}>

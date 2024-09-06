@@ -3,6 +3,7 @@ import bigDecimal from 'js-big-decimal';
 import { formatUnits, getAddress, isAddress } from 'viem';
 
 import { REGEX_EMOJI, REGEX_NO_SPECIAL_CHARACTERS } from './regex';
+import { RoundingModes } from 'js-big-decimal/dist/node/roundingModes';
 
 export function capitalizeFirstLetter(str = '') {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -187,4 +188,14 @@ export const delay = async (ms: number) => {
 
 export const getRoundActiveNumber = (value: number): string => {
   return value ? `${value < 10 ? `0${value}` : value}` : '00';
+};
+
+export const roundNumber = (
+  number: string | number,
+  round = 8,
+  roundMode: RoundingModes = bigDecimal.RoundingModes.DOWN
+) => {
+  const roundedNumber = bigDecimal.round(number, round, roundMode);
+
+  return parseFloat(roundedNumber.toString());
 };

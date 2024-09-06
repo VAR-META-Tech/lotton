@@ -56,7 +56,7 @@ const PoolPrizePot: FC<Props> = ({ pool, roundActive, isEndRound = false, isBefo
           <motion.div key={roundActiveNumber} {...slideAnimation} className="flex-1 flex flex-col">
             <VStack spacing={0} justify={'between'} className="flex-1">
               <WinningNumber
-                code={roundActive?.winningCode || '    '}
+                code={roundActive?.winningCode || '????'}
                 titleClassName="mx-auto"
                 spacing={12}
                 className="py-2"

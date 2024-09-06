@@ -1,4 +1,4 @@
-import { IGetPoolDetailRound } from '@/apis/pools';
+import { IGetPoolJoinedItemRound } from '@/apis/pools';
 import { Icons } from '@/assets/icons';
 
 import { HStack } from '@/components/ui/Utilities';
@@ -9,7 +9,7 @@ type Props = {
   // eslint-disable-next-line no-unused-vars
   onClick: (isUp: boolean) => void;
   activeRound: number;
-  rounds: IGetPoolDetailRound[];
+  rounds: IGetPoolJoinedItemRound[];
 };
 
 export const ChangeRoundAction = ({ onClick, activeRound, rounds }: Props) => {

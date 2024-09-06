@@ -7,7 +7,7 @@ import { HStack } from '@/components/ui/Utilities';
 import { ChangeRoundAction } from './ChangeRoundAction';
 import { DrawTime } from './DrawTime';
 import { TicketDetailDrawer } from './TicketDetailDrawer';
-import { IGetPoolDetailRound, IGetPoolJoinedItem } from '@/apis/pools';
+import { IGetPoolJoinedItem, IGetPoolJoinedItemRound } from '@/apis/pools';
 import BuyTicketDrawer from '@/modules/LandingPage/components/PoolList/BuyTicketDrawer';
 import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
 import { getRoundActiveNumber } from '@/lib/common';
@@ -24,8 +24,10 @@ export const PoolItem = ({ pool }: Props) => {
     poolId: pool?.id || 0,
   });
 
-  const rounds = poolDetail?.rounds || [];
+  const rounds = pool?.rounds || [];
   const roundActive = rounds[activeRound];
+  const roundsDetail = poolDetail?.rounds || [];
+  const roundDetailActive = roundsDetail[activeRound];
 
   const handleChangeRoundActive = (upRound: boolean) => {
     if (upRound) {
@@ -57,12 +59,12 @@ export const PoolItem = ({ pool }: Props) => {
         </TicketDetailDrawer>
       </div>
 
-      <BuyTicketDrawer pool={poolDetail} roundActive={roundActive} />
+      <BuyTicketDrawer pool={poolDetail} roundActive={roundDetailActive} />
     </div>
   );
 };
 
-const RoundNumber = ({ roundActive }: { roundActive: IGetPoolDetailRound }) => {
+const RoundNumber = ({ roundActive }: { roundActive: IGetPoolJoinedItemRound }) => {
   const roundActiveNumber = getRoundActiveNumber(roundActive?.roundNumber || 0);
 
   return (
