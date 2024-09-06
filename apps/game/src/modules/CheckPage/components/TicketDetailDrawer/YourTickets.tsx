@@ -23,7 +23,7 @@ const YourTickets: FC<IYourTicketsProps> = ({ roundActiveInfo }) => {
   );
 
   return (
-    <div className="border-t-gray-color border py-8">
+    <div className="py-8">
       <VStack spacing={32}>
         <SummaryTickets
           title="YOUR TICKET:"
@@ -38,7 +38,7 @@ const YourTickets: FC<IYourTicketsProps> = ({ roundActiveInfo }) => {
               <TicketMatch
                 key={`${item?.id}-${index}`}
                 code={item?.code || ''}
-                ticketNumber={item?.id || 0}
+                ticketNumber={index + 1}
                 matched={getMatch(item?.code || '')}
               />
             );

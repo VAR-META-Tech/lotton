@@ -43,10 +43,10 @@ const CheckWinner = () => {
           CHECK NOW
         </Button>
 
-        <CheckPrizeDrawer />
+        <CheckPrizeDrawer poolList={poolList} />
       </VStack>
     );
-  }, [isLoading, poolList?.length, setIsOpen]);
+  }, [isLoading, poolList, setIsOpen]);
 
   return renderCheckWinner;
 };

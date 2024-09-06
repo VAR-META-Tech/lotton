@@ -36,7 +36,7 @@ export default class Pool implements Contract {
     value: number;
   }) {
     const BigValue = Big(value);
-    const totalValue = BigValue.add(0.1); // send 0.1 TON for gas
+    const totalValue = BigValue.add(0.2); // send 0.2 TON for gas
 
     try {
       await provider.internal(via, {

@@ -9,6 +9,7 @@ import { HStack, VStack } from '@/components/ui/Utilities';
 
 import MatchItem from './MatchItem';
 import { fromNano } from '@ton/core';
+import { useGetTokenPrice } from '@/hooks/useGetTokenPrice';
 
 interface Props {
   pool: IGetPoolDetailData | undefined;
@@ -26,6 +27,16 @@ const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound 
     setIsShow(!isShow);
   };
 
+  const { price } = useGetTokenPrice(Number(currency?.id || 0));
+
+  const totalPrize = useMemo(() => {
+    return Number(fromNano(roundActive?.totalPrizes || 0));
+  }, [roundActive?.totalPrizes]);
+
+  const totalPrizeUsd = useMemo(() => {
+    return price * totalPrize;
+  }, [price, totalPrize]);
+
   const renderInfo = useMemo(() => {
     if (!isEndRound) {
       return (
@@ -38,15 +49,15 @@ const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound 
             <div className="grid grid-cols-2 gap-3">
               {poolPrizes?.map((item, index) => {
                 const allocationRate = Number(item?.allocation || 0) / 100;
-                const totalPrizes = Number(fromNano(roundActive?.totalPrizes || 0));
-                const value = totalPrizes * allocationRate;
+                const value = totalPrize * allocationRate;
+                const usdValue = value * price;
 
                 return (
                   <MatchItem
                     key={`${item?.id}-${index}`}
                     title={`Match first ${item?.matchNumber}`}
                     value={`${prettyNumber(roundNumber(value))} ${currency?.symbol || ''}`}
-                    subValue={`~ ${prettyNumber(Number(0 * allocationRate).toFixed(2))} USD`}
+                    subValue={`~ ${prettyNumber(roundNumber(usdValue))} USD`}
                   />
                 );
               })}
@@ -63,10 +74,10 @@ const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound 
             <span className="text-white font-medium text-base">Prize Pot</span>
 
             <span>
-              <span className="text-2xl font-semibold text-primary">{`${prettyNumber(fromNano(roundActive?.totalPrizes || 0))} ${
+              <span className="text-2xl font-semibold text-primary">{`${prettyNumber(roundNumber(totalPrize))} ${
                 currency?.symbol || ''
               }`}</span>{' '}
-              <span className="text-sm text-gray-color">~ {prettyNumber(Number(10000).toFixed(2))} USD</span>
+              <span className="text-sm text-gray-color">~ {prettyNumber(roundNumber(totalPrizeUsd))} USD</span>
             </span>
           </VStack>
 
@@ -78,8 +89,7 @@ const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound 
         <div className="grid grid-cols-2 gap-3">
           {poolPrizes?.map((item, index) => {
             const allocationRate = Number(item?.allocation || 0) / 100;
-            const totalPrizes = Number(fromNano(roundActive?.totalPrizes || 0));
-            const value = totalPrizes * allocationRate;
+            const value = totalPrize * allocationRate;
 
             const eachMatch = roundActive?.winners?.find((winner) => winner?.winningMatch === item?.matchNumber);
             const eachMatchValue = Number(eachMatch?.totalWinning || 0);
@@ -89,7 +99,7 @@ const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound 
                 key={`${item?.id}-${index}`}
                 title={`Match first ${item?.matchNumber}`}
                 value={`${prettyNumber(roundNumber(value))} ${currency?.symbol || ''}`}
-                subValue={`~ ${prettyNumber(roundNumber(0 * allocationRate))} USD`}
+                subValue={`~ ${prettyNumber(roundNumber(value * price))} USD`}
               >
                 <VStack spacing={2} className="mt-1">
                   <span className="text-xs">
@@ -103,7 +113,7 @@ const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound 
         </div>
       </VStack>
     );
-  }, [currency?.symbol, isEndRound, poolPrizes, roundActive?.totalPrizes, roundActive?.winners]);
+  }, [currency?.symbol, isEndRound, poolPrizes, price, roundActive?.winners, totalPrize, totalPrizeUsd]);
 
   return (
     <div>

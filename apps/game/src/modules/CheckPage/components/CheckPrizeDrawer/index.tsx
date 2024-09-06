@@ -7,19 +7,22 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from 
 import { FCC } from '@/types';
 import { VStack } from '@/components/ui/Utilities';
 import CollectWinning from './CollectWinning';
-import { useWinPools } from '@/hooks/useWinPools';
 import PrizeItem from './PrizeItem';
 import { useClaimStore } from '@/stores/ClaimStore';
+import { IGetPoolJoinedItem } from '@/apis/pools';
 
 export interface IClaimStep {
   poolId: number | null;
   roundId: number | null;
 }
 
-export const CheckPrizeDrawer: FCC = ({ children }) => {
+interface Props {
+  poolList: IGetPoolJoinedItem[];
+}
+
+export const CheckPrizeDrawer: FCC<Props> = ({ children, poolList }) => {
   const isOpen = useClaimStore.use.isOpen();
   const setIsOpen = useClaimStore.use.setIsOpen();
-  const { poolList } = useWinPools();
   const [claimStep, setClaimStep] = useState<IClaimStep>({
     poolId: null,
     roundId: null,

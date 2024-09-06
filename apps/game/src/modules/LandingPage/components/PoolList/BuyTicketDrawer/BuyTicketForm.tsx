@@ -20,6 +20,7 @@ import { useBuyTicketStore } from '@/stores/BuyTicketStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { fromNano } from '@ton/core';
 import ErrorMessage from '@/components/ErrorMessage';
+import { useGetTokenPrice } from '@/hooks/useGetTokenPrice';
 
 interface Props {
   pool: IGetPoolDetailData | undefined;
@@ -36,10 +37,12 @@ const BuyTicketForm: FC<Props> = ({ pool, roundActive }) => {
   const form = useForm<BuyTicketType>({
     resolver: zodResolver(buyTicketSchema),
     defaultValues: {
-      amount: 0,
+      amount: 1,
       balance: 0,
     },
   });
+
+  const { price } = useGetTokenPrice(pool?.currency?.id || 0);
 
   const {
     setValue,
@@ -200,11 +203,14 @@ const BuyTicketForm: FC<Props> = ({ pool, roundActive }) => {
             </HStack>
           </HStack>
           <HStack pos={'apart'}>
-            <span className="text-xs text-white">{`${tokenSymbol} balance: ${prettyNumber(
-              Number(balance || 0).toFixed(6)
-            )} ${tokenSymbol}`}</span>
+            <VStack spacing={0}>
+              <span className="text-xs text-white">{`${tokenSymbol} balance: ${prettyNumber(
+                roundNumber(balance || 0)
+              )} ${tokenSymbol}`}</span>
+              <ErrorMessage message={errors?.balance?.message} className="text-left" />
+            </VStack>
 
-            <span className="text-base text-gray-color">{`~ ${prettyNumber(0)} USD`}</span>
+            <span className="text-base text-gray-color">{`~ ${prettyNumber(roundNumber(totalAmount * price))} USD`}</span>
           </HStack>
         </VStack>
 
