@@ -4,9 +4,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { mnemonicToWalletKey, sign } from '@ton/crypto';
 import { Address, beginCell } from '@ton/ton';
 import dayjs from 'dayjs';
+import bigDecimal from 'js-big-decimal';
 import type { SelectQueryBuilder } from 'typeorm';
 import { Repository } from 'typeorm';
-import bigDecimal from 'js-big-decimal';
+import { parseUnits } from 'viem';
+
 import { Causes } from '@/common/exceptions/causes';
 import type { StellaConfig } from '@/configs';
 import type { User } from '@/database/entities';
@@ -25,7 +27,6 @@ import {
   UserPoolType,
 } from './dto/get-pool.query';
 import type { UpdatePoolDto } from './dto/update-pool.dto';
-import { parseUnits } from 'viem';
 
 export class PoolService {
   constructor(
@@ -38,6 +39,8 @@ export class PoolService {
     private readonly poolPrizesRepository: Repository<PoolPrize>,
     private readonly poolRoundService: PoolRoundService,
     private readonly configService: ConfigService<StellaConfig>,
+    @InjectRepository(Prizes)
+    private readonly prizesRepository: Repository<Prizes>,
   ) {}
   async create(createPoolDto: CreatePoolDto) {
     try {
@@ -210,6 +213,7 @@ export class PoolService {
   async find(pagination: QueryPaginationDto, query: PoolQueryDto) {
     try {
       const { status, search } = query;
+
       const queryBuilder = this.poolRepository
         .createQueryBuilder('pool')
         .where('status = :status', { status: PoolStatusEnum.ACTIVE });
@@ -237,22 +241,46 @@ export class PoolService {
       return await paginateEntities<Pool>(
         queryBuilder,
         pagination,
-        FetchType.MANAGED,
+        FetchType.RAW,
       );
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     try {
-      const pool = this.poolRepository
-        .createQueryBuilder('pool')
+      const poolQueryBuilder = this.poolRepository.createQueryBuilder('pool');
+      const prizes = await this.prizesRepository
+        .createQueryBuilder('prizes')
+        .leftJoinAndSelect(
+          Pool,
+          'pool',
+          'pool.poolIdOnChain = prizes.poolIdOnChain',
+        )
+        .select([
+          'pool.id as poolId',
+          'pool.poolIdOnChain as poolIdOnChain',
+          'prizes.*',
+        ])
+        .groupBy('prizes.id')
+        .where('pool.id = :poolId', { poolId: id })
+        .getRawMany();
+
+      const pool = await poolQueryBuilder
+        .clone()
         .leftJoinAndSelect('pool.currency', 'token')
         .leftJoinAndSelect('pool.rounds', 'rounds')
-        .leftJoinAndSelect('pool.poolPrizes', 'prizes')
+        .leftJoinAndSelect('pool.poolPrizes', 'poolPrizes')
         .where('pool.id = :poolId', { poolId: id })
         .getOne();
+
+      pool.rounds = pool.rounds.map((round) => ({
+        ...round,
+        totalPrizes:
+          prizes.find((prize) => prize.roundIdOnChain === round.roundIdOnChain)
+            ?.totalPrizes ?? '0',
+      }));
       return pool;
     } catch (error) {
       throw new BadRequestException(error.message);
