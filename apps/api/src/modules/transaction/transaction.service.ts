@@ -22,9 +22,11 @@ export class TransactionService {
       const { tokenId, fromDate, toDate, type, sort } = query;
       const queryBuilder = this.transactionRepository
         .createQueryBuilder('transaction')
+        .innerJoin('transaction.token','token')
         .where('(transaction.fromAddress = :userWallet or transaction.toAddress = :userWallet)', {
           userWallet: user.wallet,
         })
+        .select(['transaction.*','token.name as tokenName', 'token.decimals as tokenDecimals','token.symbol as tokenSymbol'])
         .orderBy('transaction.createdAt', sort);
 
       if (tokenId) {
@@ -50,7 +52,7 @@ export class TransactionService {
       return await paginateEntities<Transaction>(
         queryBuilder,
         pagination,
-        FetchType.MANAGED,
+        FetchType.RAW,
       );
     } catch (error) {
       throw new BadRequestException(error.message);
