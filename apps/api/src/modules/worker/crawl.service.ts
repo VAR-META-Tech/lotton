@@ -30,9 +30,6 @@ import { calculatorMatch, splitTickets } from './func';
 
 @Injectable()
 export class CrawlWorkerService {
-  tonClient: TonClient;
-  gameContractAddress: Address;
-
   constructor(
     @InjectRepository(LatestBlock)
     private readonly latestBlockRepository: Repository<LatestBlock>,
@@ -44,22 +41,9 @@ export class CrawlWorkerService {
     private readonly poolRepository: Repository<Pool>,
     private readonly prizesRepository: Repository<Prizes>,
     private readonly poolPrizeRepository: Repository<PoolPrize>,
-  ) {
-    this.tonClient = new TonClient({
-      endpoint: this.configService.get('contract.rpcEndpoint', {
-        infer: true,
-      }),
-      apiKey: this.configService.get('contract.apiKey', {
-        infer: true,
-      }),
-    });
-
-    this.gameContractAddress = Address.parse(
-      this.configService.get('contract.gameContractAddress', {
-        infer: true,
-      }),
-    );
-  }
+    private readonly gameContractAddress: Address,
+    private readonly tonClient: TonClient,
+  ) {}
 
   async doCrawlJob() {
     try {

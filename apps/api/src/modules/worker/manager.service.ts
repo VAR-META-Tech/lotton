@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Address } from '@ton/core';
+import { TonClient } from '@ton/ton';
 import cron from 'node-cron';
 import { Repository } from 'typeorm';
 
@@ -45,6 +47,10 @@ export class ManagerService {
     private readonly tokenPriceService: TokenPriceService,
     @InjectRepository(PoolPrize)
     private readonly poolPrizeRepository: Repository<PoolPrize>,
+    @Inject('GAME_CONTRACT')
+    private readonly gameContractAddress?: Address,
+    @Inject('TON_CLIENT')
+    private readonly tonClient?: TonClient,
   ) {
     this.init();
     this.crawlToken();
@@ -65,6 +71,8 @@ export class ManagerService {
         this.poolRepository,
         this.prizesRepository,
         this.poolPrizeRepository,
+        this.gameContractAddress,
+        this.tonClient,
       ).doCrawlJob();
       await this.wait(10000); // 10 seconds
     }
