@@ -3,6 +3,16 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    turbo: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.tsx',
+        },
+      },
+    },
+  },
   swcMinify: true,
   webpack(config) {
     // Grab the existing rule that handles SVG imports
