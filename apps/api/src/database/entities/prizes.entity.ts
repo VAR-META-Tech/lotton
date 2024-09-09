@@ -18,7 +18,13 @@ export class Prizes extends BaseTime {
   totalPrizes: number;
 
   @Column({ type: 'double', nullable: true })
+  totalTicketAmount: number;
+
+  @Column({ type: 'double', nullable: true })
   winningPrizes: number;
+
+  @Column({ type: 'double', nullable: true })
+  previousPrizes: number;
 
   @Column({ type: 'double', nullable: true })
   claimedPrizes: number;

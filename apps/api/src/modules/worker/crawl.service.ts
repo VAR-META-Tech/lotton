@@ -54,7 +54,7 @@ export class CrawlWorkerService {
         'IN DB: ' + currentBlockNumber + ' ONCHAIN: ' + latestBlockNumber,
       );
 
-      // if (+currentBlockNumber >= +latestBlockNumber) return;
+      if (+currentBlockNumber >= +latestBlockNumber) return;
 
       const transactions = await this.getTransactions(
         latestBlockNumber,
@@ -72,6 +72,8 @@ export class CrawlWorkerService {
           const originalBody = inMsg?.body.beginParse();
           const body = originalBody.clone();
           const op = body.loadUint(32);
+
+          Logger.debug('op: ' + op);
 
           switch (op) {
             case EVENT_HEADER.CREATE_POOL_EVENT:
@@ -120,6 +122,9 @@ export class CrawlWorkerService {
     // Set draw winning code for round
     const roundExist = await this.poolRoundRepository.findOneBy({
       roundIdOnChain: Number(payloadOutMsg.roundId),
+      pool: {
+        poolIdOnChain: Number(payloadOutMsg.poolId),
+      },
     });
 
     if (!roundExist) return;
@@ -276,21 +281,50 @@ export class CrawlWorkerService {
       .execute();
 
     // Sum total prizes
+    const poolExist = await this.getPool(Number(payloadOutMsg.poolId));
+    if (!poolExist) return;
     const totalTickets = await this.getTotalTicketOfRound(
       roundExist.roundIdOnChain,
       Number(payloadOutMsg.poolId),
     );
-    const poolExist = await this.getPool(Number(payloadOutMsg.poolId));
-    if (!poolExist) return;
-    const totalPrizes = totalTickets * Number(poolExist.ticketPrice);
+    const totalTicketAmount = totalTickets * Number(poolExist.ticketPrice);
 
-    // Set prize for round
-    const roundPrize: Partial<Prizes> = {
-      poolIdOnChain: Number(payloadOutMsg.poolId),
-      roundIdOnChain: Number(payloadOutMsg.roundId),
-      totalPrizes,
-      id: null,
-    };
+    let roundPrize: Partial<Prizes>;
+
+    if (roundExist.roundIdOnChain === 1) {
+      roundPrize = {
+        id: null,
+        poolIdOnChain: Number(payloadOutMsg.poolId),
+        roundIdOnChain: Number(payloadOutMsg.roundId),
+        totalTicketAmount,
+        totalPrizes: totalTicketAmount,
+        previousPrizes: 0,
+      };
+    } else {
+      const getPreviousPrize = await this.prizesRepository
+        .createQueryBuilder('prize')
+        .where('poolIdOnChain = :poolIdOnChain', {
+          poolIdOnChain: Number(payloadOutMsg.poolId),
+        })
+        .andWhere('roundIdOnChain < :roundIdOnChain', {
+          roundIdOnChain: roundExist.roundIdOnChain,
+        })
+        .orderBy('prize.roundIdOnChain', 'DESC')
+        .getOne();
+      const previousPrizes =
+        (getPreviousPrize?.totalPrizes ?? 0) -
+        (getPreviousPrize?.winningPrizes ?? 0);
+
+      roundPrize = {
+        id: null,
+        poolIdOnChain: Number(payloadOutMsg.poolId),
+        roundIdOnChain: Number(payloadOutMsg.roundId),
+        totalTicketAmount,
+        totalPrizes: previousPrizes + totalTicketAmount,
+        previousPrizes: previousPrizes,
+      };
+    }
+
     await this.setPrizesRound(roundPrize);
   }
 
@@ -415,7 +449,10 @@ export class CrawlWorkerService {
       .insert()
       .into(Prizes)
       .values(roundPrize)
-      .orUpdate(['totalPrizes'], ['poolIdOnChain', 'roundIdOnChain'])
+      .orUpdate(
+        ['totalPrizes', 'totalTicketAmount', 'previousPrizes'],
+        ['poolIdOnChain', 'roundIdOnChain'],
+      )
       .execute();
   }
 

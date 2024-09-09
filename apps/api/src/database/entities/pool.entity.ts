@@ -46,7 +46,7 @@ export class Pool extends BaseTime {
   })
   status: PoolStatusEnum;
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'bigint' })
   ticketPrice: number;
 
   @OneToMany(() => PoolPrize, (poolPrize) => poolPrize.pool)

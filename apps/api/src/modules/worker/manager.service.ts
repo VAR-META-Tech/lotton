@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Address } from '@ton/core';
 import { TonClient } from '@ton/ton';
-import cron from 'node-cron';
+// import cron from 'node-cron';
 import { Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
@@ -54,9 +54,10 @@ export class ManagerService {
   ) {
     this.init();
     this.crawlToken();
-    cron.schedule('* * * * *', async () => {
-      this.syncData();
-    });
+    // this.syncData();
+    // cron.schedule('* * * * *', async () => {
+    //   this.syncData();
+    // });
   }
 
   async init() {
