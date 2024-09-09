@@ -66,3 +66,8 @@ export enum EVENT_HEADER {
   DRAW_WINNING_NUMBER = 3591482628,
   USER_CLAIM_PRIZE = 1449747896,
 }
+
+export enum TransactionType {
+  BUY = 'buy',
+  CLAIM = 'claim',
+}
