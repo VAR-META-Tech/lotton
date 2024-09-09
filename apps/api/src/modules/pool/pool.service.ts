@@ -464,7 +464,7 @@ export class PoolService {
     return Promise.all([
       queryBuilder
         .clone()
-        .leftJoinAndSelect('pool.poolPrizes', 'prizes')
+        // .leftJoinAndSelect('pool.poolPrizes', 'prizes')
         .andWhere('ticket.winningMatch >= :winningMatch', {
           winningMatch: 1,
         })
@@ -511,7 +511,7 @@ export class PoolService {
           'pool.ticketPrice as ticketPrice',
           'ticket.winningMatch as winningMatch',
           'ticket.id as ticketId',
-          '(SELECT (totalPrizes*(SELECT allocation from pool_prize where poolId = pool.id and winningMatch = ticket.winningMatch limit 1)/100)/(SELECT COUNT(user_ticket.id) FROM user_ticket where roundId = rounds.id and user_ticket.winningMatch = ticket.winningMatch group by user_ticket.winningMatch limit 1) from prizes where pool.poolIdOnChain = prizes.poolIdOnChain limit 1) as winningPrize',
+          '(SELECT (totalPrizes*(SELECT allocation from pool_prize where poolId = pool.id and winningMatch = ticket.winningMatch limit 1)/100)/(SELECT COUNT(user_ticket.id) FROM user_ticket where roundId = rounds.id and user_ticket.winningMatch = ticket.winningMatch group by user_ticket.winningMatch limit 1) from prizes where pool.poolIdOnChain = prizes.poolIdOnChain AND rounds.roundIdOnChain = prizes.roundIdOnChain limit 1) as winningPrize',
           'ticket.winningCode as winningCode',
           'ticket.code as ticketCode',
           'ticket.winningMatch as winningMatch',
@@ -734,23 +734,17 @@ export class PoolService {
   async mapTicket(data: FetchResult<Pool>, rounds: any[]) {
     return {
       ...data,
-      items: await Promise.all(
-        data.items.map(async (item) => ({
-          ...item,
-          rounds: await (
-            await Promise.all(
-              item.rounds.map(async (round) => ({
-                ...round,
-                totalTicket: Number(
-                  rounds.find((item) => item.roundId == round.id)?.totalTicket,
-                ),
-                totalPrizes: await this.getPrizes(item.id, round.id),
-                winners: await this.getWinners(round.id),
-              })),
-            )
-          ).sort((a, b) => a.roundNumber - b.roundNumber),
-        })),
-      ),
+      items: data.items.map((item) => ({
+        ...item,
+        rounds: item.rounds
+          .map((round) => ({
+            ...round,
+            totalTicket: Number(
+              rounds.find((item) => item.roundId == round.id)?.totalTicket,
+            ),
+          }))
+          .sort((a, b) => a.roundNumber - b.roundNumber),
+      })),
     };
   }
 }
