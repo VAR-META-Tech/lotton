@@ -180,3 +180,19 @@ export interface IGetTokensResponse {
 }
 
 export interface IGetTokenListResponse extends TResponse<IGetTokensResponse> { }
+
+export interface IGetRoundDetail {
+  id: number;
+  roundNumber: number;
+  startTime: string;
+  endTime: string;
+  winningCode: string;
+  createdAt: string;
+  updatedAt: string;
+  totalTickets: number;
+  totalUsers: number;
+  currentPrizes: number;
+  previousPrizes: number;
+}
+
+export interface IGetRoundDetailResponse extends TResponse<IGetRoundDetail> { }

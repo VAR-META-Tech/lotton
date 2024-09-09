@@ -10,6 +10,8 @@ import { format } from 'date-fns'
 import { convertToTimestamp } from '@/lib/utils'
 import { IGetRoundsListResponse } from '@/apis/pool'
 import { IGetAllPoolParams } from './types'
+import Link from 'next/link'
+import { ROUTES } from '@/lib/routes'
 
 type Props = {
   rounds: IGetRoundsListResponse,
@@ -68,11 +70,11 @@ const RoundList = ({rounds, isFetching, handlePageChange, paramsQuery}: Props) =
                 </TableCell>
                 
                 <TableCell className="text-center border border-[#D4D4D4]">
-                  {/* <Link href={`${ROUTES.POOL}/${round.id}`}> */}
-                    <Button className='min-w-20 min-h-4 rounded-sm bg-[#1D4ED8]' disabled>
+                  <Link href={`${ROUTES.ROUND}/${round.id}`}>
+                    <Button className='min-w-20 min-h-4 rounded-sm bg-[#1D4ED8]'>
                       View
                     </Button>
-                  {/* </Link> */}
+                  </Link>
                 </TableCell>
               </TableRow>
             ))}

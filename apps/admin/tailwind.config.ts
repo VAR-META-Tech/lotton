@@ -138,7 +138,9 @@ const config: Config = {
         sm: '4px',
         haft: '50%',
       },
-      boxShadow: {},
+      boxShadow: {
+        shadowCustom: 'rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px',
+      },
       keyframes: {
         'accordion-down': {
           from: { height: '0' },
