@@ -436,15 +436,10 @@ export class PoolService {
         .andWhere('ticket.userWallet = :userWallet', {
           userWallet: user.wallet,
         });
-      // if (type == UserPoolType.WINNER) {
-      //   queryBuilder.andWhere('ticket.winningMatch >= :winningMatch', {
-      //     winningMatch: 1,
-      //   });
-      // }
 
       const [items, countTicket] = await this.ticketsJoined(type, queryBuilder);
 
-      return this.mapTicket(
+      return await this.mapTicket(
         generatePagination<Pool>(totalItems, items, page, take),
         countTicket,
       );
@@ -469,6 +464,7 @@ export class PoolService {
     return Promise.all([
       queryBuilder
         .clone()
+        .leftJoinAndSelect('pool.poolPrizes', 'prizes')
         .andWhere('ticket.winningMatch >= :winningMatch', {
           winningMatch: 1,
         })
@@ -581,7 +577,7 @@ export class PoolService {
         .where('poolId = :poolId', { poolId: poolId })
         .getMany();
 
-      const prizes = await this.getPrizes(poolId);
+      const prizes = await this.getPrizes(poolId, roundId);
 
       const prizesToClaimDecimal = this.calculateUserWinningPrize(
         userWinning,
@@ -665,7 +661,7 @@ export class PoolService {
     }
   }
 
-  async getPrizes(poolId: number) {
+  async getPrizes(poolId: number, roundId: number) {
     try {
       return await this.poolRepository
         .createQueryBuilder('pool')
@@ -680,8 +676,12 @@ export class PoolService {
           'prizes.roundIdOnChain as roundIdOnChain',
           'prizes.totalPrizes as totalPrizes',
           'prizes.claimedPrizes as claimedPrizes',
+          'prizes.winningPrizes as winningPrizes',
+          'prizes.totalTicketAmount as totalTicketAmount',
+          'prizes.previousPrizes as previousPrizes',
         ])
         .where('pool.id = :poolId', { poolId: poolId })
+        .andWhere('rounds.id = :roundId', { roundId: roundId })
         .getRawOne();
     } catch (error) {
       throw error;
@@ -731,20 +731,26 @@ export class PoolService {
     }, new bigDecimal(0));
   }
 
-  mapTicket(data: FetchResult<Pool>, rounds: any[]) {
+  async mapTicket(data: FetchResult<Pool>, rounds: any[]) {
     return {
       ...data,
-      items: data.items.map((item) => ({
-        ...item,
-        rounds: item.rounds
-          .map((round) => ({
-            ...round,
-            totalTicket: Number(
-              rounds.find((item) => item.roundId == round.id)?.totalTicket,
-            ),
-          }))
-          .sort((a, b) => a.roundNumber - b.roundNumber),
-      })),
+      items: await Promise.all(
+        data.items.map(async (item) => ({
+          ...item,
+          rounds: await (
+            await Promise.all(
+              item.rounds.map(async (round) => ({
+                ...round,
+                totalTicket: Number(
+                  rounds.find((item) => item.roundId == round.id)?.totalTicket,
+                ),
+                totalPrizes: await this.getPrizes(item.id, round.id),
+                winners: await this.getWinners(round.id),
+              })),
+            )
+          ).sort((a, b) => a.roundNumber - b.roundNumber),
+        })),
+      ),
     };
   }
 }
