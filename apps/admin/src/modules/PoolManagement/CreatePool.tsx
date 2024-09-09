@@ -44,6 +44,16 @@ export const CreatePool = () => {
     resolver: zodResolver(poolSchema),
   });
 
+  //  const testLastTx = async () => {
+  //    try {
+  //     const lastTx = await getLastTx();
+  //     const lastTxHash = lastTx?.[0].hash().toString('base64');
+  //     console.log({lastTxHash})
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }
+
   const { data: tokenList } = useGetTokens({});
 
   const currencyOptions = useMemo(() => {
@@ -166,6 +176,7 @@ export const CreatePool = () => {
   
   return (
     <VStack className="mx-4 md:mx-10 mb-24 bg-white rounded-sm min-h-[12.5rem] p-8 md:px-24 md:py-12">
+       {/* <Button onClick={testLastTx}>Test get last TX</Button> */}
       <div>
         <FormWrapper methods={methods} onSubmit={handleSubmit}>
           <VStack>

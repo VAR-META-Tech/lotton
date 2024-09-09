@@ -36,7 +36,7 @@ export function useCounterContract() {
   return {
     address: counterContract?.address.toString(),
     getLastTx: () => {
-      return client?.getTransactions(Address.parse(contractAddress), {
+      return client?.getTransactions(Address.parse("0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP"), {
         limit: 1,
       });
     },
