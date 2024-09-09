@@ -20,6 +20,7 @@ import { ROUTES } from '@/lib/routes';
 import { useCounterContract } from '@/hooks/useCounterContract';
 import { Address, Dictionary } from '@ton/core';
 import { parseUnits } from 'viem';
+import { useTonConnect } from '@/hooks/useTonConnect';
 
 export const SEQUENCY_OPTIONS = [
   { label: '1 day', value: '1' },
@@ -37,6 +38,7 @@ export const CreatePool = () => {
   const queryClient = useQueryClient();
   const { createPool, getLastTx } = useCounterContract();
   const [loading, setLoading] = useState<boolean>(false);
+  const { connected } = useTonConnect();
 
   const methods = useForm<PoolSchema>({
     resolver: zodResolver(poolSchema),
@@ -328,7 +330,13 @@ export const CreatePool = () => {
                 Cancel
               </Button>
 
-              <Button type="submit" loading={isPendingCreate || loading} variant="default" className="min-w-28 min-h-8 rounded-sm">
+              <Button
+                type="submit"
+                loading={isPendingCreate || loading}
+                variant="default"
+                className="min-w-28 min-h-8 rounded-sm"
+                disabled={!connected}
+              >
                 Create
               </Button>
             </HStack>
