@@ -1,5 +1,6 @@
 import { HStack, VStack } from '@/components/ui/Utilities';
-import { env } from '@/lib/const';
+import { usePoolContract } from '@/hooks/usePoolContract';
+import { roundNumber } from '@/lib/common';
 import React, { FC } from 'react';
 
 interface Props {
@@ -21,6 +22,8 @@ const CollectTotal: FC<Props> = ({
   totalUsdValue,
   tokenSymbol,
 }) => {
+  const { claimFee } = usePoolContract();
+
   return (
     <VStack>
       <VStack className="border-t border-t-gray-color">
@@ -28,19 +31,19 @@ const CollectTotal: FC<Props> = ({
           <span className="pt-4 font-bold">Total Rewards</span>
 
           <HStack pos={'apart'} className="font-bold">
-            <span className="text-primary text-2xl">{`${Number(rewardValue || 0).toFixed(6)} ${tokenSymbol || ''}`}</span>
+            <span className="text-primary text-2xl">{`${roundNumber(rewardValue || 0)} ${tokenSymbol || ''}`}</span>
 
-            <span className="text-gray-color text-sm">~ {Number(usdValue || 0).toFixed(6)} USD</span>
+            <span className="text-gray-color text-sm">~ {roundNumber(usdValue || 0)} USD</span>
           </HStack>
         </VStack>
 
         <VStack>
-          <span className="pt-4 font-bold">Claim Fees {env.CLAIM_FEE}%</span>
+          <span className="pt-4 font-bold">Claim Fees {claimFee}%</span>
 
           <HStack pos={'apart'} className="font-bold">
-            <span className="text-primary text-2xl">{`${Number(feeValue || 0).toFixed(6)} ${tokenSymbol || ''}`}</span>
+            <span className="text-primary text-2xl">{`${roundNumber(feeValue || 0)} ${tokenSymbol || ''}`}</span>
 
-            <span className="text-gray-color text-sm">~ {Number(feeUsdValue || 0).toFixed(6)} USD</span>
+            <span className="text-gray-color text-sm">~ {roundNumber(feeUsdValue || 0)} USD</span>
           </HStack>
         </VStack>
       </VStack>
@@ -49,9 +52,9 @@ const CollectTotal: FC<Props> = ({
         <span className="pt-4 font-bold">Total Unclaimed Rewards</span>
 
         <HStack pos={'apart'} className="font-bold">
-          <span className="text-2xl  bg-gradient-to-r from-primary  to-[#ED9BD6] inline-block text-transparent bg-clip-text">{`${Number(totalValue || 0).toFixed(6)} ${tokenSymbol || ''}`}</span>
+          <span className="text-2xl  bg-gradient-to-r from-primary  to-[#ED9BD6] inline-block text-transparent bg-clip-text">{`${roundNumber(totalValue || 0)} ${tokenSymbol || ''}`}</span>
 
-          <span className="text-gray-color text-sm">~ {Number(totalUsdValue || 0).toFixed(6)} USD</span>
+          <span className="text-gray-color text-sm">~ {roundNumber(totalUsdValue || 0)} USD</span>
         </HStack>
       </VStack>
     </VStack>

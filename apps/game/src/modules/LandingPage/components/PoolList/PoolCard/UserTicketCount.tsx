@@ -3,10 +3,14 @@ import { HStack, VStack } from '@/components/ui/Utilities';
 import { useAuth } from '@/hooks/useAuth';
 import { ROUTES } from '@/lib/routes';
 import Link from 'next/link';
-import React, { useMemo } from 'react';
+import React, { FC, useMemo } from 'react';
 import { ConnectWallet } from '../../ConnectWallet';
 
-const UserTicketCount = () => {
+interface Props {
+  holdingTicket: number;
+}
+
+const UserTicketCount: FC<Props> = ({ holdingTicket }) => {
   const { isLoggedIn, status } = useAuth();
 
   const renderComponent = useMemo(() => {
@@ -16,7 +20,7 @@ const UserTicketCount = () => {
       return (
         <VStack className="text-xs" align="center" spacing={0}>
           <span className="text-center">
-            You have <span className="text-sm">05</span> ticket this round{' '}
+            You have <span className="text-sm">{holdingTicket}</span> ticket this round{' '}
           </span>
           <Link href={ROUTES.CHECK} className="text-sm font-bold text-primary text-center">
             View your tickets
@@ -30,7 +34,7 @@ const UserTicketCount = () => {
         <ConnectWallet />
       </HStack>
     );
-  }, [isLoggedIn, status]);
+  }, [holdingTicket, isLoggedIn, status]);
 
   return <div>{renderComponent}</div>;
 };

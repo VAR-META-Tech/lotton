@@ -1,3 +1,6 @@
+;; Comment "return unused excess"
+cell __gen_cell_comment_d7a2e3d435587bd3bb71130beeec92f53b4e8aa34b4016d3cdab8f25049e6cbf() asm "B{b5ee9c7241010101001a0000300000000072657475726e20756e75736564206578636573733f582e4c} B>boc PUSHREF";
+
 ;; String ""
 slice __gen_slice_string_96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7() asm "B{b5ee9c724101010100020000004cacb9cd} B>boc <s PUSHSLICE";
 

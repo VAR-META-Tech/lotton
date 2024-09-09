@@ -6,6 +6,7 @@ import {
   Network,
   NetworkToken,
   Pool,
+  PoolPrize,
   PoolRound,
   Prizes,
   Token,
@@ -14,6 +15,7 @@ import {
   UserTicket,
 } from '@/database/entities';
 
+import { ServicesModule } from '../services/services.module';
 import { ManagerService } from './manager.service';
 
 @Module({
@@ -29,8 +31,9 @@ import { ManagerService } from './manager.service';
       PoolRound,
       Pool,
       Prizes,
+      PoolPrize,
     ]),
-    // ServicesModule,
+    ServicesModule,
   ],
   providers: [ManagerService],
   exports: [ManagerService],

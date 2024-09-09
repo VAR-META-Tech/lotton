@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 import { mnemonicToPrivateKey } from '@ton/crypto';
 import {
@@ -13,10 +14,9 @@ import type { Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
 import type { Pool, PoolRound, UserTicket } from '@/database/entities';
+import { PoolStatusEnum } from '@/shared/enums';
 import { getLogger } from '@/utils/logger';
 
-import { PoolStatusEnum } from '@/shared/enums';
-import { Logger } from '@nestjs/common';
 import {
   getCurrentPool,
   getResultByRound,
@@ -269,7 +269,12 @@ export class RoundPrizesService {
       });
       await contract.send(transfer);
       console.log('draw ok');
-      await this.wait(1000);
+      let newSeqno = seqno;
+      do {
+        await this.wait(1000);
+        newSeqno = await contract.getSeqno();
+        console.log(newSeqno);
+      } while (newSeqno === seqno);
     } catch (error) {
       Logger.error(error);
     }
@@ -305,23 +310,22 @@ export class RoundPrizesService {
   }
 
   async getPoolsAvailable() {
-    return (
-      this.poolRepository
-        .createQueryBuilder()
-        .where('startTime < UNIX_TIMESTAMP(NOW())')
-        .andWhere('status = :status', { status: PoolStatusEnum.ACTIVE })
-        // .andWhere('endTime > UNIX_TIMESTAMP(NOW())')
-        .getMany()
-    );
+    return this.poolRepository
+      .createQueryBuilder('pool')
+      .leftJoinAndSelect('pool.rounds', 'rounds', 'rounds.winningCode IS NULL')
+      .where('pool.status = :status', { status: PoolStatusEnum.ACTIVE })
+      .select(['pool.*', 'COUNT(rounds.id) as totalRoundsNotDraw'])
+      .groupBy('pool.id')
+      .having('totalRoundsNotDraw > 0')
+      .getRawMany();
   }
 
   async getRoundsAvailable(poolId: number) {
     return this.poolRoundRepository
       .createQueryBuilder()
       .where('poolId = :poolId', { poolId })
-      .andWhere('startTime < UNIX_TIMESTAMP(NOW())')
-      .andWhere('UNIX_TIMESTAMP(NOW()) > endTime')
       .andWhere('winningCode IS NULL')
+      .andWhere('UNIX_TIMESTAMP(NOW()) > endTime')
       .getMany();
   }
 

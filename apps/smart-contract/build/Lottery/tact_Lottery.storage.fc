@@ -24,12 +24,12 @@ _ $Context$_get_value((int, slice, int, slice) v) inline {
 ;; TLB: _ bounce:bool to:address value:int257 mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell = SendParameters
 ;;
 
-((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline {
-    return (true, $to, $value, $mode, null(), null(), null());
-}
-
 ((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_bounce_to_value_mode_body_code_data(int $bounce, slice $to, int $value, int $mode, cell $body, cell $code, cell $data) inline {
     return ($bounce, $to, $value, $mode, $body, $code, $data);
+}
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline {
+    return (true, $to, $value, $mode, null(), null(), null());
 }
 
 ;;
@@ -694,6 +694,18 @@ cell $WinningNumbersDrawnEvent$_store_cell((int, int, int) v) inline {
 }
 
 ;;
+;; Type: SetClaimFeePercent
+;; Header: 0x0de724be
+;; TLB: set_claim_fee_percent#0de724be claimFeePercent:uint8 = SetClaimFeePercent
+;;
+
+(slice, ((int))) $SetClaimFeePercent$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 233252030);
+    var v'claimFeePercent = sc_0~load_uint(8);
+    return (sc_0, (v'claimFeePercent));
+}
+
+;;
 ;; Type: PoolCreatedEvent
 ;; Header: 0x233540bc
 ;; TLB: pool_created_event#233540bc poolId:int257 ticketPrice:uint32 initialRounds:uint8 startTime:uint32 endTime:uint32 active:bool sequence:uint32 rounds:dict<int, ^RoundConfig{roundId:uint32,poolId:uint32,ticketPrice:coins,startTime:uint32,endTime:uint32,active:bool}> creator:address prizes:dict<uint8, uint8> = PoolCreatedEvent
@@ -778,42 +790,42 @@ cell $ClaimedEvent$_store_cell((int, int, int, slice) v) inline {
 ;; Type: Lottery
 ;;
 
-builder $Lottery$_store(builder build_0, (slice, cell, cell, int, cell, cell, cell, cell, int, cell) v) inline {
-    var (v'owner, v'admin, v'pools, v'nextPoolId, v'usersTicket, v'rewardSettings, v'result, v'rewardPools, v'publicKey, v'claimData) = v;
+builder $Lottery$_store(builder build_0, (slice, cell, cell, int, cell, cell, cell, int, cell, int) v) inline {
+    var (v'owner, v'admin, v'pools, v'nextPoolId, v'usersTicket, v'result, v'rewardPools, v'publicKey, v'claimData, v'claimFeePercent) = v;
     build_0 = __tact_store_address(build_0, v'owner);
     build_0 = build_0.store_dict(v'admin);
     var build_1 = begin_cell();
     build_1 = build_1.store_dict(v'pools);
     build_1 = build_1.store_int(v'nextPoolId, 257);
     build_1 = build_1.store_dict(v'usersTicket);
-    build_1 = build_1.store_dict(v'rewardSettings);
+    build_1 = build_1.store_dict(v'result);
     var build_2 = begin_cell();
-    build_2 = build_2.store_dict(v'result);
     build_2 = build_2.store_dict(v'rewardPools);
     build_2 = ~ null?(v'publicKey) ? build_2.store_int(true, 1).store_int(v'publicKey, 257) : build_2.store_int(false, 1);
     build_2 = build_2.store_dict(v'claimData);
+    build_2 = build_2.store_int(v'claimFeePercent, 257);
     build_1 = store_ref(build_1, build_2.end_cell());
     build_0 = store_ref(build_0, build_1.end_cell());
     return build_0;
 }
 
-(slice, ((slice, cell, cell, int, cell, cell, cell, cell, int, cell))) $Lottery$_load(slice sc_0) inline {
+(slice, ((slice, cell, cell, int, cell, cell, cell, int, cell, int))) $Lottery$_load(slice sc_0) inline {
     var v'owner = sc_0~__tact_load_address();
     var v'admin = sc_0~load_dict();
     slice sc_1 = sc_0~load_ref().begin_parse();
     var v'pools = sc_1~load_dict();
     var v'nextPoolId = sc_1~load_int(257);
     var v'usersTicket = sc_1~load_dict();
-    var v'rewardSettings = sc_1~load_dict();
+    var v'result = sc_1~load_dict();
     slice sc_2 = sc_1~load_ref().begin_parse();
-    var v'result = sc_2~load_dict();
     var v'rewardPools = sc_2~load_dict();
     var v'publicKey = sc_2~load_int(1) ? sc_2~load_int(257) : null();
     var v'claimData = sc_2~load_dict();
-    return (sc_0, (v'owner, v'admin, v'pools, v'nextPoolId, v'usersTicket, v'rewardSettings, v'result, v'rewardPools, v'publicKey, v'claimData));
+    var v'claimFeePercent = sc_2~load_int(257);
+    return (sc_0, (v'owner, v'admin, v'pools, v'nextPoolId, v'usersTicket, v'result, v'rewardPools, v'publicKey, v'claimData, v'claimFeePercent));
 }
 
-(slice, cell, cell, int, cell, cell, cell, cell, int, cell) $Lottery$_contract_load() impure inline_ref {
+(slice, cell, cell, int, cell, cell, cell, int, cell, int) $Lottery$_contract_load() impure inline_ref {
     slice $sc = get_data().begin_parse();
     __tact_context_sys = $sc~load_ref();
     int $loaded = $sc~load_int(1);
@@ -826,7 +838,7 @@ builder $Lottery$_store(builder build_0, (slice, cell, cell, int, cell, cell, ce
     }
 }
 
-() $Lottery$_contract_store((slice, cell, cell, int, cell, cell, cell, cell, int, cell) v) impure inline {
+() $Lottery$_contract_store((slice, cell, cell, int, cell, cell, cell, int, cell, int) v) impure inline {
     builder b = begin_cell();
     b = b.store_ref(__tact_context_sys);
     b = b.store_int(true, 1);

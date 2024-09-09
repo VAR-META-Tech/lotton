@@ -1,11 +1,11 @@
-import React, { FC, HTMLAttributes, useMemo, useState } from 'react';
+import React, { FC, HTMLAttributes, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { Icons } from '@/assets/icons';
 import { MAX_TICKET, MIN_TICKET } from '@/modules/LandingPage/utils/const';
 import { FCC } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { onMutateError, prettyNumber } from '@/lib/common';
+import { delay, onMutateError, prettyNumber, roundNumber } from '@/lib/common';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { HStack, VStack } from '@/components/ui/Utilities';
@@ -13,42 +13,49 @@ import { usePoolContract } from '@/hooks/usePoolContract';
 import { useWallet } from '@/hooks/useWallet';
 import { useForm } from 'react-hook-form';
 import { buyTicketSchema, BuyTicketType } from '@/modules/LandingPage/types/schema';
-import { IGetPoolDetailCurrency } from '@/apis/pools';
+import { IGetPoolDetailData, IGetPoolDetailRound } from '@/apis/pools';
 import { FormWrapper } from '@/components/ui/form';
 import { toast } from 'sonner';
 import { useBuyTicketStore } from '@/stores/BuyTicketStore';
 import { useQueryClient } from '@tanstack/react-query';
+import { fromNano } from '@ton/core';
+import ErrorMessage from '@/components/ErrorMessage';
+import { useGetTokenPrice } from '@/hooks/useGetTokenPrice';
 
 interface Props {
-  ticketPrice: number;
-  currency: IGetPoolDetailCurrency | undefined;
-  roundIdOnChain: number;
-  poolIdOnChain: number;
+  pool: IGetPoolDetailData | undefined;
+  roundActive: IGetPoolDetailRound;
 }
 
-const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundIdOnChain }) => {
+const BuyTicketForm: FC<Props> = ({ pool, roundActive }) => {
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState<boolean>(false);
   const { buyTicket, getLastTx } = usePoolContract();
-  const { balance } = useWallet();
+  const { balance: balanceValue } = useWallet();
   const clear = useBuyTicketStore.use.clear();
 
   const form = useForm<BuyTicketType>({
     resolver: zodResolver(buyTicketSchema),
     defaultValues: {
-      amount: 0,
+      amount: 1,
+      balance: 0,
     },
   });
+
+  const { price } = useGetTokenPrice(pool?.currency?.id || 0);
 
   const {
     setValue,
     watch,
     formState: { errors },
     clearErrors,
+    setError,
   } = form;
 
-  const [amount] = watch(['amount']);
+  const [amount, balance] = watch(['amount', 'balance']);
 
+  const ticketPrice = Number(fromNano(pool?.ticketPrice || 0));
+  const currency = pool?.currency;
   const isMax = amount === MAX_TICKET;
   const isMin = amount === MIN_TICKET;
   const tokenSymbol = currency?.symbol || '';
@@ -72,32 +79,55 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundI
     return Number(amount) * Number(ticketPrice);
   }, [amount, ticketPrice]);
 
+  const handleTransaction = (status: 'success' | 'error', msg: string) => {
+    if (status === 'success') {
+      toast.success(msg);
+    } else {
+      toast.error(msg);
+    }
+
+    queryClient.refetchQueries({
+      queryKey: ['/api/pools'],
+    });
+
+    clear();
+  };
+
   const handleSubmit = async () => {
     try {
+      if (totalAmount > balanceValue) {
+        setError('balance', {
+          type: 'custom',
+          message: 'Insufficient TON balance',
+        });
+
+        return;
+      }
+
       setLoading(true);
       const lastTx = await getLastTx();
       const lastTxHash = lastTx?.[0].hash().toString('base64');
 
       buyTicket({
-        poolId: poolIdOnChain || 0,
+        poolId: pool?.poolIdOnChain || 0,
         quantity: amount,
-        roundId: roundIdOnChain,
+        roundId: roundActive?.roundIdOnChain,
+        ticketPrice: ticketPrice,
       });
 
       let newLastTxHash = lastTxHash;
       while (newLastTxHash === lastTxHash) {
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        await delay(5000);
         const updatedLastTx = await getLastTx();
+
+        if (updatedLastTx?.[0].hash().toString('base64') === newLastTxHash) {
+          continue;
+        }
+
         const isAbortedTx = (updatedLastTx?.[0]?.description as any)?.aborted;
 
         if (isAbortedTx) {
-          toast.error('Buy tickets unsuccessful');
-
-          queryClient.refetchQueries({
-            queryKey: ['/api/pools'],
-          });
-
-          clear();
+          handleTransaction('error', 'Buy tickets unsuccessful');
 
           return;
         }
@@ -105,15 +135,7 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundI
         newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
       }
 
-      if (newLastTxHash !== lastTxHash) {
-        toast.success('Buy tickets successful');
-
-        queryClient.refetchQueries({
-          queryKey: ['/api/pools'],
-        });
-
-        clear();
-      }
+      if (newLastTxHash !== lastTxHash) handleTransaction('error', 'Buy tickets successful');
     } catch (error) {
       onMutateError(error);
       setLoading(false);
@@ -121,6 +143,12 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundI
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (balanceValue) {
+      setValue('balance', balanceValue);
+    }
+  }, [balanceValue, setValue]);
 
   return (
     <FormWrapper form={form} onSubmit={handleSubmit}>
@@ -160,9 +188,7 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundI
                 </ChangeAmountButton>
               </HStack>
             </HStack>
-            {errors?.amount?.message && (
-              <span className="text-red-500 text-right text-xs">{errors?.amount?.message}</span>
-            )}
+            <ErrorMessage message={errors?.amount?.message} />
           </VStack>
         </VStack>
 
@@ -173,15 +199,18 @@ const BuyTicketForm: FC<Props> = ({ ticketPrice, currency, poolIdOnChain, roundI
             <HStack spacing={8}>
               <Image src={currency?.icon || '/images/tokens/ton_symbol.webp'} width={24} height={24} alt="ton" />
 
-              <span className="text-2xl">{`${prettyNumber(totalAmount)} ${tokenSymbol}`}</span>
+              <span className="text-2xl">{`${prettyNumber(roundNumber(totalAmount))} ${tokenSymbol}`}</span>
             </HStack>
           </HStack>
           <HStack pos={'apart'}>
-            <span className="text-xs text-white">{`${tokenSymbol} balance: ${prettyNumber(
-              Number(balance || 0).toFixed(6)
-            )} ${tokenSymbol}`}</span>
+            <VStack spacing={0}>
+              <span className="text-xs text-white">{`${tokenSymbol} balance: ${prettyNumber(
+                roundNumber(balance || 0)
+              )} ${tokenSymbol}`}</span>
+              <ErrorMessage message={errors?.balance?.message} className="text-left" />
+            </VStack>
 
-            <span className="text-base text-gray-color">{`~ ${prettyNumber(0)} USD`}</span>
+            <span className="text-base text-gray-color">{`~ ${prettyNumber(roundNumber(totalAmount * price))} USD`}</span>
           </HStack>
         </VStack>
 

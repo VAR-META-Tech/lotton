@@ -5,11 +5,12 @@ import SummaryTickets from '../SummaryTickets';
 import { IGetPoolJoinedItemRound } from '@/apis/pools';
 
 interface IYourTicketsProps {
-  winCode: string;
-  roundInfo: IGetPoolJoinedItemRound | undefined;
+  roundActiveInfo: IGetPoolJoinedItemRound | undefined;
 }
 
-const YourTickets: FC<IYourTicketsProps> = ({ winCode, roundInfo }) => {
+const YourTickets: FC<IYourTicketsProps> = ({ roundActiveInfo }) => {
+  const winCode = roundActiveInfo?.winningCode || '    ';
+
   const getMatch = useCallback(
     (code: string) => {
       for (let index = winCode?.length; index >= 0; index--) {
@@ -22,22 +23,22 @@ const YourTickets: FC<IYourTicketsProps> = ({ winCode, roundInfo }) => {
   );
 
   return (
-    <div className="border-t-gray-color border py-8">
+    <div className="py-8">
       <VStack spacing={32}>
         <SummaryTickets
           title="YOUR TICKET:"
-          total={Number(roundInfo?.totalTicket || 0)}
+          total={Number(roundActiveInfo?.totalTicket || 0)}
           icon={''}
           className="justify-start"
         />
 
         <VStack spacing={32}>
-          {roundInfo?.ticket?.map((item, index) => {
+          {roundActiveInfo?.ticket?.map((item, index) => {
             return (
               <TicketMatch
                 key={`${item?.id}-${index}`}
                 code={item?.code || ''}
-                ticketNumber={item?.id || 0}
+                ticketNumber={index + 1}
                 matched={getMatch(item?.code || '')}
               />
             );

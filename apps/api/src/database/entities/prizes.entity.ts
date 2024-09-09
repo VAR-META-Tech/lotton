@@ -14,9 +14,12 @@ export class Prizes extends BaseTime {
   @Column({ type: 'integer' })
   roundIdOnChain: number;
 
-  @Column({ type: 'decimal', nullable: true })
+  @Column({ type: 'double', nullable: true })
   totalPrizes: number;
 
-  @Column({ type: 'decimal', nullable: true })
+  @Column({ type: 'double', nullable: true })
+  winningPrizes: number;
+
+  @Column({ type: 'double', nullable: true })
   claimedPrizes: number;
 }

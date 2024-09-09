@@ -2,6 +2,7 @@ import React, { FC, memo, useCallback, useEffect, useState } from 'react';
 
 interface Props {
   date: number;
+  isBeforeRoundEnd: boolean;
   onForceUpdate: () => void;
 }
 
@@ -19,7 +20,7 @@ const getDefaultTimeLeft = (): TimeLeft => ({
   seconds: 0,
 });
 
-const PoolCountDown: FC<Props> = ({ date, onForceUpdate }) => {
+const PoolCountDown: FC<Props> = ({ date, isBeforeRoundEnd, onForceUpdate }) => {
   const calculateTimeLeft = useCallback((): TimeLeft => {
     if (!date) return getDefaultTimeLeft();
 
@@ -63,13 +64,16 @@ const PoolCountDown: FC<Props> = ({ date, onForceUpdate }) => {
 
   if (timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0) return <></>;
 
+  if (!isBeforeRoundEnd) return <div className="text-white text-center font-medium">Upcoming</div>;
+
   return (
     <div className="text-white text-center font-medium">
       <TimeItem value={timeLeft.days} />
       <span>d</span> <TimeItem value={timeLeft.hours} />
       <span>h</span> <TimeItem value={timeLeft.minutes} />
       <span>m</span> <TimeItem value={timeLeft.seconds} />
-      <span>s until the draw</span>
+      <span>s</span>
+      {/* <span>s until the draw</span> */}
     </div>
   );
 };
@@ -77,5 +81,5 @@ const PoolCountDown: FC<Props> = ({ date, onForceUpdate }) => {
 export default memo(PoolCountDown);
 
 const TimeItem = ({ value }: { value: number }) => {
-  return <span className="text-primary h-6">{String(value).padStart(2, '0')}</span>;
+  return <span className="h-6">{String(value).padStart(2, '0')}</span>;
 };

@@ -4,17 +4,29 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { mnemonicToWalletKey, sign } from '@ton/crypto';
 import { Address, beginCell } from '@ton/ton';
 import dayjs from 'dayjs';
+import bigDecimal from 'js-big-decimal';
 import type { SelectQueryBuilder } from 'typeorm';
 import { Repository } from 'typeorm';
-import bigDecimal from 'js-big-decimal';
+
 import { Causes } from '@/common/exceptions/causes';
 import type { StellaConfig } from '@/configs';
 import type { User } from '@/database/entities';
-import { Pool, PoolPrize, PoolRound, Prizes, Token } from '@/database/entities';
+import {
+  Pool,
+  PoolPrize,
+  PoolRound,
+  Prizes,
+  Token,
+  UserTicket,
+} from '@/database/entities';
 import type { QueryPaginationDto } from '@/shared/dto/pagination.query';
 import { PoolRoundStatusEnum, PoolStatusEnum } from '@/shared/enums';
 import type { FetchResult } from '@/utils/paginate';
-import { FetchType, paginateEntities } from '@/utils/paginate';
+import {
+  FetchType,
+  generatePagination,
+  paginateEntities,
+} from '@/utils/paginate';
 
 import { PoolRoundService } from '../poolRound/poolRound.service';
 import type { CreatePoolDto, PoolPrizes } from './dto/create-pool.dto';
@@ -25,7 +37,6 @@ import {
   UserPoolType,
 } from './dto/get-pool.query';
 import type { UpdatePoolDto } from './dto/update-pool.dto';
-import { parseUnits } from 'viem';
 
 export class PoolService {
   constructor(
@@ -38,6 +49,10 @@ export class PoolService {
     private readonly poolPrizesRepository: Repository<PoolPrize>,
     private readonly poolRoundService: PoolRoundService,
     private readonly configService: ConfigService<StellaConfig>,
+    @InjectRepository(Prizes)
+    private readonly prizesRepository: Repository<Prizes>,
+    @InjectRepository(UserTicket)
+    private readonly userTicketRepository: Repository<UserTicket>,
   ) {}
   async create(createPoolDto: CreatePoolDto) {
     try {
@@ -210,6 +225,7 @@ export class PoolService {
   async find(pagination: QueryPaginationDto, query: PoolQueryDto) {
     try {
       const { status, search } = query;
+
       const queryBuilder = this.poolRepository
         .createQueryBuilder('pool')
         .where('status = :status', { status: PoolStatusEnum.ACTIVE });
@@ -244,19 +260,75 @@ export class PoolService {
     }
   }
 
-  findOne(id: number) {
+  async findOne(id: number) {
     try {
-      const pool = this.poolRepository
-        .createQueryBuilder('pool')
+      const poolQueryBuilder = this.poolRepository.createQueryBuilder('pool');
+      const prizes = await this.prizesRepository
+        .createQueryBuilder('prizes')
+        .leftJoinAndSelect(
+          Pool,
+          'pool',
+          'pool.poolIdOnChain = prizes.poolIdOnChain',
+        )
+        .select([
+          'pool.id as poolId',
+          'pool.poolIdOnChain as poolIdOnChain',
+          'prizes.*',
+        ])
+        .groupBy('prizes.id')
+        .where('pool.id = :poolId', { poolId: id })
+        .getRawMany();
+
+      const pool = await poolQueryBuilder
+        .clone()
         .leftJoinAndSelect('pool.currency', 'token')
         .leftJoinAndSelect('pool.rounds', 'rounds')
-        .leftJoinAndSelect('pool.poolPrizes', 'prizes')
+        .leftJoinAndSelect('pool.poolPrizes', 'poolPrizes')
         .where('pool.id = :poolId', { poolId: id })
         .getOne();
+
+      pool.rounds = await Promise.all(
+        pool.rounds.map(async (round) => ({
+          ...round,
+          totalPrizes:
+            prizes.find(
+              (prize) => prize.roundIdOnChain === round.roundIdOnChain,
+            )?.totalPrizes ?? '0',
+          winners: await this.getWinners(round.id),
+          totalTickets: await this.getTotalTickets(round.id),
+        })),
+      );
       return pool;
     } catch (error) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  async getTotalTickets(roundId: number) {
+    const [, total] = await this.userTicketRepository.findAndCountBy({
+      round: {
+        id: roundId,
+      },
+    });
+    return total;
+  }
+
+  getWinners(roundId: number) {
+    return this.userTicketRepository
+      .createQueryBuilder('userTicket')
+      .leftJoin('userTicket.round', 'round')
+      .where(
+        'userTicket.winningMatch IS NOT NULL AND userTicket.winningMatch > 0',
+      )
+      .andWhere('round.id = :roundId', {
+        roundId,
+      })
+      .select([
+        'COUNT(userTicket.userWallet) as totalWinning',
+        'userTicket.winningMatch as winningMatch',
+      ])
+      .groupBy('userTicket.winningMatch')
+      .getRawMany();
   }
 
   async deleteOne(poolId: number) {
@@ -328,39 +400,91 @@ export class PoolService {
   ): Promise<FetchResult<Pool>> {
     try {
       const { type = UserPoolType.JOINED } = query;
+      const { page = 1, pageSizes } = pagination;
+      const take = pageSizes > 50 || !pageSizes ? 50 : pageSizes;
+      const skip = (page - 1) * take || 0;
+
+      const subQuery = this.poolRepository
+        .createQueryBuilder('poolSub')
+        .leftJoin('poolSub.rounds', 'roundsSub')
+        .leftJoin('roundsSub.ticket', 'ticketSub')
+        .where('ticketSub.userWallet = :userWallet', {
+          userWallet: user.wallet,
+        });
+      if (type == UserPoolType.WINNER) {
+        subQuery.andWhere('ticketSub.winningMatch >= :winningMatch', {
+          winningMatch: 1,
+        });
+      }
+
+      const [pools, totalItems] = await subQuery
+        .clone()
+        .skip(skip)
+        .take(take)
+        .getManyAndCount();
+
+      if (pools.length == 0)
+        return generatePagination<Pool>(totalItems, pools, page, take);
+
       const queryBuilder = this.poolRepository
         .createQueryBuilder('pool')
         .leftJoinAndSelect('pool.rounds', 'rounds')
         .leftJoinAndSelect('rounds.ticket', 'ticket')
+        .where('pool.id IN (:...poolIds)', {
+          poolIds: pools.map((pool) => pool?.id ?? 0),
+        })
         .andWhere('ticket.userWallet = :userWallet', {
           userWallet: user.wallet,
         });
+      // if (type == UserPoolType.WINNER) {
+      //   queryBuilder.andWhere('ticket.winningMatch >= :winningMatch', {
+      //     winningMatch: 1,
+      //   });
+      // }
 
-      const count = await queryBuilder
-        .clone()
-        .groupBy('rounds.id')
-        .select(['count(ticket.id) as totalTicket', 'rounds.id as roundId'])
-        .getRawMany();
-
-      console.log(count);
-
-      if (type == UserPoolType.WINNER) {
-        queryBuilder.andWhere('ticket.winningMatch > 0');
-      }
+      const [items, countTicket] = await this.ticketsJoined(type, queryBuilder);
 
       return this.mapTicket(
-        await paginateEntities<Pool>(
-          queryBuilder,
-          pagination,
-          FetchType.MANAGED,
-        ),
-        count,
+        generatePagination<Pool>(totalItems, items, page, take),
+        countTicket,
       );
     } catch (error) {
       console.log({ error });
 
       throw new BadRequestException(error.message);
     }
+  }
+
+  ticketsJoined(
+    userPoolType: UserPoolType,
+    queryBuilder: SelectQueryBuilder<Pool>,
+  ) {
+    if (userPoolType === UserPoolType.JOINED) {
+      return Promise.all([
+        queryBuilder.clone().having('ticket.id IS NOT NULL').getMany(),
+        this.getTotalTicketsRound(queryBuilder),
+      ]);
+    }
+
+    return Promise.all([
+      queryBuilder
+        .clone()
+        .andWhere('ticket.winningMatch >= :winningMatch', {
+          winningMatch: 1,
+        })
+        .having('ticket.id IS NOT NULL')
+        .getMany(),
+      this.getTotalTicketsRound(queryBuilder),
+    ]);
+  }
+
+  getTotalTicketsRound(queryBuilder: SelectQueryBuilder<Pool>) {
+    return queryBuilder
+      .clone()
+      .select(['count(ticket.id) as totalTicket', 'rounds.id as roundId'])
+      .having('totalTicket > 0')
+      .groupBy('rounds.id')
+      .getRawMany();
   }
 
   async collectPrizes(
@@ -475,22 +599,19 @@ export class PoolService {
 
       if (!token) throw Causes.NOT_FOUND('Token');
 
-      const prizesToClaim = prizesToClaimDecimal.getValue();
-      const prizesToClaimAmount = parseUnits(prizesToClaim, token.decimals);
-
-      console.log(roundExits);
+      const prizesToClaim = +prizesToClaimDecimal.getValue();
 
       const signatureData = beginCell()
         .storeInt(roundExits.poolIdOnChain, 32)
         .storeInt(roundExits.roundIdOnChain, 32)
         .storeAddress(Address.parse(user.wallet))
-        .storeCoins(prizesToClaimAmount)
+        .storeCoins(BigInt(prizesToClaim))
         .endCell();
 
       const keyPair = await mnemonicToWalletKey(
         this.configService
           .get('contract.adminWalletPhrase', { infer: true })
-          .split(''),
+          .split(' '),
       );
       const signature = sign(signatureData.hash(), keyPair.secretKey).toString(
         'base64',
@@ -501,7 +622,7 @@ export class PoolService {
         prizesToClaim,
         token,
         roundExits,
-        unitPrizes: prizesToClaimAmount.toString(),
+        unitPrizes: prizesToClaim,
       };
     } catch (error) {
       throw new BadRequestException(error);
@@ -548,8 +669,8 @@ export class PoolService {
     try {
       return await this.poolRepository
         .createQueryBuilder('pool')
-        .leftJoin('pool.rounds', 'rounds')
-        .leftJoin(
+        .innerJoin('pool.rounds', 'rounds')
+        .innerJoin(
           Prizes,
           'prizes',
           'pool.poolIdOnChain = prizes.poolIdOnChain AND rounds.roundIdOnChain = prizes.roundIdOnChain',

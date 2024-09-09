@@ -15,10 +15,10 @@ const logger = getLogger('Response');
 function processResponseData(data: any, statusCode?: number): any {
   return {
     meta: {
-      code: data.statusCode || statusCode,
-      message: data.message || 'Successful',
+      code: data?.statusCode || statusCode,
+      message: data?.message || 'Successful',
     },
-    data: data.results || data,
+    data: data?.results || data,
   };
 }
 

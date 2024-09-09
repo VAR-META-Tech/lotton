@@ -12,21 +12,17 @@ contract Lottery with Deployable, Ownable {
     pools: map<Int, Pool>;
     nextPoolId: Int;
     usersTicket: map<Int, RoundTicket>;
-    rewardSettings: map<Int,Int>;
     result: map<Int,Result>;
     rewardPools: map<Int,Int>;
     publicKey: Int?;
     claimData: map<Int, ClaimInfo>;
+    claimFeePercent: Int;
 
     init() {
         self.owner = sender();
         self.nextPoolId = 1;
         self.publicKey = 0;
-        // Default reward settings
-        self.rewardSettings.set(1, 10);
-        self.rewardSettings.set(2, 20);
-        self.rewardSettings.set(3, 30);
-        self.rewardSettings.set(4, 40);
+        self.claimFeePercent = 10;
     }
 
     // =============== Private Methods ============== //
@@ -103,6 +99,8 @@ contract Lottery with Deployable, Ownable {
         }
         self.pools.set(poolId, pool);
         self.usersTicket.set(poolId, roundTickets);
+
+        self.reply("return unused excess".asComment());
 
         emit(PoolCreatedEvent{
             poolId: poolId,
@@ -269,7 +267,7 @@ contract Lottery with Deployable, Ownable {
             send(SendParameters{
                 to: user,
                 value: context().value - totalCost,
-                mode: SendRemainingValue | SendIgnoreErrors
+                mode: SendIgnoreErrors
             });
         }
 
@@ -316,7 +314,7 @@ contract Lottery with Deployable, Ownable {
         require(round != null, "Round does not exist");
 
         let roundInfo = round!!;
-        //require(now() >= roundInfo.endTime, "Round is still active");
+        require(now() >= roundInfo.endTime, "Round is still active");
 
         let rs: RandomTicketResponse = self.generateRandomASCIIString(TICKET_DIGITS);
         let ticketNumber = rs.ASCIINumber;
@@ -326,6 +324,8 @@ contract Lottery with Deployable, Ownable {
         };
         resultData.rounds.set(roundId, ticketNumber);
         self.result.set(poolId, resultData);
+
+        self.reply("return unused excess".asComment());
 
         emit(WinningNumbersDrawnEvent{
             poolId: roundInfo.poolId,
@@ -376,17 +376,21 @@ contract Lottery with Deployable, Ownable {
                 require(false, "Invalid claim");
             }
         }
+
+        let claimFee: Int = msg.amount * self.claimFeePercent / 100;
+        let claimAmount: Int = msg.amount - claimFee;
+
         //send the token to user
         send(SendParameters{
             to: msg.receiver,
-            value: msg.amount,
-            mode: SendRemainingValue | SendIgnoreErrors | SendPayGasSeparately,
+            value: claimAmount,
+            mode: SendRemainingValue | SendIgnoreErrors | SendPayGasSeparately
         });
 
         emit(ClaimedEvent{
             poolId: msg.poolId,
             roundId: msg.roundId,
-            amount: msg.amount,
+            amount: claimAmount,
             receiver: msg.receiver
         }.toCell());
     }
@@ -435,6 +439,12 @@ contract Lottery with Deployable, Ownable {
 
     receive(msg: SetPublicKey) {
         self.publicKey = msg.publicKey;
+    }
+
+    receive(msg: SetClaimFeePercent) {
+        self.requireOwnerOrAdmin();
+        require(msg.claimFeePercent >= 0 && msg.claimFeePercent <= 100, "Invalid claim fee percent");
+        self.claimFeePercent = msg.claimFeePercent;
     }
 
     // Getter functions
@@ -495,6 +505,14 @@ contract Lottery with Deployable, Ownable {
             }
         }
         return false;
+    }
+
+    get fun contractBalance(): Int {
+        return myBalance();
+    }
+
+    get fun claimFeePercent(): Int {
+        return self.claimFeePercent;
     }
 }
 
@@ -611,6 +629,10 @@ message SetAdmin {
 
 message SetPublicKey {
     publicKey: Int;
+}
+
+message SetClaimFeePercent {
+    claimFeePercent: Int as uint8;
 }
 
 // ---------------- Events ---------------- //

@@ -1,5 +1,6 @@
 import { Contract, ContractProvider, Sender, Address, Cell, contractAddress, beginCell } from '@ton/core';
 import { Maybe } from '@ton/core/dist/utils/maybe';
+import Big from 'big.js';
 
 export default class Pool implements Contract {
   static createForDeploy(code: Cell, initialPoolValue: number): Pool {
@@ -23,14 +24,27 @@ export default class Pool implements Contract {
     });
   }
 
-  async buyTicket(provider: ContractProvider, via: Sender, messageBody?: Maybe<string | Cell>) {
+  async buyTicket({
+    provider,
+    via,
+    messageBody,
+    value,
+  }: {
+    provider: ContractProvider;
+    via: Sender;
+    messageBody?: Maybe<string | Cell>;
+    value: number;
+  }) {
+    const BigValue = Big(value);
+    const totalValue = BigValue.add(0.2); // send 0.2 TON for gas
+
     try {
       await provider.internal(via, {
-        value: '0.05', // send 0.05 TON for gas
+        value: String(totalValue),
         body: messageBody,
       });
     } catch (error) {
-      console.error(error);
+      throw new Error(error as string);
     }
   }
 
@@ -41,7 +55,13 @@ export default class Pool implements Contract {
         body: messageBody,
       });
     } catch (error) {
-      console.error(error);
+      throw new Error(error as string);
     }
+  }
+
+  async getClaimFee(provider: ContractProvider) {
+    const { stack } = await provider.get('claimFeePercent', []);
+
+    return stack.readBigNumber();
   }
 }

@@ -7,38 +7,26 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from 
 import BuyTicketForm from './BuyTicketForm';
 import BuyTicketNote from './BuyTicketNote';
 import { useBuyTicketStore } from '@/stores/BuyTicketStore';
-import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
+import { IGetPoolDetailData, IGetPoolDetailRound } from '@/apis/pools';
 
 interface Props {
-  poolId: number;
-  roundIdOnChain: number;
-  poolIdOnChain: number;
+  pool: IGetPoolDetailData | undefined;
+  roundActive: IGetPoolDetailRound;
 }
 
-const BuyTicketDrawer: FCC<Props> = ({ children, poolId, poolIdOnChain, roundIdOnChain }) => {
+const BuyTicketDrawer: FCC<Props> = ({ pool, roundActive, children }) => {
   const currentPoolId = useBuyTicketStore.use.poolId();
   const setPoolId = useBuyTicketStore.use.setPoolId();
 
-  const { currency, pool } = useGetPoolDetail({
-    poolId: poolId || 0,
-    isActive: true,
-  });
-
-  const handleClose = () => {
-    setPoolId(undefined);
-  };
-
-  const ticketPrice = Number(pool?.ticketPrice || 0);
-
   return (
-    <Drawer open={currentPoolId === poolId} onClose={handleClose}>
+    <Drawer open={pool?.id ? currentPoolId === pool?.id : false} onClose={() => setPoolId(undefined)}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent>
         <div className="w-full">
           <DrawerHeader className="flex justify-between container">
             <DrawerTitle className="text-white text-2xl font-semibold">Buy Tickets</DrawerTitle>
 
-            <button onClick={handleClose}>
+            <button onClick={() => setPoolId(undefined)}>
               <Icons.x className="text-gray-color" />
             </button>
           </DrawerHeader>
@@ -49,12 +37,7 @@ const BuyTicketDrawer: FCC<Props> = ({ children, poolId, poolIdOnChain, roundIdO
               </div>
 
               <div className="space-y-10">
-                <BuyTicketForm
-                  ticketPrice={ticketPrice}
-                  currency={currency}
-                  poolIdOnChain={poolIdOnChain}
-                  roundIdOnChain={roundIdOnChain}
-                />
+                <BuyTicketForm pool={pool} roundActive={roundActive} />
 
                 <BuyTicketNote />
               </div>
