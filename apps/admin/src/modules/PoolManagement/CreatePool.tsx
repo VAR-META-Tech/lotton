@@ -68,76 +68,81 @@ export const CreatePool = () => {
   });
   
   const handleSubmit = async (values: PoolSchema) => {
-    await createPoolMutate(
-      {
-        name: values.name,
-        currency: Number(values.currency),
-        sequency: Number(values.sequency) * 86400,
-        totalRounds: Number(values.totalRounds),
-        startTime: String(new Date(values.startTime).getTime() / 1000),
-        ticketPrice: Number(parseUnits(values.ticketPrice, 9)),
-        poolPrizes: [
-          {
-            matchNumber: 1,
-            allocation: Number(values.match1),
-          },
-          {
-            matchNumber: 2,
-            allocation: Number(values.match2),
-          },
-          {
-            matchNumber: 3,
-            allocation: Number(values.match3),
-          },
-          {
-            matchNumber: 4,
-            allocation: Number(values.match4),
-          },
-        ],
-      },
-    );
-
-    setLoading(true);
-    const lastTx = await getLastTx();
-    const lastTxHash = lastTx?.[0].hash().toString('base64');
-
-    let prizes = Dictionary.empty(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8));
-    prizes.set(1, Number(values.match1));
-    prizes.set(2, Number(values.match2));
-    prizes.set(3, Number(values.match3));
-    prizes.set(4, Number(values.match4));
-
-    await createPool({
-      jettonWallet: Address.parse(
-        '0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP',
-      ),
-      ticketPrice: BigInt(parseUnits(values.ticketPrice, 9)),
-      initialRounds: BigInt(Number(values.totalRounds)),
-      startTime: BigInt(new Date(values.startTime).getTime() / 1000),
-      endTime: BigInt(new Date(values.endTime).getTime() / 1000),
-      sequence: BigInt(Number(values.sequency) * 86400),
-      active: true,
-      prizes,
-    });
-
-    let newLastTxHash = lastTxHash;
-    while (newLastTxHash === lastTxHash) {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      const updatedLastTx = await getLastTx();
-      const isAbortedTx = (updatedLastTx?.[0]?.description as any)?.aborted;
-
-      if (isAbortedTx) {
-        toast.error('Something went wrong!');
-        setLoading(false);
-        return;
+    try {
+      await createPoolMutate(
+        {
+          name: values.name,
+          currency: Number(values.currency),
+          sequency: Number(values.sequency) * 86400,
+          totalRounds: Number(values.totalRounds),
+          startTime: String(new Date(values.startTime).getTime() / 1000),
+          ticketPrice: Number(parseUnits(values.ticketPrice, 9)),
+          poolPrizes: [
+            {
+              matchNumber: 1,
+              allocation: Number(values.match1),
+            },
+            {
+              matchNumber: 2,
+              allocation: Number(values.match2),
+            },
+            {
+              matchNumber: 3,
+              allocation: Number(values.match3),
+            },
+            {
+              matchNumber: 4,
+              allocation: Number(values.match4),
+            },
+          ],
+        },
+      );
+  
+      setLoading(true);
+      const lastTx = await getLastTx();
+      const lastTxHash = lastTx?.[0].hash().toString('base64');
+  
+      let prizes = Dictionary.empty(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8));
+      prizes.set(1, Number(values.match1));
+      prizes.set(2, Number(values.match2));
+      prizes.set(3, Number(values.match3));
+      prizes.set(4, Number(values.match4));
+  
+      await createPool({
+        jettonWallet: Address.parse(
+          '0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP',
+        ),
+        ticketPrice: BigInt(parseUnits(values.ticketPrice, 9)),
+        initialRounds: BigInt(Number(values.totalRounds)),
+        startTime: BigInt(new Date(values.startTime).getTime() / 1000),
+        endTime: BigInt(new Date(values.endTime).getTime() / 1000),
+        sequence: BigInt(Number(values.sequency) * 86400),
+        active: true,
+        prizes,
+      });
+  
+      let newLastTxHash = lastTxHash;
+      while (newLastTxHash === lastTxHash) {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        const updatedLastTx = await getLastTx();
+        const isAbortedTx = (updatedLastTx?.[0]?.description as any)?.aborted;
+  
+        if (isAbortedTx) {
+          toast.error('Something went wrong!');
+          setLoading(false);
+          return;
+        }
+        newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
       }
-      newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
+  
+      setLoading(false);
+      route.push(ROUTES.POOL);
+      queryClient.invalidateQueries({ queryKey: ['/pools'] });
+      toast.success('Create new pool successfully!');
+    } catch (error) {
+      setLoading(false);
+      toast.error('Failed to create pool, please try again!');
     }
-
-    setLoading(false);
-    route.push(ROUTES.POOL);
-    queryClient.invalidateQueries({ queryKey: ['/pools'] });
-    toast.success('Create new pool successfully!');
   };
 
   const startTime = methods.watch('startTime');
