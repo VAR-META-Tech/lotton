@@ -50,7 +50,7 @@ export type CreatePoolWithoutType = Omit<CreatePool, '$$type'>;
 export function storeCreatePool(src: CreatePool) {
   return (builder: Builder) => {
     const b_0 = builder;
-    b_0.storeUint(2004140043, 32);
+    b_0.storeUint(2095598070, 32);
     b_0.storeAddress(src.jettonWallet);
     b_0.storeUint(src.ticketPrice, 32);
     b_0.storeUint(src.initialRounds, 8);
