@@ -20,6 +20,7 @@ import {
 
 import { ServicesModule } from '../services/services.module';
 import { ManagerService } from './manager.service';
+import { CrawlPoolInactiveService } from './pool_inactive.service';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ManagerService } from './manager.service';
     ServicesModule,
   ],
   providers: [
+    CrawlPoolInactiveService,
     ManagerService,
     {
       provide: 'GAME_CONTRACT',
@@ -64,6 +66,6 @@ import { ManagerService } from './manager.service';
         }),
     },
   ],
-  exports: [ManagerService],
+  exports: [ManagerService, CrawlPoolInactiveService],
 })
 export class WorkerModule {}
