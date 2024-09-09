@@ -26,14 +26,14 @@ export const RoundDetail = () => {
   }, []);
 
   return (
-    <VStack className="mx-10 space-y-6">
+    <VStack className="mx-10 mb-32 space-y-6">
       <HStack spacing={24}>
         {infoData.map((info) => (
           <InfoCard key={info.key} icon={info.icon} title={info.title} desc={info.desc} />
         ))}
       </HStack>
 
-      <VStack className="mb-24 bg-white rounded-sm min-h-[12.5rem] px-8 py-12">
+      <VStack className="bg-white rounded-sm min-h-[12.5rem] px-8 py-12">
         <WinningSection />
       </VStack>
     </VStack>

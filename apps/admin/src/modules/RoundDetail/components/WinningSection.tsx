@@ -1,15 +1,37 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHeader, TableRow } from '@/components/ui/table';
 import { HStack, VStack } from '@/components/ui/Utilities';
 
 import TextWrap from './TextWrap';
 
 const WinningSection = () => {
+  const columns = useMemo(
+    () => [
+      { title: 'Match First', key: 'match_first' },
+      { title: '% Prize', key: 'prize' },
+      { title: 'Amount', key: 'amount' },
+      { title: 'Winning Tickets', key: 'winning_tickets' },
+      { title: 'Amount/Ticket', key: 'amount_per_ticket' },
+      { title: 'Action', key: '' },
+    ],
+    []
+  );
+
   return (
     <VStack>
-      <HStack>
+      <HStack className="mb-12">
         <VStack className="flex-1">
           <div className="flex flex-col gap-2 justify-center items-start">
             <p className="text-md">Winning Ticket Block</p>
@@ -40,6 +62,72 @@ const WinningSection = () => {
           </HStack>
         </div>
       </HStack>
+
+      <Table>
+        <TableHeader className="!rounded-xl bg-[#D4D4D4] text-[#262626] font-bold">
+          <TableRow className="hover:bg-inherit">
+            {columns.map((column) => (
+              <TableCell className="border border-[#e2e1e1] text-center" key={column.key}>
+                {column.title}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHeader>
+
+        <TableBody>
+          {Array.from({ length: 4 }, (_, i) => (
+            <TableRow className="bg-white">
+              <TableCell className="text-center border border-[#D4D4D4]">Match first {i + 1}</TableCell>
+              <TableCell className="text-center border border-[#D4D4D4]"></TableCell>
+
+              <TableCell className="text-center border border-[#D4D4D4]"></TableCell>
+              <TableCell className="text-center border border-[#D4D4D4]"></TableCell>
+
+              <TableCell className="text-center border border-[#D4D4D4]"></TableCell>
+
+              <TableCell className="text-center border border-[#D4D4D4]">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="min-w-20 min-h-4 rounded-sm bg-[#1D4ED8]">View</Button>
+                  </DialogTrigger>
+
+                  <DialogContent className="!rounded-sm">
+                    <DialogHeader>
+                      <DialogTitle className="text-center text-md leading-8 font-extrabold">WINNING NUMBER</DialogTitle>
+                      <DialogDescription className="!my-8 space-y-8">
+                        <HStack spacing={12} className="justify-center ">
+                          <TextWrap text={'b'} />
+                          <TextWrap text={'2'} />
+                          <TextWrap text={'a'} />
+                          <TextWrap text={'5'} />
+                        </HStack>
+
+                        <div className="w-full h-[.0625rem] bg-[#8B8B94]"></div>
+
+                        <VStack>
+                          <p className="font-bold text-md text-black">MATCHED FIRST 2</p>
+                        </VStack>
+                      </DialogDescription>
+                    </DialogHeader>
+                  </DialogContent>
+                </Dialog>
+              </TableCell>
+            </TableRow>
+          ))}
+
+          <TableRow className="!bg-[#D4D4D4] hover:bg-inherit">
+            <TableCell className="text-center border border-[#e2e1e1]"></TableCell>
+            <TableCell className="text-center border border-[#e2e1e1]"></TableCell>
+
+            <TableCell className="text-center border border-[#e2e1e1]">-</TableCell>
+            <TableCell className="text-center border border-[#e2e1e1]">-</TableCell>
+
+            <TableCell className="text-center border border-[#e2e1e1]">-</TableCell>
+
+            <TableCell className="text-center border border-[#e2e1e1]"></TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </VStack>
   );
 };
