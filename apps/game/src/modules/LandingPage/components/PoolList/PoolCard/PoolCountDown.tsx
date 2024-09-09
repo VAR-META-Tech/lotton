@@ -1,7 +1,10 @@
-import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import { IGetPoolDetailRound } from '@/apis/pools';
+import { HStack, VStack } from '@/components/ui/Utilities';
+import { cn } from '@/lib/utils';
+import React, { FC, HTMLAttributes, memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 interface Props {
-  date: number;
+  roundActive: IGetPoolDetailRound;
   isBeforeRoundEnd: boolean;
   onForceUpdate: () => void;
 }
@@ -20,11 +23,13 @@ const getDefaultTimeLeft = (): TimeLeft => ({
   seconds: 0,
 });
 
-const PoolCountDown: FC<Props> = ({ date, isBeforeRoundEnd, onForceUpdate }) => {
-  const calculateTimeLeft = useCallback((): TimeLeft => {
-    if (!date) return getDefaultTimeLeft();
+const PoolCountDown: FC<Props> = ({ roundActive, isBeforeRoundEnd, onForceUpdate }) => {
+  const endTime = useMemo(() => Number(roundActive?.endTime || 0), [roundActive?.endTime]);
 
-    const targetDate = new Date(Number(date) * 1000).getTime();
+  const calculateTimeLeft = useCallback((): TimeLeft => {
+    if (!endTime) return getDefaultTimeLeft();
+
+    const targetDate = new Date(Number(endTime) * 1000).getTime();
     const now = Date.now();
 
     if (isNaN(targetDate)) return getDefaultTimeLeft();
@@ -39,12 +44,12 @@ const PoolCountDown: FC<Props> = ({ date, isBeforeRoundEnd, onForceUpdate }) => 
       minutes: Math.floor((difference / 1000 / 60) % 60),
       seconds: Math.floor((difference / 1000) % 60),
     };
-  }, [date]);
+  }, [endTime]);
 
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft);
 
   useEffect(() => {
-    if (!date || isNaN(new Date(Number(date) * 1000).getTime())) return;
+    if (!endTime || isNaN(new Date(Number(endTime) * 1000).getTime())) return;
 
     const timer = setInterval(() => {
       const newTimeLeft = calculateTimeLeft();
@@ -55,24 +60,44 @@ const PoolCountDown: FC<Props> = ({ date, isBeforeRoundEnd, onForceUpdate }) => 
 
         setTimeout(() => {
           onForceUpdate();
-        }, 1500);
+        }, 1000);
       }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [date, calculateTimeLeft, onForceUpdate]);
+  }, [endTime, calculateTimeLeft, onForceUpdate]);
 
-  if (timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0) return <></>;
+  const isEnd = timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0;
 
-  if (!isBeforeRoundEnd) return <div className="text-white text-center font-medium">Upcoming</div>;
+  if (isEnd && !roundActive?.winningCode) {
+    return (
+      <HStack pos="center" align="center" className="text-white font-medium flex-1">
+        Drawing
+      </HStack>
+    );
+  }
+
+  if (isEnd) {
+    return (
+      <HStack pos="center" align="center" className="text-white font-medium flex-1 ">
+        Closed
+      </HStack>
+    );
+  }
+
+  if (!isBeforeRoundEnd)
+    return (
+      <HStack pos="center" align="center" className="text-white font-medium flex-1 ">
+        Upcoming
+      </HStack>
+    );
 
   return (
-    <div className="text-white text-center font-medium">
-      <TimeItem value={timeLeft.days} />
-      <span>d</span> <TimeItem value={timeLeft.hours} />
-      <span>h</span> <TimeItem value={timeLeft.minutes} />
-      <span>m</span> <TimeItem value={timeLeft.seconds} />
-      <span>s</span>
+    <div className="text-white text-center font-medium flex justify-center gap-3">
+      <TimeItem value={timeLeft.days} description="day" />
+      <TimeItem value={timeLeft.hours} description="hour" />
+      <TimeItem value={timeLeft.minutes} description="minute" />
+      <TimeItem value={timeLeft.seconds} description="second" />
       {/* <span>s until the draw</span> */}
     </div>
   );
@@ -80,6 +105,25 @@ const PoolCountDown: FC<Props> = ({ date, isBeforeRoundEnd, onForceUpdate }) => 
 
 export default memo(PoolCountDown);
 
-const TimeItem = ({ value }: { value: number }) => {
-  return <span className="h-6">{String(value).padStart(2, '0')}</span>;
+interface ITimeItemProps extends HTMLAttributes<HTMLDivElement> {
+  value: number;
+  description: string;
+  valueClassName?: ITimeItemProps['className'];
+  descriptionClassName?: ITimeItemProps['className'];
+}
+
+const TimeItem: FC<ITimeItemProps> = ({
+  value,
+  description,
+  valueClassName,
+  descriptionClassName,
+  className,
+  ...props
+}) => {
+  return (
+    <VStack spacing={0} className={cn(className)} {...props}>
+      <span className={cn('text-lg', valueClassName)}>{String(value).padStart(2, '0')}</span>
+      <span className={cn('text-xs leading-tight', descriptionClassName)}>{description}</span>
+    </VStack>
+  );
 };

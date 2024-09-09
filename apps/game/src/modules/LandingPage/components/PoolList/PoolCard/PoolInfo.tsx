@@ -82,7 +82,7 @@ const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound 
           </VStack>
 
           <VStack spacing={12}>
-            <span className="text-sm">Total ticket this round: 89</span>
+            <span className="text-sm">Total ticket this round: {roundActive?.totalTickets || 0}</span>
             <span className="text-sm">Match the wining value in the same order to share prize.</span>
           </VStack>
         </VStack>
@@ -113,7 +113,16 @@ const PoolInfo: FC<Props> = ({ pool, roundActive, isShow, setIsShow, isEndRound 
         </div>
       </VStack>
     );
-  }, [currency?.symbol, isEndRound, poolPrizes, price, roundActive?.winners, totalPrize, totalPrizeUsd]);
+  }, [
+    currency?.symbol,
+    isEndRound,
+    poolPrizes,
+    price,
+    roundActive?.totalTickets,
+    roundActive?.winners,
+    totalPrize,
+    totalPrizeUsd,
+  ]);
 
   return (
     <div>

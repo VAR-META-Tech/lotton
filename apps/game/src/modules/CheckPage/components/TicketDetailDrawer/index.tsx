@@ -1,48 +1,42 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import { Icons } from '@/assets/icons';
 
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import YourTickets from './YourTickets';
 import { FCC } from '@/types';
-import TicketInfo from '../TicketInfo';
-import { HStack } from '@/components/ui/Utilities';
-import { Button } from '@/components/ui/button';
-import { IGetPoolJoinedItem, IGetPoolJoinedItemRound } from '@/apis/pools';
-import { useBuyTicketStore } from '@/stores/BuyTicketStore';
+import { IGetPoolJoinedItem } from '@/apis/pools';
+import { CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import { useCommonCarousel } from '@/hooks/useCommonCarousel';
+import TicketDetailItem from './TicketDetailItem';
 
 type Props = {
   pool: IGetPoolJoinedItem;
-  roundActive: IGetPoolJoinedItemRound;
+  activeRound: number;
+  setActiveRound: Dispatch<SetStateAction<number>>;
 };
 
-export const TicketDetailDrawer: FCC<Props> = ({ children, pool, roundActive }) => {
-  const setPoolId = useBuyTicketStore.use.setPoolId();
+export const TicketDetailDrawer: FCC<Props> = ({ children, pool, activeRound, setActiveRound }) => {
+  const [skipLoop, setSkipLoop] = React.useState(false);
 
-  const roundActiveInfo = useMemo(() => {
-    const round = pool?.rounds?.find((round) => {
-      return round?.roundNumber === roundActive?.roundNumber;
-    });
+  const { carouselRef, selectedIndex, onNextButtonClick } = useCommonCarousel();
 
-    return round;
-  }, [roundActive?.roundNumber, pool?.rounds]);
+  useEffect(() => {
+    setActiveRound(selectedIndex);
+    setSkipLoop(true);
+  }, [selectedIndex, setActiveRound]);
 
-  const isEndRound = useMemo(() => {
-    if (!roundActiveInfo?.endTime) return false;
-
-    const roundEndTime = new Date(Number(roundActiveInfo?.endTime) * 1000);
-    const now = new Date();
-
-    if (now > roundEndTime) {
-      return true;
+  useEffect(() => {
+    if (!skipLoop) {
+      for (let i = 0; i < activeRound; i++) {
+        onNextButtonClick();
+      }
     }
-
-    return false;
-  }, [roundActiveInfo?.endTime]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeRound, onNextButtonClick]);
 
   return (
-    <Drawer>
+    <Drawer onOpenChange={() => setSkipLoop(false)}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent>
         <div className="w-full">
@@ -53,20 +47,16 @@ export const TicketDetailDrawer: FCC<Props> = ({ children, pool, roundActive }) 
               <Icons.x className="text-gray-color" />
             </DrawerClose>
           </DrawerHeader>
-          <div className="border-t-[1px] max-h-[70vh] overflow-auto border-t-gray-color pt-5 pb-10">
-            <div className="container">
-              <TicketInfo name={pool?.name || ''} roundActiveNumber={roundActive?.roundNumber || 0} />
-
-              <YourTickets roundActiveInfo={roundActiveInfo} />
-
-              {!isEndRound && (
-                <HStack pos={'center'}>
-                  <Button className="text-white" onClick={() => setPoolId(pool?.id)}>
-                    Buy More Ticket
-                  </Button>
-                </HStack>
-              )}
-            </div>
+          <div className="border-t-[1px] max-h-[70vh] h-fit overflow-auto border-t-gray-color pt-5 pb-10">
+            <CarouselContent className="-ml-[3rem]" ref={carouselRef}>
+              {pool?.rounds?.map((item, index) => {
+                return (
+                  <CarouselItem key={`${pool?.id || 0}-${index}`} className="pl-[3rem] basis-[100%]">
+                    <TicketDetailItem pool={pool} roundActive={item} />
+                  </CarouselItem>
+                );
+              })}
+            </CarouselContent>
           </div>
         </div>
       </DrawerContent>
