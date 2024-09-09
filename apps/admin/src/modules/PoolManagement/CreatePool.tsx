@@ -52,63 +52,49 @@ export const CreatePool = () => {
     }));
   }, [tokenList]);
 
-  const { mutate: createPoolMutate, isPending: isPendingCreate } = useCreatePool({
+  const { mutateAsync: createPoolMutate, isPending: isPendingCreate } = useCreatePool({
     onSuccess: () => {
-      setLoading(false)
-      queryClient.invalidateQueries({ queryKey: ['/pools'] });
-      route.push(ROUTES.POOL);
-      toast.success('Create new pool successfully!');
+      setLoading(true)
+      // queryClient.invalidateQueries({ queryKey: ['/pools'] });
+      // route.push(ROUTES.POOL);
+      // toast.success('Create new pool successfully!');
     },
     onError: (error) => {
       setLoading(false)
       toast.error(`${error.message}`);
     },
   });
-
-  // const testLastTx = async () => {
-  //   try {
-  //     const result = await getLastTx();
-  
-  //     console.log({ result: result?.[0] });
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // }
-
-  // const testCreate = async () => {
-  //   const mockData = {
-  //     currency: '1',
-  //     sequency: '300',
-  //     totalRounds: '10',
-  //     match1: '10',
-  //     match2: '20',
-  //     match3: '30',
-  //     match4: '40',
-  //     name: 'Test 5 minutes',
-  //     startTime: new Date().valueOf().toString().slice(0, -3),
-  //     ticketPrice: parseUnits('1', 9),
-  //   };
-
-  //   let prizes = Dictionary.empty(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8));
-  //   prizes.set(1, +mockData.match1);
-  //   prizes.set(2, +mockData.match2);
-  //   prizes.set(3, +mockData.match3);
-  //   prizes.set(4, +mockData.match4);
-
-  //   await createPool({
-  //     jettonWallet: Address.parse('0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP'),
-  //     ticketPrice: BigInt(mockData.ticketPrice),
-  //     initialRounds: BigInt(mockData.totalRounds),
-  //     startTime: BigInt(mockData.startTime),
-  //     endTime: BigInt(+mockData.startTime + +mockData.sequency * +mockData.totalRounds),
-  //     sequence: BigInt(mockData.sequency),
-  //     active: true,
-  //     prizes,
-  //   });
-  // }
-
   
   const handleSubmit = async (values: PoolSchema) => {
+    await createPoolMutate(
+      {
+        name: values.name,
+        currency: Number(values.currency),
+        sequency: Number(values.sequency) * 86400,
+        totalRounds: Number(values.totalRounds),
+        startTime: String(new Date(values.startTime).getTime() / 1000),
+        ticketPrice: Number(parseUnits(values.ticketPrice, 9)),
+        poolPrizes: [
+          {
+            matchNumber: 1,
+            allocation: Number(values.match1),
+          },
+          {
+            matchNumber: 2,
+            allocation: Number(values.match2),
+          },
+          {
+            matchNumber: 3,
+            allocation: Number(values.match3),
+          },
+          {
+            matchNumber: 4,
+            allocation: Number(values.match4),
+          },
+        ],
+      },
+    );
+
     setLoading(true);
     const lastTx = await getLastTx();
     const lastTxHash = lastTx?.[0].hash().toString('base64');
@@ -147,34 +133,9 @@ export const CreatePool = () => {
     }
 
     setLoading(false);
-    createPoolMutate(
-      {
-        name: values.name,
-        currency: Number(values.currency),
-        sequency: Number(values.sequency) * 86400,
-        totalRounds: Number(values.totalRounds),
-        startTime: String(new Date(values.startTime).getTime() / 1000),
-        ticketPrice: Number(values.ticketPrice),
-        poolPrizes: [
-          {
-            matchNumber: 1,
-            allocation: Number(values.match1),
-          },
-          {
-            matchNumber: 2,
-            allocation: Number(values.match2),
-          },
-          {
-            matchNumber: 3,
-            allocation: Number(values.match3),
-          },
-          {
-            matchNumber: 4,
-            allocation: Number(values.match4),
-          },
-        ],
-      },
-    );
+    route.push(ROUTES.POOL);
+    queryClient.invalidateQueries({ queryKey: ['/pools'] });
+    toast.success('Create new pool successfully!');
   };
 
   const startTime = methods.watch('startTime');
@@ -198,8 +159,6 @@ export const CreatePool = () => {
   
   return (
     <VStack className="mx-4 md:mx-10 mb-24 bg-white rounded-sm min-h-[12.5rem] p-8 md:px-24 md:py-12">
-      {/* <Button onClick={testLastTx}>Test get last TX</Button> */}
-      {/* <Button onClick={testCreate}>Test Create</Button> */}
       <div>
         <FormWrapper methods={methods} onSubmit={handleSubmit}>
           <VStack>
