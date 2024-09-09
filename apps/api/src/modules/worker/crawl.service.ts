@@ -177,14 +177,12 @@ export class CrawlWorkerService {
       if (!getTotalTickets) return acc;
 
       const allocationDecimal = new bigDecimal(prize.allocation);
-      const totalTicketsDecimal = new bigDecimal(getTotalTickets.totalTickets);
+      // const totalTicketsDecimal = new bigDecimal(getTotalTickets.totalTickets);
       const percentDecimal = new bigDecimal(100);
 
       return acc.add(
-        totalPrizesDecimal
-          .multiply(allocationDecimal)
-          .divide(percentDecimal)
-          .divide(totalTicketsDecimal),
+        totalPrizesDecimal.multiply(allocationDecimal).divide(percentDecimal),
+        // .divide(totalTicketsDecimal),
       );
     }, new bigDecimal(0));
 
