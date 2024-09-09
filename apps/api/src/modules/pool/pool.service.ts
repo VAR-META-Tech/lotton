@@ -511,7 +511,7 @@ export class PoolService {
           'pool.ticketPrice as ticketPrice',
           'ticket.winningMatch as winningMatch',
           'ticket.id as ticketId',
-          '(SELECT FLOOR(totalPrizes*(SELECT allocation from pool_prize where poolId = pool.id and winningMatch = ticket.winningMatch limit 1)/100)/(SELECT COUNT(user_ticket.id) FROM user_ticket where roundId = rounds.id and user_ticket.winningMatch = ticket.winningMatch group by user_ticket.winningMatch limit 1) from prizes where pool.poolIdOnChain = prizes.poolIdOnChain AND rounds.roundIdOnChain = prizes.roundIdOnChain limit 1) as winningPrize',
+          '(SELECT FLOOR((totalPrizes*(SELECT allocation from pool_prize where poolId = pool.id and winningMatch = ticket.winningMatch limit 1)/100)/(SELECT COUNT(user_ticket.id) FROM user_ticket where roundId = rounds.id and user_ticket.winningMatch = ticket.winningMatch group by user_ticket.winningMatch limit 1)) from prizes where pool.poolIdOnChain = prizes.poolIdOnChain AND rounds.roundIdOnChain = prizes.roundIdOnChain limit 1) as winningPrize',
           'ticket.winningCode as winningCode',
           'ticket.code as ticketCode',
           'ticket.winningMatch as winningMatch',
