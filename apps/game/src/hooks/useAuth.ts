@@ -1,4 +1,5 @@
 import { ILoginByWalletUser } from '@/apis/auth';
+import { convertTonWalletToBase64 } from '@/lib/common';
 import { useUserStore } from '@/stores';
 
 interface ISetUserData {
@@ -32,5 +33,6 @@ export const useAuth = () => {
     status,
     setUserData,
     logout,
+    walletBase64: convertTonWalletToBase64(user?.wallet || ''),
   };
 };

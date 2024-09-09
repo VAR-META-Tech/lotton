@@ -4,6 +4,7 @@ import { formatUnits, getAddress, isAddress } from 'viem';
 
 import { REGEX_EMOJI, REGEX_NO_SPECIAL_CHARACTERS } from './regex';
 import { RoundingModes } from 'js-big-decimal/dist/node/roundingModes';
+import { Address } from '@ton/core';
 
 export function capitalizeFirstLetter(str = '') {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -198,4 +199,14 @@ export const roundNumber = (
   const roundedNumber = bigDecimal.round(number, round, roundMode);
 
   return parseFloat(roundedNumber.toString());
+};
+
+export const convertTonWalletToBase64 = (address: string) => {
+  try {
+    const addressParse = Address.parse(address);
+
+    return String(addressParse.toString());
+  } catch (error) {
+    return '';
+  }
 };
