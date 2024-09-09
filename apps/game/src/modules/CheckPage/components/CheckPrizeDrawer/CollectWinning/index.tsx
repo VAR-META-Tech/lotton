@@ -9,6 +9,7 @@ import { fromNano } from '@ton/core';
 import { usePoolContract } from '@/hooks/usePoolContract';
 import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
 import { useGetTokenPrice } from '@/hooks/useGetTokenPrice';
+import { roundNumber } from '@/lib/common';
 
 interface Props {
   poolId: number;
@@ -46,8 +47,9 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
     <VStack className="container">
       <VStack>
         {items?.map((item, index) => {
-          const winningPrize = Number(fromNano(item?.winningPrize || 0));
+          const winningPrize = Number(fromNano(roundNumber(item?.winningPrize || 0, 0)));
           const winningPrizeUsd = winningPrize * price;
+
           return (
             <CollectItem
               key={`${item?.poolId}-${index}`}

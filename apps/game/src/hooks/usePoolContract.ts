@@ -105,7 +105,7 @@ export function usePoolContract() {
 
   return {
     address: poolContract?.address.toString(),
-    claimFee,
+    claimFee: claimFee / 1000 || 0,
     getLastTx,
     buyTicket,
     claimPrize,

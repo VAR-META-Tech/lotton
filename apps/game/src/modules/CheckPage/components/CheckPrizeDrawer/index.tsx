@@ -49,7 +49,7 @@ export const CheckPrizeDrawer: FCC<Props> = ({ children, poolList }) => {
   const renderContent = useCallback(() => {
     if (!claimStep?.poolId && !claimStep?.roundId) {
       return (
-        <VStack spacing={40}>
+        <VStack spacing={80}>
           {poolList?.map((pool) => {
             return pool?.rounds?.map((round, index) => (
               <PrizeItem

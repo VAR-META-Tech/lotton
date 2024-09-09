@@ -17,9 +17,13 @@ export const useWallet = () => {
   });
 
   useEffect(() => {
-    if (wallet) {
+    if (wallet) return;
+
+    const refetchInterval = setInterval(() => {
       refetch();
-    }
+    }, 5000);
+
+    return () => clearInterval(refetchInterval);
   }, [refetch, wallet]);
 
   const handleDisconnectWallet = useCallback(async () => {
