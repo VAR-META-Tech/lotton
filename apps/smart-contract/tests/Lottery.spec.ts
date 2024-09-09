@@ -1,5 +1,5 @@
 import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
-import { toNano } from '@ton/core';
+import { Address, Dictionary, toNano } from '@ton/core';
 import { Lottery } from '../wrappers/Lottery';
 import '@ton/test-utils';
 import now = jest.now;
@@ -45,19 +45,29 @@ describe('Lottery', () => {
     it('should create pool', async () => {
         const provider = await blockchain.treasury('wallet');
 
+        let prizes: Dictionary<number, number> = Dictionary.empty(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8));
+        prizes.set(1, 10);
+        prizes.set(2, 15);
+        prizes.set(3, 20);
+        prizes.set(4, 25);
+
+        const now = Math.floor(Date.now()/1000);
+
         const pool = await lottery.send(
             provider.getSender(), {
-                value: toNano('0.05'),
+                value: toNano('1.05'),
+                bounce: true
             },
             {
                 $$type: 'CreatePool',
-                ticketPrice: 1n,
+                ticketPrice: toNano(1),
                 initialRounds: 1n,
-                startTime: 1724511710n,
-                endTime: 1735511710n,
-                sequence: 3600n,
-                jettonWallet: provider.address,
+                startTime: BigInt(now),
+                endTime: BigInt(now) + BigInt(60 * 60 * 24 * 7),
                 active: true,
+                sequence: BigInt(3600 * 24),
+                jettonWallet: Address.parse('EQDw0Uwf9kK-_AlMOJV7sgmYSX86tAD83q9R8LKc-UMy1DfT'),
+                prizes: prizes
             }
         );
         expect(pool.transactions).toHaveTransaction({
@@ -65,10 +75,14 @@ describe('Lottery', () => {
             to: lottery.address,
             success: false,
         });
+
+        const getPool = await lottery.getPoolById(1n);
+        console.log('getPool', getPool);
+        expect(getPool).toBe(1n);
     });
 
     it('should return current pool', async () => {
-        const getPool = await lottery.getCurrentPool();
+        const getPool = await lottery.getPoolById(1n);
         console.log('getPool', getPool);
         expect(getPool).toBe(1n);
     });
@@ -86,7 +100,7 @@ describe('Lottery', () => {
         console.log('balance', balance);
         const ticket = await lottery.send(
             provider.getSender(), {
-                value: toNano('3.05'),
+                value: toNano('3.005'),
             },
             {
                 $$type: 'BuyTicket',

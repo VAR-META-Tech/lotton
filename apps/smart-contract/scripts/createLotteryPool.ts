@@ -7,7 +7,7 @@ export async function run(provider: NetworkProvider, args: string[]) {
     const ui = provider.ui();
 
     // const address = Address.parse(args.length > 0 ? args[0] : await ui.input('Lottery address'));
-    const address = Address.parse('EQD828d9ATU8RJR_PfuybhvmI1VzILc0u0KUM5HTtG5v7EZT');
+    const address = Address.parse('EQA1BR-oWvvSGeNs-YetnaALR-CNkG8ZuVfmVyuMjOWkdG-c');
 
     if (!(await provider.isContractDeployed(address))) {
         ui.write(`Error: Contract at address ${address} is not deployed!`);
@@ -35,14 +35,13 @@ export async function run(provider: NetworkProvider, args: string[]) {
     await lottery.send(
         provider.sender(), {
             value: toNano('0.05'),
-            bounce: true
         },
         {
             $$type: 'CreatePool',
             ticketPrice: toNano(1),
             initialRounds: 1n,
             startTime: BigInt(now),
-            endTime: BigInt(now) + BigInt(60 * 60 * 24 * 7),
+            endTime: BigInt(now) + BigInt(40),
             active: true,
             sequence: BigInt(3600 * 24),
             jettonWallet: Address.parse('EQDw0Uwf9kK-_AlMOJV7sgmYSX86tAD83q9R8LKc-UMy1DfT'),
@@ -50,39 +49,36 @@ export async function run(provider: NetworkProvider, args: string[]) {
         }
     );
 
-    ui.write('Waiting for counter to increase...');
     await sleep(20000);
     let pools = await lottery.getCurrentPool();
     let attempt = 1;
-    let poolId = 1n;
+    let poolId = 2n;
+    let roundId = 1n;
     console.log('pools', pools);
     console.log('Prizes: ', pools.get(1n)?.prizes);
     while (poolId) {
         ui.setActionPrompt(`Attempt ${attempt}: `);
         let pool = await lottery.getPoolById(poolId);
         console.log('pool', pool);
-        let round = await lottery.getRoundById(1n, 1n);
+        let round = await lottery.getRoundById(poolId, roundId);
         console.log('round', round);
         if (round?.roundId) {
             await lottery.send(
                 provider.sender(), {
                     value: toNano('1.5'),
-                    bounce: true
                 },
                 {
                     $$type: 'BuyTicket',
-                    poolId: 1n,
-                    roundId: 1n,
+                    poolId: poolId,
+                    roundId: roundId,
                     quantity: 1n
                 }
             );
             console.log('Waiting for user ticket...');
             await sleep(20000);
             console.log('Address: ', provider.sender().address!!);
-            let userTicket = await lottery.getUsersTicket(1n, 1n);
-            let attempt2 = 1;
-            let x = await lottery.getPublicKey();
-            console.log('publicKey', x);
+            let userTicket = await lottery.getUsersTicket(poolId, roundId);
+            await lottery.getPublicKey();
             console.log('userTicket', userTicket);
             let userTicketNumber = await lottery.getUserTicketByAddress(round?.poolId, round?.roundId, provider.sender().address!!);
             console.log('userTicketNumber', userTicketNumber);
@@ -91,12 +87,11 @@ export async function run(provider: NetworkProvider, args: string[]) {
             await lottery.send(
                 provider.sender(), {
                     value: toNano('0.05'),
-                    bounce: true
                 },
                 {
                     $$type: 'DrawWinningNumbers',
-                    poolId: 1n,
-                    roundId: 1n,
+                    poolId: poolId,
+                    roundId: roundId,
                     latestTxHash: '0x1234567890',
                 }
             );
@@ -123,7 +118,6 @@ export async function run(provider: NetworkProvider, args: string[]) {
             await lottery.send(
                 provider.sender(), {
                     value: toNano('0.06'),
-                    bounce: true
                 },
                 {
                     $$type: 'SetPublicKey',
@@ -137,12 +131,11 @@ export async function run(provider: NetworkProvider, args: string[]) {
             let claim = await lottery.send(
                 provider.sender(), {
                     value: toNano('0.07'),
-                    bounce: true
                 },
                 {
                     $$type: 'Claim',
-                    poolId: 1n,
-                    roundId: 1n,
+                    poolId: poolId,
+                    roundId: roundId,
                     amount: airDropAmount,
                     receiver: provider.sender().address!!,
                     signature: signatureCell
@@ -151,9 +144,9 @@ export async function run(provider: NetworkProvider, args: string[]) {
             await sleep(20000);
             console.log('claim', claim);
 
-            let userClaim = await lottery.getClaimData(1n, 1n);
+            let userClaim = await lottery.getClaimData(poolId, roundId);
             console.log('userClaim', userClaim);
-            let isClaimed = await lottery.getIsClaim(1n, 1n, provider.sender().address!!);
+            let isClaimed = await lottery.getIsClaim(poolId, roundId, provider.sender().address!!);
             console.log('isClaimed', isClaimed);
         }
     }

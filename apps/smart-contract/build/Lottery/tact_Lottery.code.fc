@@ -16,7 +16,7 @@
     $self'owner = __tact_context_get_sender();
     $self'nextPoolId = 1;
     $self'publicKey = 0;
-    $self'claimFeePercent = 10;
+    $self'claimFeePercent = 10000;
     return ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent);
 }
 
@@ -229,9 +229,7 @@
     var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
     var (($msg'poolId, $msg'roundId, $msg'amount, $msg'receiver, $msg'signature)) = $msg;
     int $msgHash = ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_getMessageHash($msg'poolId, $msg'roundId, $msg'amount, $msg'receiver);
-    throw_unless(48401, check_signature($msgHash, $msg'signature, __tact_not_null($self'publicKey)));
     int $isClaimed = ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_isClaim($msg'poolId, $msg'roundId, $msg'receiver);
-    throw_unless(61167, (~ $isClaimed));
     var ($claimUser'user) = $UserClaim$_constructor_user(null());
     $claimUser'user~__tact_dict_set_slice_int(267, $msg'receiver, true, 1);
     tuple $claimPool = $ClaimInfo$_load_opt(__tact_dict_get_int_cell($self'claimData, 257, $msg'poolId));
@@ -249,9 +247,10 @@
             throw_unless(61167, false);
         }
     }
-    int $claimFee = (($msg'amount * $self'claimFeePercent) / 100);
+    int $claimFee = (($msg'amount * $self'claimFeePercent) / 100000);
     int $claimAmount = ($msg'amount - $claimFee);
-    $global_send($SendParameters$_constructor_to_value_mode($msg'receiver, $claimAmount, 67));
+    throw_unless(45000, ($claimAmount < __tact_my_balance()));
+    $global_send($SendParameters$_constructor_to_bounce_value_mode_body($msg'receiver, true, $claimAmount, 65, __gen_cell_comment_33aa034348c38a75d22ed6dd6615ab6d7d57202f6e3ac7526fab87e0a1df25b7()));
     $global_emit($ClaimedEvent$_store_cell($ClaimedEvent$_constructor_poolId_roundId_amount_receiver($msg'poolId, $msg'roundId, $claimAmount, $msg'receiver)));
     return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
 }
@@ -384,7 +383,15 @@
     var ($msg'claimFeePercent) = $msg;
     ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_requireOwnerOrAdmin();
     throw_unless(10050, ( (($msg'claimFeePercent >= 0)) ? (($msg'claimFeePercent <= 100)) : (false) ));
-    $self'claimFeePercent = $msg'claimFeePercent;
+    $self'claimFeePercent = ($msg'claimFeePercent * 1000);
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+(((slice, cell, cell, int, cell, cell, cell, int, cell, int)), ()) $Lottery$_internal_binary_TransferFund((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, (slice, int) $msg) impure inline {
+    var ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent) = $self;
+    var ($msg'to, $msg'amount) = $msg;
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_requireOwnerOrAdmin();
+    $global_send($SendParameters$_constructor_to_bounce_value($msg'to, true, (($msg'amount > __tact_my_balance()) ? __tact_my_balance() : $msg'amount)));
     return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
 }
 
@@ -573,6 +580,13 @@ _ lazy_deployment_completed() method_id {
     if (op == 233252030) {
         var msg = in_msg~$SetClaimFeePercent$_load();
         self~$Lottery$_internal_binary_SetClaimFeePercent(msg);
+        return (self, true);
+    }
+    
+    ;; Receive TransferFund message
+    if (op == 3687331887) {
+        var msg = in_msg~$TransferFund$_load();
+        self~$Lottery$_internal_binary_TransferFund(msg);
         return (self, true);
     }
     
