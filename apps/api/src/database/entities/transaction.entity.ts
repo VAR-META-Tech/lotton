@@ -25,8 +25,11 @@ export class Transaction extends BaseTime {
   @Column({ length: 100, nullable: false })
   toAddress: string;
 
-  @Column({ length: 100, nullable: false })
+  @Column({ nullable: false })
   value: string;
+
+  @Column({ nullable: true })
+  quantity: number;
 
   @Column({ length: 20, nullable: false })
   blockTimestamp: string;

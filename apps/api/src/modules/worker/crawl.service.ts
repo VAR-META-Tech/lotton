@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Message, Transaction } from '@ton/core';
-import { Address } from '@ton/core';
+import { Address, fromNano } from '@ton/core';
 import { TonClient } from '@ton/ton';
 import bigDecimal from 'js-big-decimal';
 import TonWeb from 'tonweb';
@@ -17,7 +17,7 @@ import {
   Transaction as TransactionDB,
   UserTicket,
 } from '@/database/entities';
-import { EVENT_HEADER, PoolStatusEnum } from '@/shared/enums';
+import { EVENT_HEADER, PoolStatusEnum, TransactionType } from '@/shared/enums';
 
 import {
   getCurrentPool,
@@ -74,6 +74,7 @@ export class CrawlWorkerService {
           const op = body.loadUint(32);
 
           Logger.debug('op: ' + op);
+          Logger.debug('lt: ' + tx.lt);
 
           switch (op) {
             case EVENT_HEADER.CREATE_POOL_EVENT:
@@ -227,7 +228,9 @@ export class CrawlWorkerService {
     const newTransaction: Partial<TransactionDB> = {
       fromAddress: this.parseAddress(inMsgs.info.src.toString()),
       toAddress: this.parseAddress(tx.inMessage.info.dest.toString()),
-      value: payloadInMsg.quantity.toString(),
+      quantity: Number(payloadInMsg.quantity),
+      value: fromNano(inMsgs.info['value']?.coins ?? 0),
+      type: TransactionType.BUY,
       blockTimestamp: tx.lt.toString(),
       transactionHash: txHash,
       token,
@@ -240,7 +243,14 @@ export class CrawlWorkerService {
       .into(TransactionDB)
       .values(newTransaction)
       .orUpdate(
-        ['fromAddress', 'toAddress', 'value', 'blockTimestamp'],
+        [
+          'fromAddress',
+          'toAddress',
+          'value',
+          'blockTimestamp',
+          'quantity',
+          'type',
+        ],
         ['transactionHash'],
       )
       .execute();
