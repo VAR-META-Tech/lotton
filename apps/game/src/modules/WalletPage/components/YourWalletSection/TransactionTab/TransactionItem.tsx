@@ -3,15 +3,20 @@ import { Icons } from '@/assets/icons';
 
 import { useCopy } from '@/hooks/useCopy';
 import { HStack } from '@/components/ui/Utilities';
+import { convertTonWalletToBase64, prettyNumber, roundNumber, shortenAddress } from '@/lib/common';
+import { IGetAllTransactionItem } from '@/apis/transaction';
 
 interface Props {
-  type: string;
-  address: string;
-  amount: string;
+  transaction: IGetAllTransactionItem;
 }
 
-const TransactionItem: FC<Props> = ({ type, address, amount }) => {
+const TransactionItem: FC<Props> = ({ transaction }) => {
   const [copied, copy] = useCopy();
+  const address = convertTonWalletToBase64(transaction?.fromAddress || '');
+  const type = transaction?.type || '';
+  const tokenSymbol = transaction?.tokenSymbol || '';
+  const isClaim = type === 'claim';
+  const amount = `${prettyNumber(roundNumber(transaction?.value))} ${tokenSymbol}`;
 
   const renderCopyBtn = useMemo(() => {
     if (!copied) {
@@ -30,12 +35,12 @@ const TransactionItem: FC<Props> = ({ type, address, amount }) => {
   }, [address, copied, copy]);
 
   const renderIcon = useMemo(() => {
-    if (type === 'Claim') {
+    if (transaction?.type === 'claim') {
       return <Icons.download size={16} className="stroke-white" />;
     }
 
     return <Icons.upload size={16} className="stroke-white" />;
-  }, [type]);
+  }, [transaction?.type]);
 
   return (
     <HStack pos={'apart'} align={'center'} className="pt-2 pb-3 text-white border-b border-b-gray-color">
@@ -45,16 +50,16 @@ const TransactionItem: FC<Props> = ({ type, address, amount }) => {
         </HStack>
 
         <div>
-          <span className="text-sm">{type}</span>
+          <span className="text-sm">{isClaim ? 'Claimed' : 'Buy tickets'}</span>
           <HStack spacing={16}>
-            <span className="text-xs text-gray-400">{address}</span>
+            <span className="text-xs text-gray-400">{shortenAddress(address, 16)}</span>
 
             {renderCopyBtn}
           </HStack>
         </div>
       </HStack>
 
-      <div className="font-bold">{amount}</div>
+      <div className="font-bold">{isClaim ? `+ ${amount}` : `- ${amount}`}</div>
     </HStack>
   );
 };

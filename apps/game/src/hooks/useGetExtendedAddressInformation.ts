@@ -1,22 +1,19 @@
 import { useGetExtendedAddressInformationQuery } from '@/apis/wallet';
-import { useAuth } from './useAuth';
 import { useEffect } from 'react';
 
-export const useGetExtendedAddressInformation = () => {
-  const { user } = useAuth();
-
+export const useGetExtendedAddressInformation = (wallet: string) => {
   const { data, refetch, ...rest } = useGetExtendedAddressInformationQuery({
     variables: {
-      address: user?.wallet || '',
+      address: wallet,
     },
-    enabled: !!user?.wallet,
+    enabled: !!wallet,
   });
 
   useEffect(() => {
-    if (user?.wallet) {
+    if (wallet) {
       refetch();
     }
-  }, [refetch, user?.wallet]);
+  }, [refetch, wallet]);
 
   return {
     data,

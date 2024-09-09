@@ -10,29 +10,28 @@ import { Input } from '@/components/ui/input';
 import { VStack } from '@/components/ui/Utilities';
 
 import { useWallet } from '@/hooks/useWallet';
-import { useGetExtendedAddressInformation } from '@/hooks/useGetExtendedAddressInformation';
 import BalanceItem from './BalanceItem';
+import { useAuth } from '@/hooks/useAuth';
 
 const WalletTab = () => {
   const [copied, copy] = useCopy();
   const { balance, handleDisconnectWallet } = useWallet();
-
-  const { accountAddress } = useGetExtendedAddressInformation();
+  const { walletBase64 } = useAuth();
 
   const renderCopyComponent = useMemo(() => {
     if (copied) {
       return <Icons.check className="text-gray-color" />;
     }
 
-    return <Icons.copy className="text-gray-color" onClick={() => copy(accountAddress)} />;
-  }, [accountAddress, copied, copy]);
+    return <Icons.copy className="text-gray-color" onClick={() => copy(walletBase64)} />;
+  }, [copied, copy, walletBase64]);
 
   return (
     <VStack spacing={40} className="text-white">
       <VStack>
         <span className="text-base font-bold">Your wallet address</span>
 
-        <Input value={shortenAddress(accountAddress, 16)} suffix={renderCopyComponent} className="text-white pr-10" />
+        <Input value={shortenAddress(walletBase64, 16)} suffix={renderCopyComponent} className="text-white pr-10" />
       </VStack>
 
       <VStack>
@@ -40,7 +39,6 @@ const WalletTab = () => {
 
         <VStack spacing={12}>
           <BalanceItem title="TON balance" value={prettyNumber(Number(balance || 0).toFixed(6))} />
-          {/* <BalanceItem title="NOT balance" value={prettyNumber(20000)} /> */}
         </VStack>
       </VStack>
 
