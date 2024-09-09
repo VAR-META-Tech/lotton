@@ -237,6 +237,9 @@ cell $WinningNumbersDrawnEvent$_store_cell((int, int, int) v) inline;
 ;; $SetClaimFeePercent$_load
 (slice, ((int))) $SetClaimFeePercent$_load(slice sc_0) inline;
 
+;; $TransferFund$_load
+(slice, ((slice, int))) $TransferFund$_load(slice sc_0) inline;
+
 ;; $PoolCreatedEvent$_store
 builder $PoolCreatedEvent$_store(builder build_0, (int, int, int, int, int, int, int, cell, slice, cell) v) inline_ref;
 
@@ -462,6 +465,9 @@ int $global_random(int $min, int $max) impure inline;
 ;; $ClaimInfo$_constructor_info
 ((cell)) $ClaimInfo$_constructor_info(cell $info) inline;
 
+;; $SendParameters$_constructor_to_bounce_value_mode_body
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_bounce_value_mode_body(slice $to, int $bounce, int $value, int $mode, cell $body) inline;
+
 ;; $ClaimedEvent$_constructor_poolId_roundId_amount_receiver
 ((int, int, int, slice)) $ClaimedEvent$_constructor_poolId_roundId_amount_receiver(int $poolId, int $roundId, int $amount, slice $receiver) inline;
 
@@ -509,6 +515,9 @@ int $global_random(int $min, int $max) impure inline;
 
 ;; $Lottery$_fun_owner
 ((slice, cell, cell, int, cell, cell, cell, int, cell, int), slice) $Lottery$_fun_owner((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref;
+
+;; $SendParameters$_constructor_to_bounce_value
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_bounce_value(slice $to, int $bounce, int $value) inline;
 
 ;; $DeployOk$_constructor_queryId
 ((int)) $DeployOk$_constructor_queryId(int $queryId) inline;

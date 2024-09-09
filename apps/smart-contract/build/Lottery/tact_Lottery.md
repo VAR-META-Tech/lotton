@@ -1,9 +1,9 @@
 # TACT Compilation Report
 Contract: Lottery
-BOC Size: 4889 bytes
+BOC Size: 5036 bytes
 
 # Types
-Total Types: 33
+Total Types: 34
 
 ## StateInit
 TLB: `_ code:^cell data:^cell = StateInit`
@@ -121,6 +121,10 @@ Signature: `SetPublicKey{publicKey:int257}`
 TLB: `set_claim_fee_percent#0de724be claimFeePercent:uint8 = SetClaimFeePercent`
 Signature: `SetClaimFeePercent{claimFeePercent:uint8}`
 
+## TransferFund
+TLB: `transfer_fund#dbc8382f to:address amount:coins = TransferFund`
+Signature: `TransferFund{to:address,amount:coins}`
+
 ## PoolCreatedEvent
 TLB: `pool_created_event#233540bc poolId:int257 ticketPrice:uint32 initialRounds:uint8 startTime:uint32 endTime:uint32 active:bool sequence:uint32 rounds:dict<int, ^RoundConfig{roundId:uint32,poolId:uint32,ticketPrice:coins,startTime:uint32,endTime:uint32,active:bool}> creator:address prizes:dict<uint8, uint8> = PoolCreatedEvent`
 Signature: `PoolCreatedEvent{poolId:int257,ticketPrice:uint32,initialRounds:uint8,startTime:uint32,endTime:uint32,active:bool,sequence:uint32,rounds:dict<int, ^RoundConfig{roundId:uint32,poolId:uint32,ticketPrice:coins,startTime:uint32,endTime:uint32,active:bool}>,creator:address,prizes:dict<uint8, uint8>}`
@@ -221,8 +225,8 @@ Argument: receiver
 41780: Total prize must be less than or equal to 100
 42120: Pool does not exist
 42342: Sequence must be positive
+45000: Insufficient funds in the contract
 47697: Round is not active
-48401: Invalid signature
 50778: Round is still active
 52453: Initial rounds must be positive
 52657: Prizes must be set

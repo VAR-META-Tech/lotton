@@ -22,7 +22,7 @@ contract Lottery with Deployable, Ownable {
         self.owner = sender();
         self.nextPoolId = 1;
         self.publicKey = 0;
-        self.claimFeePercent = 10;
+        self.claimFeePercent = 10 * 1000; // percent-mille
     }
 
     // =============== Private Methods ============== //
@@ -179,10 +179,6 @@ contract Lottery with Deployable, Ownable {
             ticketNumberTmp = ticketNumberTmp % base;
         }
         return result.toString();
-    }
-
-    fun convertStringToTicketNumber(ticket: String): Int? {
-        return 0;
     }
 
     fun createTicket(user: Address, poolId: Int, roundId: Int, quantity: Int): String {
@@ -377,14 +373,17 @@ contract Lottery with Deployable, Ownable {
             }
         }
 
-        let claimFee: Int = msg.amount * self.claimFeePercent / 100;
+        let claimFee: Int = msg.amount * self.claimFeePercent / 100000;
         let claimAmount: Int = msg.amount - claimFee;
+        require(claimAmount < myBalance(), "Insufficient funds in the contract");
 
         //send the token to user
         send(SendParameters{
             to: msg.receiver,
+            bounce: true,
             value: claimAmount,
-            mode: SendRemainingValue | SendIgnoreErrors | SendPayGasSeparately
+            mode: SendRemainingValue | SendPayGasSeparately,
+            body: "Claim prize".asComment(),
         });
 
         emit(ClaimedEvent{
@@ -444,7 +443,16 @@ contract Lottery with Deployable, Ownable {
     receive(msg: SetClaimFeePercent) {
         self.requireOwnerOrAdmin();
         require(msg.claimFeePercent >= 0 && msg.claimFeePercent <= 100, "Invalid claim fee percent");
-        self.claimFeePercent = msg.claimFeePercent;
+        self.claimFeePercent = msg.claimFeePercent * 1000;
+    }
+
+    receive(msg: TransferFund) {
+        self.requireOwnerOrAdmin();
+        send(SendParameters{
+            to: msg.to,
+            bounce: true,
+            value: msg.amount > myBalance() ? myBalance() : msg.amount,
+        });
     }
 
     // Getter functions
@@ -633,6 +641,11 @@ message SetPublicKey {
 
 message SetClaimFeePercent {
     claimFeePercent: Int as uint8;
+}
+
+message TransferFund {
+    to: Address;
+    amount: Int as coins;
 }
 
 // ---------------- Events ---------------- //

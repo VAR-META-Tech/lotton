@@ -77,6 +77,7 @@ PROGRAM{
   DECLPROC $SetAdmin$_load
   DECLPROC $SetPublicKey$_load
   DECLPROC $SetClaimFeePercent$_load
+  DECLPROC $TransferFund$_load
   DECLPROC $PoolCreatedEvent$_store
   DECLPROC $PoolCreatedEvent$_store_cell
   DECLPROC $TicketBoughtEvent$_store
@@ -152,6 +153,7 @@ PROGRAM{
   DECLPROC $Lottery$_fun_getMessageHash
   DECLPROC $UserClaim$_constructor_user
   DECLPROC $ClaimInfo$_constructor_info
+  DECLPROC $SendParameters$_constructor_to_bounce_value_mode_body
   DECLPROC $ClaimedEvent$_constructor_poolId_roundId_amount_receiver
   DECLPROC $Lottery$_fun_isClaim
   DECLPROC $Lottery$_fun_claimPrize
@@ -168,6 +170,7 @@ PROGRAM{
   DECLPROC $Lottery$_fun_claimFeePercent
   DECLPROC $Lottery$_fun_notify
   DECLPROC $Lottery$_fun_owner
+  DECLPROC $SendParameters$_constructor_to_bounce_value
   DECLPROC $DeployOk$_constructor_queryId
   DECLPROC $Lottery$_internal_binary_CreatePool
   DECLPROC $Lottery$_internal_binary_BuyTicket
@@ -176,6 +179,7 @@ PROGRAM{
   DECLPROC $Lottery$_internal_binary_Claim
   DECLPROC $Lottery$_internal_binary_SetPublicKey
   DECLPROC $Lottery$_internal_binary_SetClaimFeePercent
+  DECLPROC $Lottery$_internal_binary_TransferFund
   DECLPROC $Lottery$_internal_binary_Deploy
   100637 DECLMETHOD %admins
   122448 DECLMETHOD %isAdmin
@@ -963,6 +967,17 @@ PROGRAM{
     8 LDU
     SWAP
   }>
+  $TransferFund$_load PROCINLINE:<{
+    32 LDU
+    SWAP
+    3687331887 PUSHINT
+    EQUAL
+    129 THROWIFNOT
+    __tact_load_address INLINECALLDICT
+    SWAP
+    LDGRAMS
+    -ROT
+  }>
   $PoolCreatedEvent$_store PROCREF:<{
     590692540 PUSHINT
     s0 s11 XCHG2
@@ -1327,7 +1342,7 @@ PROGRAM{
     s1 s3 XCHG
     0 PUSHINT
     s0 s3 XCHG2
-    10 PUSHINT
+    10000 PUSHINT
   }>
   $Lottery$_contract_load PROCREF:<{
     c4 PUSH
@@ -2172,6 +2187,11 @@ PROGRAM{
   }>
   $ClaimInfo$_constructor_info PROCINLINE:<{
   }>
+  $SendParameters$_constructor_to_bounce_value_mode_body PROCINLINE:<{
+    s3 s4 XCHG
+    PUSHNULL
+    PUSHNULL
+  }>
   $ClaimedEvent$_constructor_poolId_roundId_amount_receiver PROCINLINE:<{
   }>
   $Lottery$_fun_isClaim PROCREF:<{
@@ -2224,34 +2244,32 @@ PROGRAM{
     FALSE
   }>
   $Lottery$_fun_claimPrize PROCREF:<{
-    10 5 BLKSWAP
-    s14 s13 s12 PUSH3
-    s14 PUSH
+    DROP
+    s9 s13 XCHG
+    s8 s12 XCHG
+    s7 s11 XCHG
+    s6 s10 XCHG
+    s5 s13 XCHG
+    s4 s12 XCHG
+    s3 s11 XCHG
+    s10 s13 s12 XCHG3
+    s11 s10 s13 PUSH3
+    s15 PUSH
     $Lottery$_fun_getMessageHash INLINECALLDICT
-    48401 PUSHINT
-    s4 PUSH
-    __tact_not_null INLINECALLDICT
-    s1 s13 XCHG
-    CHKSIGNU
-    s1 s11 XCHG
-    THROWANYIFNOT
-    9 ROLL
-    s13 s12 s10 PUSH3
+    DROP
+    s11 s10 s12 PUSH3
     $Lottery$_fun_isClaim INLINECALLDICT
-    61167 PUSHINT
-    SWAP
-    NOT
-    THROWANYIFNOT
+    DROP
     PUSHNULL
     $UserClaim$_constructor_user INLINECALLDICT
     267 PUSHINT
-    s12 PUSH
+    s14 PUSH
     TRUE
     1 PUSHINT
     __tact_dict_set_slice_int INLINECALLDICT
     s2 PUSH
     257 PUSHINT
-    16 s() PUSH
+    s14 PUSH
     __tact_dict_get_int_cell INLINECALLDICT
     $ClaimInfo$_load_opt INLINECALLDICT
     DUP
@@ -2263,12 +2281,12 @@ PROGRAM{
       257 PUSHINT
       s0 s2 XCHG
       $UserClaim$_store_cell INLINECALLDICT
-      s2 s15 s(-1) XCPUXC
+      s2 s13 s(-1) XCPUXC
       __tact_dict_set_int_cell INLINECALLDICT
       257 PUSHINT
       SWAP
       $ClaimInfo$_store_cell INLINECALLDICT
-      s15 PUSH
+      s13 PUSH
       s3 s4 XCHG
       SWAP
       __tact_dict_set_int_cell INLINECALLDICT
@@ -2277,12 +2295,12 @@ PROGRAM{
       $ClaimInfo$_not_null INLINECALLDICT
       $ClaimInfo$_get_info INLINECALLDICT
       257 PUSHINT
-      16 s() PUSH
+      s14 PUSH
       __tact_dict_get_int_cell INLINECALLDICT
       $UserClaim$_load_opt INLINECALLDICT
       $UserClaim$_not_null INLINECALLDICT
       267 PUSHINT
-      s14 PUSH
+      16 s() PUSH
       1 PUSHINT
       __tact_dict_get_slice_int INLINECALLDICT
       ISNULL
@@ -2293,12 +2311,12 @@ PROGRAM{
         257 PUSHINT
         s0 s2 XCHG
         $UserClaim$_store_cell INLINECALLDICT
-        s2 s15 s(-1) XCPUXC
+        s2 s13 s(-1) XCPUXC
         __tact_dict_set_int_cell INLINECALLDICT
         257 PUSHINT
         SWAP
         $ClaimInfo$_store_cell INLINECALLDICT
-        s15 PUSH
+        s13 PUSH
         s3 s4 XCHG
         SWAP
         __tact_dict_set_int_cell INLINECALLDICT
@@ -2309,22 +2327,34 @@ PROGRAM{
         SWAP
       }>
     }>
-    s11 s1 PUSH2
+    s13 s1 PUSH2
     MUL
-    100 PUSHINT
+    100000 PUSHINT
     DIV
-    s1 s12 XCHG
+    s1 s14 XCHG
     SUB
-    s10 s0 PUSH2
-    67 PUSHINT
-    $SendParameters$_constructor_to_value_mode INLINECALLDICT
+    45000 PUSHINT
+    __tact_my_balance INLINECALLDICT
+    s2 s(-1) PUXC
+    LESS
+    THROWANYIFNOT
+    TRUE
+    65 PUSHINT
+    B{b5ee9c7241010101001100001e00000000436c61696d207072697a654edb5268} B>boc PUSHREF
+    s15 PUSH
+    s3 s1 s3 XCHG3
+    s4 PUSH
+    s0 s2 XCHG
+    $SendParameters$_constructor_to_bounce_value_mode_body INLINECALLDICT
     $global_send INLINECALLDICT
-    s3 s13 XCHG
-    s12 s0 s10 XCHG3
+    s3 s11 XCHG
+    s10 s0 s12 XCHG3
     $ClaimedEvent$_constructor_poolId_roundId_amount_receiver INLINECALLDICT
     $ClaimedEvent$_store_cell INLINECALLDICT
     $global_emit INLINECALLDICT
-    4 6 BLKSWAP
+    s5 s9 XCHG
+    s4 s8 XCHG
+    4 4 BLKSWAP
   }>
   $Lottery$_fun_admins PROCREF:<{
     s8 PUSH
@@ -2426,6 +2456,13 @@ PROGRAM{
   $Lottery$_fun_owner PROCREF:<{
     s9 PUSH
   }>
+  $SendParameters$_constructor_to_bounce_value PROCINLINE:<{
+    s1 s2 XCHG
+    0 PUSHINT
+    PUSHNULL
+    PUSHNULL
+    PUSHNULL
+  }>
   $DeployOk$_constructor_queryId PROCINLINE:<{
   }>
   $Lottery$_internal_binary_CreatePool PROCINLINE:<{
@@ -2469,7 +2506,34 @@ PROGRAM{
       FALSE
     }>
     THROWANYIFNOT
-    9 ROLL
+    s0 s9 XCHG
+    1000 PUSHINT
+    MUL
+    s8 s9 XCHG
+    s7 s8 XCHG
+    s6 s7 XCHG
+    s5 s6 XCHG
+    s4 s5 XCHG
+    s3 s4 XCHG
+    s1 s3 s0 XCHG3
+  }>
+  $Lottery$_internal_binary_TransferFund PROCINLINE:<{
+    10 2 BLKSWAP
+    $Lottery$_fun_requireOwnerOrAdmin INLINECALLDICT
+    TRUE
+    __tact_my_balance INLINECALLDICT
+    s12 s(-1) PUXC
+    GREATER
+    IF:<{
+      s11 POP
+      __tact_my_balance INLINECALLDICT
+    }>ELSE<{
+      s0 s11 XCHG
+    }>
+    s12 s11 s0 XCHG3
+    $SendParameters$_constructor_to_bounce_value INLINECALLDICT
+    $global_send INLINECALLDICT
+    2 8 BLKSWAP
   }>
   $Lottery$_internal_binary_Deploy PROCINLINE:<{
     $DeployOk$_constructor_queryId INLINECALLDICT
@@ -2658,6 +2722,16 @@ PROGRAM{
       $SetClaimFeePercent$_load INLINECALLDICT
       NIP
       $Lottery$_internal_binary_SetClaimFeePercent INLINECALLDICT
+      TRUE
+    }>
+    DUP
+    3687331887 PUSHINT
+    EQUAL
+    IFJMP:<{
+      DROP
+      $TransferFund$_load INLINECALLDICT
+      1 2 BLKDROP2
+      $Lottery$_internal_binary_TransferFund INLINECALLDICT
       TRUE
     }>
     2490013878 PUSHINT
