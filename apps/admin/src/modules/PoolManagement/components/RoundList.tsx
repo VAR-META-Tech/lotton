@@ -55,16 +55,16 @@ const RoundList = ({rounds, isFetching, handlePageChange, paramsQuery}: Props) =
                 <TableCell className="text-center border border-[#D4D4D4]">{round?.roundNumber}</TableCell>
 
                 <TableCell className="text-center border border-[#D4D4D4]">
-                  {round?.startTime ? format(convertToTimestamp(round?.startTime), 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
+                  {round?.startTime ? format(Number(round?.startTime) * 1000, 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
                 </TableCell>
                 <TableCell className="text-center border border-[#D4D4D4]">
-                  {round?.endTime ? format(convertToTimestamp(round?.endTime), 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
+                  {round?.endTime ? format(Number(round?.endTime) * 1000, 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
                 </TableCell>
 
                 <TableCell className="text-center border border-[#D4D4D4]">{round?.prizePool ?? '-'} {round?.symbol}</TableCell>
 
                 <TableCell className="text-center border border-[#D4D4D4]">
-                  <Status endTime={round?.endTime} startTime={round?.startTime} />
+                  <Status endTime={Number(round?.endTime)} startTime={Number(round?.startTime)} />
                 </TableCell>
                 
                 <TableCell className="text-center border border-[#D4D4D4]">

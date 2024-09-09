@@ -1,14 +1,14 @@
 import React from "react";
 
 type Props = {
-  startTime: string | null;
-  endTime: string | null;
+  startTime: number | null;
+  endTime: number | null;
 };
 
 export const Status: React.FC<Props> = ({ startTime, endTime }) => {
-  const now = new Date();
-  const start = startTime ? new Date(startTime) : null;
-  const end = endTime ? new Date(endTime) : null;
+  const now = new Date().getTime();
+  const start = startTime ? Number(startTime) * 1000 : null;
+  const end = endTime ? Number(endTime) * 1000 : null;
 
   if (start && start > now) {
     return <span className="text-[#2978D1] text-base font-bold">Up Coming</span>;

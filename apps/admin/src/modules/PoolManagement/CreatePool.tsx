@@ -18,7 +18,8 @@ import { HStack, VStack } from '@/components/ui/Utilities';
 import { poolSchema, PoolSchema } from './components/types';
 import { ROUTES } from '@/lib/routes';
 import { useCounterContract } from '@/hooks/useCounterContract';
-import { Address } from '@ton/core';
+import { Address, Dictionary } from '@ton/core';
+import { parseUnits } from 'viem';
 
 export const SEQUENCY_OPTIONS = [
   { label: '1 day', value: '1' },
@@ -33,6 +34,7 @@ export const SEQUENCY_OPTIONS = [
 
 export const CreatePool = () => {
   const route = useRouter();
+  const queryClient = useQueryClient();
   const { createPool, getLastTx } = useCounterContract();
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -50,57 +52,28 @@ export const CreatePool = () => {
     }));
   }, [tokenList]);
 
-  const { mutate: createPoolMutate, isPending: isPendingCreate } = useCreatePool();
-  const queryClient = useQueryClient();
-
-  // const testLastTx = async () => {
-  //   try {
-  //     const result = await getLastTx();
-  
-  //     console.log({ result: result?.[0] });
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // }
+  const { mutateAsync: createPoolMutate, isPending: isPendingCreate } = useCreatePool({
+    onSuccess: () => {
+      setLoading(true)
+      // queryClient.invalidateQueries({ queryKey: ['/pools'] });
+      // route.push(ROUTES.POOL);
+      // toast.success('Create new pool successfully!');
+    },
+    onError: (error) => {
+      setLoading(false)
+      toast.error(`${error.message}`);
+    },
+  });
   
   const handleSubmit = async (values: PoolSchema) => {
-    setLoading(true);
-    const lastTx = await getLastTx();
-    const lastTxHash = lastTx?.[0].hash().toString('base64');
-    
-    await createPool({
-      jettonWallet: Address.parse(
-        '0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP',
-      ),
-      ticketPrice: BigInt(Number(values.ticketPrice)),
-      initialRounds: BigInt(Number(values.totalRounds)),
-      startTime: BigInt(new Date(values.startTime).getTime() / 1000),
-      endTime: BigInt(new Date(values.endTime).getTime() / 1000),
-      sequence: BigInt(Number(values.sequency) * 86400),
-      active: true,
-    })
-
-    let newLastTxHash = lastTxHash;
-    while (newLastTxHash === lastTxHash) {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      const updatedLastTx = await getLastTx();
-      // const isAbortedTx = updatedLastTx?.[0]?.description?.aborted;
-
-      // if (isAbortedTx) {
-      //   toast.error('Something went wrong!');
-      //   return;
-      // }
-      newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
-    }
-
-    createPoolMutate(
+    await createPoolMutate(
       {
         name: values.name,
         currency: Number(values.currency),
         sequency: Number(values.sequency) * 86400,
         totalRounds: Number(values.totalRounds),
-        startTime: new Date(values.startTime).toISOString(),
-        ticketPrice: Number(values.ticketPrice),
+        startTime: String(new Date(values.startTime).getTime() / 1000),
+        ticketPrice: Number(parseUnits(values.ticketPrice, 9)),
         poolPrizes: [
           {
             matchNumber: 1,
@@ -120,19 +93,49 @@ export const CreatePool = () => {
           },
         ],
       },
-      {
-        onSuccess: () => {
-          setLoading(false)
-          queryClient.invalidateQueries({ queryKey: ['/pools'] });
-          route.push(ROUTES.POOL);
-          toast.success('Create new pool successfully!');
-        },
-        onError: (error) => {
-          setLoading(false)
-          toast.error(`${error.message}`);
-        },
-      }
     );
+
+    setLoading(true);
+    const lastTx = await getLastTx();
+    const lastTxHash = lastTx?.[0].hash().toString('base64');
+
+    let prizes = Dictionary.empty(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8));
+    prizes.set(1, Number(values.match1));
+    prizes.set(2, Number(values.match2));
+    prizes.set(3, Number(values.match3));
+    prizes.set(4, Number(values.match4));
+
+    await createPool({
+      jettonWallet: Address.parse(
+        '0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP',
+      ),
+      ticketPrice: BigInt(parseUnits(values.ticketPrice, 9)),
+      initialRounds: BigInt(Number(values.totalRounds)),
+      startTime: BigInt(new Date(values.startTime).getTime() / 1000),
+      endTime: BigInt(new Date(values.endTime).getTime() / 1000),
+      sequence: BigInt(Number(values.sequency) * 86400),
+      active: true,
+      prizes,
+    });
+
+    let newLastTxHash = lastTxHash;
+    while (newLastTxHash === lastTxHash) {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      const updatedLastTx = await getLastTx();
+      const isAbortedTx = (updatedLastTx?.[0]?.description as any)?.aborted;
+
+      if (isAbortedTx) {
+        toast.error('Something went wrong!');
+        setLoading(false);
+        return;
+      }
+      newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
+    }
+
+    setLoading(false);
+    route.push(ROUTES.POOL);
+    queryClient.invalidateQueries({ queryKey: ['/pools'] });
+    toast.success('Create new pool successfully!');
   };
 
   const startTime = methods.watch('startTime');
@@ -155,8 +158,7 @@ export const CreatePool = () => {
   }, [startTime, sequency, totalRound]);
   
   return (
-    <VStack className="mx-10 mb-24 bg-white rounded-sm min-h-[12.5rem] px-24 py-12">
-      {/* <Button onClick={testLastTx}>Test get last TX</Button> */}
+    <VStack className="mx-4 md:mx-10 mb-24 bg-white rounded-sm min-h-[12.5rem] p-8 md:px-24 md:py-12">
       <div>
         <FormWrapper methods={methods} onSubmit={handleSubmit}>
           <VStack>

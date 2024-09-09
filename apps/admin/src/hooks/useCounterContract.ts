@@ -54,6 +54,7 @@ export function useCounterContract() {
             endTime: data.endTime,
             sequence: data.sequence,
             active: data.active,
+            prizes: data.prizes,
           }),
         )
         .endCell();
