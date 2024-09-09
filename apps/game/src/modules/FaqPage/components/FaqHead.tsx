@@ -1,7 +1,4 @@
 import React from 'react';
-import { Icons } from '@/assets/icons';
-
-import { Input } from '@/components/ui/input';
 
 const FaqHead = () => {
   return (
@@ -13,12 +10,12 @@ const FaqHead = () => {
         your concern or check our frequently asked questions listed below.{' '}
       </p>
 
-      <Input
+      {/* <Input
         placeholder="Search for anything"
         containerClassName="mx-2"
         className="placeholder:text-white bg-gray-color h-12 rounded-lg"
         prefix={<Icons.search className="text-white w-5 h-5" />}
-      />
+      /> */}
     </div>
   );
 };
