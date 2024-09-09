@@ -11,22 +11,25 @@ import { IGetPoolJoinedItem, IGetPoolJoinedItemRound } from '@/apis/pools';
 import BuyTicketDrawer from '@/modules/LandingPage/components/PoolList/BuyTicketDrawer';
 import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
 import { getRoundActiveNumber } from '@/lib/common';
+import { Carousel } from '@/components/ui/carousel';
 
 type Props = {
   pool: IGetPoolJoinedItem;
 };
 
 export const PoolItem = ({ pool }: Props) => {
-  const [activeRound, setActiveRound] = useState(0);
+  const [activeRound, setActiveRound] = useState<number>(0);
 
-  const { pool: poolDetail } = useGetPoolDetail({
+  const { pool: poolDetail, rounds: roundsDetail } = useGetPoolDetail({
     isActive: true,
     poolId: pool?.id || 0,
   });
 
+  // pool joined
   const rounds = pool?.rounds || [];
   const roundActive = rounds[activeRound];
-  const roundsDetail = poolDetail?.rounds || [];
+
+  // pool detail
   const roundDetailActive = roundsDetail[activeRound];
 
   const handleChangeRoundActive = (upRound: boolean) => {
@@ -54,9 +57,11 @@ export const PoolItem = ({ pool }: Props) => {
 
         <DrawTime endTime={Number(roundActive?.endTime || 0)} />
 
-        <TicketDetailDrawer pool={pool} roundActive={roundActive}>
-          <Button className="mx-auto rounded-lg text-white">View your tickets</Button>
-        </TicketDetailDrawer>
+        <Carousel>
+          <TicketDetailDrawer pool={pool} activeRound={activeRound} setActiveRound={setActiveRound}>
+            <Button className="mx-auto rounded-lg text-white">View your tickets</Button>
+          </TicketDetailDrawer>
+        </Carousel>
       </div>
 
       <BuyTicketDrawer pool={poolDetail} roundActive={roundDetailActive} />

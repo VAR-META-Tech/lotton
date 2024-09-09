@@ -7,7 +7,7 @@ import { RoundButton } from '../PoolCard/RoundAction';
 const PoolCardSkeleton = () => {
   return (
     <div className="w-full rounded-xl overflow-hidden relative">
-      <Skeleton className="rounded-none py-1.5 h-[4.25rem]" />
+      <Skeleton className="rounded-none py-1.5 h-[5.5rem]" />
 
       <div className="border-x-navigate-tab border-x text-white px-5 py-4">
         <HStack pos={'apart'} spacing={12}>
@@ -17,7 +17,7 @@ const PoolCardSkeleton = () => {
             <Skeleton className="h-3 w-[10rem]" />
           </div>
 
-          <div className="space-x-5 absolute top-24 right-5 z-20">
+          <div className="space-x-5 absolute top-[7.5rem] right-5 z-20">
             <RoundButton isDisabled={true}>
               <Icons.arrowLeft color="#fff" />
             </RoundButton>

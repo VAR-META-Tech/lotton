@@ -11,6 +11,7 @@ import PoolPrizePot from './PoolPrizePot';
 import PoolRound from './PoolRound';
 import RoundAction from './RoundAction';
 import { useForceUpdate } from '@mantine/hooks';
+import { VStack } from '@/components/ui/Utilities';
 
 const PoolCountDown = dynamic(() => import('./PoolCountDown'), { ssr: false });
 
@@ -79,15 +80,15 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
 
   return (
     <div {...props} className={cn('w-full rounded-xl overflow-hidden relative', className)}>
-      <div className="bg-navigate-tab py-1.5 h-[4.25rem]">
+      <VStack spacing={0} className="bg-navigate-tab py-1.5 h-[5.5rem]">
         <div className="text-primary text-2xl font-semibold text-center">{pool?.name}</div>
 
         <PoolCountDown
-          date={Number(roundActive?.endTime || 0)}
+          roundActive={roundActive}
           isBeforeRoundEnd={isBeforeRoundEnd}
           onForceUpdate={handleForceUpdate}
         />
-      </div>
+      </VStack>
 
       <RoundAction roundActive={roundActive} maxRound={rounds?.length || 0} setCurrentRound={setCurrentRound} />
 

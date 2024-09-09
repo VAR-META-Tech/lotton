@@ -16,28 +16,28 @@ const RoundAction: FC<Props> = ({ maxRound, roundActive, setCurrentRound }) => {
   const roundNumber = Number(getRoundActiveNumber(roundActive?.roundNumber) || 0);
 
   const handleChangeRound = useCallback(
-    (type: 'plus' | 'minus') => {
-      const isPlus = type === 'plus';
+    (isPlus: boolean) => {
+      const isMaxRound = maxRound === roundNumber;
+      const isMinRound = roundNumber === MIN_ROUND;
 
-      if ((isPlus && roundNumber === maxRound) || (!isPlus && roundNumber === MIN_ROUND)) return;
+      if ((isPlus && isMaxRound) || (!isPlus && isMinRound)) return;
 
       if (isPlus) {
         setCurrentRound((prev) => prev + 1);
-        return;
+      } else {
+        setCurrentRound((prev) => prev - 1);
       }
-
-      setCurrentRound((prev) => prev - 1);
     },
     [maxRound, roundNumber, setCurrentRound]
   );
 
   return (
-    <div className="space-x-5 absolute top-24 right-5 z-20">
-      <RoundButton isDisabled={roundNumber === MIN_ROUND} onClick={() => handleChangeRound('minus')}>
+    <div className="space-x-5 absolute top-[7.5rem] right-5 z-20">
+      <RoundButton isDisabled={roundNumber === MIN_ROUND} onClick={() => handleChangeRound(false)}>
         <Icons.arrowLeft color="#fff" />
       </RoundButton>
 
-      <RoundButton isDisabled={roundNumber === maxRound} onClick={() => handleChangeRound('plus')}>
+      <RoundButton isDisabled={roundNumber === maxRound} onClick={() => handleChangeRound(true)}>
         <Icons.arrowRight color="#fff" />
       </RoundButton>
     </div>

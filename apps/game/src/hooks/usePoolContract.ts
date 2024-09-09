@@ -86,7 +86,7 @@ export function usePoolContract() {
   };
 
   const getLastTx = () => {
-    return client?.getTransactions(Address.parse(env.CONTRACT_ADDRESS), {
+    return client?.getTransactions(Address.parse(wallet?.account?.address || ''), {
       limit: 1,
     });
   };

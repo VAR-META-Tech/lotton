@@ -26,7 +26,7 @@ const PoolPrizePot: FC<Props> = ({ pool, roundActive, isEndRound = false, isBefo
   const currency = pool?.currency;
   const tokenSymbol = currency?.symbol || '';
 
-  const { data: tokenPriceData } = useGetTokenPrice(Number(currency?.id || 0));
+  const { price } = useGetTokenPrice(Number(currency?.id || 0));
 
   const { data } = useGetTotalTickets(roundActive?.id);
 
@@ -35,8 +35,8 @@ const PoolPrizePot: FC<Props> = ({ pool, roundActive, isEndRound = false, isBefo
   }, [roundActive?.totalPrizes]);
 
   const totalPrizeUsd = useMemo(() => {
-    return Number(tokenPriceData?.price) * totalPrize;
-  }, [tokenPriceData, totalPrize]);
+    return price * totalPrize;
+  }, [price, totalPrize]);
 
   const prizePot = useMemo(() => {
     return (
