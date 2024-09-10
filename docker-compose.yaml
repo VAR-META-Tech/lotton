@@ -1,0 +1,48 @@
+version: "3"
+services:
+  game:
+    container_name: game
+    build:
+      context: .
+      dockerfile: ./apps/game/Dockerfile
+    restart: always
+    env_file: ./.env
+    environment:
+      - PORT=${GAME_PORT}
+    ports:
+      - ${GAME_PORT}:${GAME_PORT}
+    depends_on:
+      - api
+  admin:
+    container_name: admin
+    build:
+      context: .
+      dockerfile: ./apps/admin/Dockerfile
+    restart: always
+    env_file: ./.env
+    environment:
+      - PORT=${ADMIN_PORT}
+    ports:
+      - ${ADMIN_PORT}:${ADMIN_PORT}
+    depends_on:
+      - api
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    restart: always
+    env_file: ./.env
+    ports:
+      - ${PORT}:${PORT}
+    command: ["npm", "run", "start:prod"]
+  worker:
+    container_name: worker
+    build:
+      context: .
+      dockerfile: ./apps/api/Dockerfile
+    restart: always
+    env_file: ./.env
+    ports:
+      - ${WORKER_PORT}:${WORKER_PORT}
+    command: ["npm", "run", "start:prod-worker"]

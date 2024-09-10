@@ -1,0 +1,45 @@
+# include:
+#   - project: foundation/templates/ci-template
+#     file: backend-ci.yml
+#     inputs:
+#       branch: develop
+#   - project: foundation/templates/ci-template
+#     file: update-manifest.yml
+
+stages:
+  - dockerize
+
+##### Dockerize template
+.dockerize_template: &dockerize
+  stage: dockerize
+  image: $KANIKO_RUNNER_IMAGE
+  script:
+    - sh ./scripts/dockerize.sh
+  tags:
+    - vm-docker
+  allow_failure: false
+  when: on_success
+
+dockerize:api:
+  <<: *dockerize
+  variables:
+    REGISTRY: $REGISTRY_API
+    DOCKERFILE_DIR: apps/api
+  only: # update this for staging
+    - main
+
+dockerize:game:
+  <<: *dockerize
+  variables:
+    REGISTRY: $REGISTRY_GAME
+    DOCKERFILE_DIR: apps/game
+  only: # update this for staging
+    - main
+
+dockerize:admin:
+  <<: *dockerize
+  variables:
+    REGISTRY: $REGISTRY_ADMIN
+    DOCKERFILE_DIR: apps/admin
+  only: # update this for staging
+    - main
