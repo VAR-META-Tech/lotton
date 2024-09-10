@@ -384,6 +384,9 @@ int $global_random(int $min, int $max) impure inline;
 ;; $Lottery$_fun_requireOwnerOrAdmin
 ((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_requireOwnerOrAdmin((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref;
 
+;; $Lottery$_fun_requireOwner
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_requireOwner((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref;
+
 ;; $Lottery$_fun_setAdmin
 ((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_setAdmin((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, slice $admin) impure inline_ref;
 
@@ -471,6 +474,9 @@ int $global_random(int $min, int $max) impure inline;
 ;; $ClaimedEvent$_constructor_poolId_roundId_amount_receiver
 ((int, int, int, slice)) $ClaimedEvent$_constructor_poolId_roundId_amount_receiver(int $poolId, int $roundId, int $amount, slice $receiver) inline;
 
+;; $Lottery$_fun_claimData
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_claimData((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId) impure inline_ref;
+
 ;; $Lottery$_fun_isClaim
 ((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_isClaim((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, slice $receiver) impure inline_ref;
 
@@ -500,9 +506,6 @@ int $global_random(int $min, int $max) impure inline;
 
 ;; $Lottery$_fun_publicKey
 ((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_publicKey((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref;
-
-;; $Lottery$_fun_claimData
-((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_claimData((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId) impure inline_ref;
 
 ;; $Lottery$_fun_contractBalance
 ((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_contractBalance((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref;
