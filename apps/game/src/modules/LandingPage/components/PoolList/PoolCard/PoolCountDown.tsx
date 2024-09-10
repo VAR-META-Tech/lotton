@@ -1,12 +1,15 @@
 import { IGetPoolDetailRound } from '@/apis/pools';
+import { Skeleton } from '@/components/ui/skeleton';
 import { HStack, VStack } from '@/components/ui/Utilities';
 import { cn } from '@/lib/utils';
+import { useBuyTicketStore } from '@/stores/BuyTicketStore';
 import React, { FC, HTMLAttributes, memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 interface Props {
   roundActive: IGetPoolDetailRound;
   isBeforeRoundEnd: boolean;
   onForceUpdate: () => void;
+  isLoadingCountDown: boolean;
 }
 
 interface TimeLeft {
@@ -23,8 +26,9 @@ const getDefaultTimeLeft = (): TimeLeft => ({
   seconds: 0,
 });
 
-const PoolCountDown: FC<Props> = ({ roundActive, isBeforeRoundEnd, onForceUpdate }) => {
+const PoolCountDown: FC<Props> = ({ roundActive, isBeforeRoundEnd, onForceUpdate, isLoadingCountDown }) => {
   const endTime = useMemo(() => Number(roundActive?.endTime || 0), [roundActive?.endTime]);
+  const setPoolId = useBuyTicketStore.use.setPoolId();
 
   const calculateTimeLeft = useCallback((): TimeLeft => {
     if (!endTime) return getDefaultTimeLeft();
@@ -60,15 +64,23 @@ const PoolCountDown: FC<Props> = ({ roundActive, isBeforeRoundEnd, onForceUpdate
 
         setTimeout(() => {
           onForceUpdate();
+          setPoolId(undefined);
         }, 1000);
       }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [endTime, calculateTimeLeft, onForceUpdate]);
+  }, [endTime, calculateTimeLeft, onForceUpdate, setPoolId]);
 
   const isEnd = timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0;
 
+  if (isLoadingCountDown) {
+    return (
+      <HStack pos="center" align="center" className="text-white font-medium flex-1">
+        <Skeleton className="h-9 w-32 bg-gray-color" />
+      </HStack>
+    );
+  }
   if (isEnd && !roundActive?.winningCode) {
     return (
       <HStack pos="center" align="center" className="text-white font-medium flex-1">

@@ -41,7 +41,7 @@ export const FAQ_DATA = [
               Ticket Price: 10 NOT User sent 40 NOT and produced this transaction hash:
               6771975b6b2671850bcd8de6bd48915b674d3d5990a5fc4fbf770298cb25d87a
             </li>
-            <li>Ticket 1: d87a Ticket 2: cb25 Ticket 3: 0298 Ticket 4: bf77</li>
+            <li>Ticket 1: D87A Ticket 2: CB25 Ticket 3: 0298 Ticket 4: BF77</li>
           </ul>
         </div>
       </VStack>
@@ -60,7 +60,7 @@ export const FAQ_DATA = [
         <VStack spacing={8}>
           <span className="text-justify">For example, if that block was:</span>
           <span className="text-justify">6771975b6b2671850bcd8de6bd48915b674d3d5990a5fc4fbf770298cb25d87a</span>
-          <span className="text-justify">the winning ticket would be: d87a</span>
+          <span className="text-justify">the winning ticket would be: D87A</span>
         </VStack>
       </VStack>
     ),

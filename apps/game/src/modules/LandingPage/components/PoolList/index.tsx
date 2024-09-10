@@ -32,7 +32,12 @@ const PoolList = () => {
     }
 
     if (!pools?.length) {
-      return <Empty />;
+      return (
+        <Empty
+          textClassName="text-center max-w-96"
+          emptyText={`Stay tuned! Exciting new lottery pools are coming soon. We're working hard to bring you the best opportunities to win big.`}
+        />
+      );
     }
 
     return (

@@ -1,5 +1,4 @@
 import { HStack, VStack } from '@/components/ui/Utilities';
-import { usePoolContract } from '@/hooks/usePoolContract';
 import { roundNumber } from '@/lib/common';
 import React, { FC, useMemo } from 'react';
 import CollectItemSkeleton from './CollectItemSkeleton';
@@ -13,6 +12,7 @@ interface Props {
   totalUsdValue: number;
   tokenSymbol: string;
   isLoading: boolean;
+  claimFee: number;
 }
 
 const CollectTotal: FC<Props> = ({
@@ -24,9 +24,8 @@ const CollectTotal: FC<Props> = ({
   totalUsdValue,
   tokenSymbol,
   isLoading,
+  claimFee,
 }) => {
-  const { claimFee } = usePoolContract();
-
   const showTotalComponent = useMemo(() => {
     if (!isLoading)
       return (

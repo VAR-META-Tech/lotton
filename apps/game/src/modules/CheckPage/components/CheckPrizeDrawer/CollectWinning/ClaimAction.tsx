@@ -1,4 +1,4 @@
-import { useGetClaimSignatureMutation } from '@/apis/pools/mutations';
+import { useConfirmClaimMutation, useGetClaimSignatureMutation } from '@/apis/pools/mutations';
 import { Button } from '@/components/ui/button';
 import { HStack } from '@/components/ui/Utilities';
 import { useAuth } from '@/hooks/useAuth';
@@ -18,6 +18,10 @@ const ClaimAction: FC<Props> = ({ poolId, roundId }) => {
   const { claimPrize, getLastTx } = usePoolContract();
   const { user } = useAuth();
   const setIsOpen = useClaimStore.use.setIsOpen();
+
+  const { mutate: confirm } = useConfirmClaimMutation({
+    onError: onMutateError,
+  });
 
   const handleTransaction = (status: 'success' | 'error', msg: string) => {
     if (status === 'success') {
@@ -63,7 +67,12 @@ const ClaimAction: FC<Props> = ({ poolId, roundId }) => {
           newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
         }
 
-        if (newLastTxHash !== lastTxHash) handleTransaction('success', 'Claim successful');
+        if (newLastTxHash !== lastTxHash) {
+          handleTransaction('success', 'Claim successful');
+          confirm({
+            roundId: roundId,
+          });
+        }
       } catch (error) {
         onMutateError(error);
         setLoading(false);
