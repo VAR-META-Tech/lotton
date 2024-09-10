@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useGetRoundDetail } from '@/apis/pool';
 import { Icons } from '@/assets/icons';
 
+import { formatPrize } from '@/lib/common';
 import { HStack, VStack } from '@/components/ui/Utilities';
 
 import InfoCard from './components/InfoCard';
@@ -17,13 +18,38 @@ export const RoundDetail = () => {
 
   const infoData = useMemo(() => {
     return [
-      { title: 'Prize Pool', key: 'prizePool', desc: '0 TON', icon: <Icons.ticket /> },
-      { title: 'Current Prize', key: 'currentPrize', desc: '0 TON', icon: <Icons.text fill="#8B8B94" /> },
-      { title: 'Previous Prize', key: 'previousPrize', desc: '0 TON', icon: <Icons.text fill="#9333EA" /> },
-      { title: 'Total Tickets', key: 'totalTickets', desc: '0', icon: <Icons.ticket2 /> },
-      { title: 'Prize Users', key: 'prizePool', desc: '0', icon: <Icons.userGroup /> },
+      {
+        title: 'Prize Pool',
+        key: 'prizePool',
+        desc: `${formatPrize(Number(roundDetail?.data?.totalPrizes), Number(roundDetail?.data?.tokenDecimals)) || '0'} ${roundDetail?.data?.tokenSymbol || ''}`,
+        icon: <Icons.ticket />,
+      },
+      {
+        title: 'Current Prize',
+        key: 'currentPrize',
+        desc: `${formatPrize(Number(roundDetail?.data?.currentPrizes), Number(roundDetail?.data?.tokenDecimals)) || '0'} ${roundDetail?.data?.tokenSymbol || ''}`,
+        icon: <Icons.text fill="#8B8B94" />,
+      },
+      {
+        title: 'Previous Prize',
+        key: 'previousPrize',
+        desc: `${formatPrize(Number(roundDetail?.data?.previousPrizes), Number(roundDetail?.data?.tokenDecimals)) || '0'} ${roundDetail?.data?.tokenSymbol || ''}`,
+        icon: <Icons.text fill="#9333EA" />,
+      },
+      {
+        title: 'Total Tickets',
+        key: 'totalTickets',
+        desc: `${roundDetail?.data?.totalTickets || '0'}`,
+        icon: <Icons.ticket2 />,
+      },
+      {
+        title: 'Total Users',
+        key: 'totalUsers',
+        desc: `${roundDetail?.data?.totalUsers || '0'}`,
+        icon: <Icons.userGroup />,
+      },
     ];
-  }, []);
+  }, [roundDetail]);
 
   return (
     <VStack className="mx-10 mb-32 space-y-6">
@@ -34,7 +60,7 @@ export const RoundDetail = () => {
       </HStack>
 
       <VStack className="bg-white rounded-sm min-h-[12.5rem] px-8 py-12">
-        <WinningSection />
+        <WinningSection round={roundDetail?.data} />
       </VStack>
     </VStack>
   );

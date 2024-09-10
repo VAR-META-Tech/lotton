@@ -95,6 +95,13 @@ export interface IGetRoundsParams {
   status?: string;
 }
 
+export interface IGetRoundsWinningTicketParams {
+  roundId?: number;
+  matchNumber?: number;
+  page?: number;
+  pageSizes?: number;
+}
+
 export interface IRoundItem {
   createdAt: string;
   updatedAt: string;
@@ -107,6 +114,7 @@ export interface IRoundItem {
   prizePool: number;
   symbol: string;
   poolName: string;
+  tokenDecimals: number;
 }
 
 export interface IGetRoundsResponse {
@@ -181,18 +189,58 @@ export interface IGetTokensResponse {
 
 export interface IGetTokenListResponse extends TResponse<IGetTokensResponse> { }
 
+export interface IMatchDetail {
+  id: number;
+  matchNumber: number;
+  allocation: number;
+  createdAt: string;
+  updatedAt: string;
+  tokenName: string;
+  tokenSymbol: string;
+  tokenDecimals: number;
+  winningTickets: string;
+  amount: number;
+  amountPerTicket: number | null;
+}
+
 export interface IGetRoundDetail {
   id: number;
   roundNumber: number;
   startTime: string;
   endTime: string;
   winningCode: string;
+  winningBlock: string;
   createdAt: string;
   updatedAt: string;
   totalTickets: number;
   totalUsers: number;
   currentPrizes: number;
   previousPrizes: number;
+  totalPrizes: number;
+  totalWinningPrizes: number;
+  winningTickets: string;
+  tokenDecimals: number;
+  tokenName: string;
+  tokenSymbol: string;
+  matchs: IMatchDetail[];
 }
 
+
 export interface IGetRoundDetailResponse extends TResponse<IGetRoundDetail> { }
+
+export interface IItems {
+  id: number;
+  userWallet: string;
+  winningMatch: number;
+  winningCode: string;
+  ticketCode: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+} 
+
+export interface IGetRoundsWinningTicket {
+  items: IItems[];
+}
+
+export interface IGetRoundsWinningTicketResponse extends TResponse<IGetRoundsWinningTicket> { }

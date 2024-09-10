@@ -12,6 +12,7 @@ import { IGetRoundsListResponse } from '@/apis/pool'
 import { IGetAllPoolParams } from './types'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/routes'
+import { formatPrize } from '@/lib/common'
 
 type Props = {
   rounds: IGetRoundsListResponse,
@@ -63,7 +64,7 @@ const RoundList = ({rounds, isFetching, handlePageChange, paramsQuery}: Props) =
                   {round?.endTime ? format(Number(round?.endTime) * 1000, 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
                 </TableCell>
 
-                <TableCell className="text-center border border-[#D4D4D4]">{round?.prizePool ?? '-'} {round?.symbol}</TableCell>
+                <TableCell className="text-center border border-[#D4D4D4]">{formatPrize(Number(round?.prizePool), Number(round?.tokenDecimals)) ?? '-'} {round?.symbol}</TableCell>
 
                 <TableCell className="text-center border border-[#D4D4D4]">
                   <Status endTime={Number(round?.endTime)} startTime={Number(round?.startTime)} />
