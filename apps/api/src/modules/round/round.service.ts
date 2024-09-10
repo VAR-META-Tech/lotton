@@ -183,7 +183,7 @@ export class RoundService {
           'ticket.winningMatch as winningMatch',
           'ticket.winningCode as winningCode',
           'ticket.code as ticketCode',
-          'ticket.claimed as claimed',
+          'ticket.status as status',
           'ticket.createdAt as createdAt',
           'ticket.updatedAt as updatedAt',
         ]);
