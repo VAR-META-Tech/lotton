@@ -10,11 +10,11 @@ import {
   TupleBuilder,
   WalletContractV4,
 } from '@ton/ton';
-import type { Repository } from 'typeorm';
+import { MoreThanOrEqual, type Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
 import type { Pool, PoolRound, UserTicket } from '@/database/entities';
-import { PoolStatusEnum } from '@/shared/enums';
+import { PoolStatusEnum, UserTicketStatus } from '@/shared/enums';
 import { getLogger } from '@/utils/logger';
 
 import {
@@ -28,6 +28,7 @@ import {
   storeSetPublicKey,
 } from './contract_funcs';
 import { calculatorMatch, splitTickets } from './func';
+import dayjs from 'dayjs';
 
 const logger = getLogger('CrawlTokenService');
 
@@ -89,6 +90,8 @@ export class RoundPrizesService {
     // await this.setAdmin();
     // await this.publicKey();
 
+    this.revertStatusTicketClaim();
+
     const pools = await this.getPoolsAvailable();
     for (const pool of pools) {
       const rounds = await this.getRoundsAvailable(pool.id);
@@ -96,6 +99,19 @@ export class RoundPrizesService {
         await this.drawWinningNumbers(pool.poolIdOnChain, round.roundIdOnChain);
       }
     }
+  }
+
+  async revertStatusTicketClaim() {
+    const tickets = await this.userTicketRepository
+      .createQueryBuilder('userTicket')
+      .where('status = :status', { status: UserTicketStatus.CONFIRMING_CLAIM })
+      .andWhere('claimedAt < :time', {
+        time: dayjs().subtract(1, 'minute').unix(),
+      })
+      .getMany();
+    await this.userTicketRepository.save(
+      tickets.map((ticket) => ({ ...ticket, status: UserTicketStatus.BOUGHT })),
+    );
   }
 
   async userTickets(poolId: number, roundId: number) {

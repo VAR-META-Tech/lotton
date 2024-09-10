@@ -39,8 +39,8 @@ export class UserTicket extends BaseTime {
   })
   status: UserTicketStatus;
 
-  @Column({ type: 'timestamp' })
-  claimedAt: Date;
+  @Column({ nullable: true })
+  claimedAt: number;
 
   @Column({ nullable: true })
   winningMatch: number;

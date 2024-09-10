@@ -632,15 +632,20 @@ export class PoolService {
   async confirmClaim(user: User, claimDto: ConfirmClaimDto) {
     try {
       const { roundId } = claimDto;
-      const roundExist = await this.roundRepository.findBy({ id: roundId });
+      const roundExist = await this.roundRepository.findOneBy({ id: roundId });
       if (!roundExist) throw Causes.NOT_FOUND('Round');
 
       const tickets = await this.userTicketRepository.findBy({
-        round: roundExist,
+        round: {
+          id: roundExist.id,
+        },
         userWallet: user.wallet,
         status: UserTicketStatus.BOUGHT,
         winningMatch: MoreThanOrEqual(1),
       });
+
+      if (tickets.length === 0) throw Causes.NOT_FOUND('Tickets');
+
       await this.userTicketRepository.save(
         tickets.map((ticket) => ({
           ...ticket,
