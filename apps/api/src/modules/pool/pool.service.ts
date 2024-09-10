@@ -6,7 +6,7 @@ import { Address, beginCell } from '@ton/ton';
 import dayjs from 'dayjs';
 import bigDecimal from 'js-big-decimal';
 import type { SelectQueryBuilder } from 'typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
 
 import { Causes } from '@/common/exceptions/causes';
 import type { StellaConfig } from '@/configs';
@@ -20,7 +20,11 @@ import {
   UserTicket,
 } from '@/database/entities';
 import type { QueryPaginationDto } from '@/shared/dto/pagination.query';
-import { PoolRoundStatusEnum, PoolStatusEnum } from '@/shared/enums';
+import {
+  PoolRoundStatusEnum,
+  PoolStatusEnum,
+  UserTicketStatus,
+} from '@/shared/enums';
 import type { FetchResult } from '@/utils/paginate';
 import {
   FetchType,
@@ -30,7 +34,7 @@ import {
 
 import { PoolRoundService } from '../poolRound/poolRound.service';
 import type { CreatePoolDto, PoolPrizes } from './dto/create-pool.dto';
-import type { ClaimDto } from './dto/get-pool.query';
+import type { ClaimDto, ConfirmClaimDto } from './dto/get-pool.query';
 import {
   type PoolQueryDto,
   type UserPoolDto,
@@ -625,6 +629,32 @@ export class PoolService {
     }
   }
 
+  async confirmClaim(user: User, claimDto: ConfirmClaimDto) {
+    try {
+      const { roundId } = claimDto;
+      const roundExist = await this.roundRepository.findBy({ id: roundId });
+      if (!roundExist) throw Causes.NOT_FOUND('Round');
+
+      const tickets = await this.userTicketRepository.findBy({
+        round: roundExist,
+        userWallet: user.wallet,
+        status: UserTicketStatus.BOUGHT,
+        winningMatch: MoreThanOrEqual(1),
+      });
+      await this.userTicketRepository.save(
+        tickets.map((ticket) => ({
+          ...ticket,
+          status: UserTicketStatus.CONFIRMING_CLAIM,
+          claimedAt: dayjs().unix(),
+        })),
+      );
+
+      return true;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
   async getUserTicketWinning(
     builder: SelectQueryBuilder<Pool>,
     wallet: string,
@@ -632,7 +662,9 @@ export class PoolService {
     try {
       return await builder
         .clone()
-        .andWhere('ticket.claimed = :claimed', { claimed: false })
+        .andWhere('ticket.status = :status', {
+          status: UserTicketStatus.BOUGHT,
+        })
         .andWhere('ticket.userWallet = :userWallet', { userWallet: wallet })
         .select([
           'ticket.winningMatch as winningMatch',

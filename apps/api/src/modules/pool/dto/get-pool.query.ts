@@ -65,3 +65,14 @@ export class ClaimDto {
   @Type(() => Number)
   roundId: number;
 }
+
+export class ConfirmClaimDto {
+  @ApiProperty({
+    description: 'Round id',
+    required: false,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  roundId: number;
+}

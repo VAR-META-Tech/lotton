@@ -25,6 +25,7 @@ import {
   storeCreatePool,
   storeDrawWinningNumbers,
   storeSetAdmin,
+  storeSetPublicKey,
 } from './contract_funcs';
 import { calculatorMatch, splitTickets } from './func';
 
@@ -85,7 +86,8 @@ export class RoundPrizesService {
     // this.createPool();
     // this.getListPools();
     // this.buyTickets();
-    // this.setAdmin();
+    // await this.setAdmin();
+    // await this.publicKey();
 
     const pools = await this.getPoolsAvailable();
     for (const pool of pools) {
@@ -202,6 +204,33 @@ export class RoundPrizesService {
     });
     await contract.send(transfer);
     console.log('create ok');
+  }
+
+  async publicKey() {
+    const { wallet: adminWallet, keyPair } = await this.makeWallet();
+    const contract = this.tonClient.open(adminWallet);
+    const seqno = await contract.getSeqno();
+    const transfer = await contract.createTransfer({
+      seqno,
+      secretKey: keyPair.secretKey,
+      messages: [
+        internal({
+          value: toNano('0.05'),
+          to: this.contractAddress,
+          body: beginCell()
+            .store(
+              storeSetPublicKey({
+                $$type: 'SetPublicKey',
+                publicKey:
+                  35697107194817367972172360094398639751774068753154718602415145470517477976469n,
+              }),
+            )
+            .endCell(),
+        }),
+      ],
+    });
+    await contract.send(transfer);
+    console.log('publicKey ok');
   }
 
   async getListPools() {

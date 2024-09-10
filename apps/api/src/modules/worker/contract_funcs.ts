@@ -305,24 +305,24 @@ export function loadTuplePool(source: TupleReader) {
 }
 
 export function loadPoolCreatedEvent(slice: Slice) {
-  let sc_0 = slice;
+  const sc_0 = slice;
   if (sc_0.loadUint(32) !== 590692540) {
     throw Error('Invalid prefix');
   }
-  let _poolId = sc_0.loadIntBig(257);
-  let _ticketPrice = sc_0.loadUintBig(32);
-  let _initialRounds = sc_0.loadUintBig(8);
-  let _startTime = sc_0.loadUintBig(32);
-  let _endTime = sc_0.loadUintBig(32);
-  let _active = sc_0.loadBit();
-  let _sequence = sc_0.loadUintBig(32);
-  let _rounds = Dictionary.load(
+  const _poolId = sc_0.loadIntBig(257);
+  const _ticketPrice = sc_0.loadUintBig(32);
+  const _initialRounds = sc_0.loadUintBig(8);
+  const _startTime = sc_0.loadUintBig(32);
+  const _endTime = sc_0.loadUintBig(32);
+  const _active = sc_0.loadBit();
+  const _sequence = sc_0.loadUintBig(32);
+  const _rounds = Dictionary.load(
     Dictionary.Keys.BigInt(257),
     dictValueParserRoundConfig(),
     sc_0,
   );
-  let _creator = sc_0.loadAddress();
-  let _prizes = Dictionary.load(
+  const _creator = sc_0.loadAddress();
+  const _prizes = Dictionary.load(
     Dictionary.Keys.Uint(8),
     Dictionary.Values.Uint(8),
     sc_0,
@@ -367,10 +367,41 @@ export async function getResultByRound(
   poolId: bigint,
   roundId: bigint,
 ) {
-  let builder = new TupleBuilder();
+  const builder = new TupleBuilder();
   builder.writeNumber(poolId);
   builder.writeNumber(roundId);
-  let source = (await provider.get('resultByRound', builder.build())).stack;
-  let result = source.readBigNumberOpt();
+  const source = (await provider.get('resultByRound', builder.build())).stack;
+  const result = source.readBigNumberOpt();
   return result;
+}
+
+export type SetPublicKey = {
+  $$type: 'SetPublicKey';
+  publicKey: bigint;
+};
+
+export function storeSetPublicKey(src: SetPublicKey) {
+  return (builder: Builder) => {
+    const b_0 = builder;
+    b_0.storeUint(3279683070, 32);
+    b_0.storeInt(src.publicKey, 257);
+  };
+}
+
+export function loadClaimedEvent(slice: Slice) {
+  let sc_0 = slice;
+  if (sc_0.loadUint(32) !== 916403026) {
+    throw Error('Invalid prefix');
+  }
+  let _poolId = sc_0.loadIntBig(257);
+  let _roundId = sc_0.loadIntBig(257);
+  let _amount = sc_0.loadCoins();
+  let _receiver = sc_0.loadAddress();
+  return {
+    $$type: 'ClaimedEvent' as const,
+    poolId: _poolId,
+    roundId: _roundId,
+    amount: _amount,
+    receiver: _receiver,
+  };
 }

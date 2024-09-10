@@ -17,16 +17,23 @@ import {
   Transaction as TransactionDB,
   UserTicket,
 } from '@/database/entities';
-import { EVENT_HEADER, PoolStatusEnum, TransactionType } from '@/shared/enums';
+import {
+  EVENT_HEADER,
+  PoolStatusEnum,
+  TransactionType,
+  UserTicketStatus,
+} from '@/shared/enums';
 
 import {
   getCurrentPool,
   loadBuyTicket,
+  loadClaimedEvent,
   loadPoolCreatedEvent,
   loadTicketBoughtEvent,
   loadWinningNumbersDrawnEvent,
 } from './contract_funcs';
 import { calculatorMatch, splitTickets } from './func';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class CrawlWorkerService {
@@ -104,11 +111,112 @@ export class CrawlWorkerService {
   }
 
   async userClaimPrize(tx: Transaction) {
+    const inMsgs = tx.inMessage;
+    const outMsgs = this.getBodyExternalOut(tx.outMessages.values());
+    if (outMsgs.length === 0) return;
+
     const outMsgsList = this.getBodyExternalOut(tx.outMessages.values());
     const outMsgsFirst = outMsgsList[0];
     const originalOutMsgBody = outMsgsFirst?.body.beginParse();
-    const payloadOutMsg = loadWinningNumbersDrawnEvent(originalOutMsgBody);
-    Logger.debug({ payloadOutMsg });
+    const payloadOutMsg = loadClaimedEvent(originalOutMsgBody);
+
+    const txHash = tx.hash().toString('hex');
+    const token = await this.tokenRepository.findOneBy({ symbol: 'TON' });
+
+    const newTransaction: Partial<TransactionDB> = {
+      fromAddress: this.parseAddress(inMsgs.info.src.toString()),
+      toAddress: this.parseAddress(tx.inMessage.info.dest.toString()),
+      value: fromNano(payloadOutMsg?.amount ?? 0),
+      type: TransactionType.CLAIM,
+      blockTimestamp: tx.lt.toString(),
+      transactionHash: txHash,
+      token,
+      id: null,
+    };
+
+    const userClaimAddress = payloadOutMsg.receiver.toRawString();
+
+    await Promise.all([
+      this.saveTxUserClaim(newTransaction),
+      this.setTicketClaim(
+        Number(payloadOutMsg.poolId),
+        Number(payloadOutMsg.roundId),
+        userClaimAddress,
+        dayjs().unix(),
+      ),
+      this.setClaimedPrize(
+        Number(payloadOutMsg.poolId),
+        Number(payloadOutMsg.roundId),
+        Number(payloadOutMsg.amount),
+      ),
+    ]);
+  }
+
+  async setClaimedPrize(
+    poolIdOnChain: number,
+    roundIdOnChain: number,
+    amount: number,
+  ) {
+    const prizes = await this.prizesRepository.findOneBy({
+      poolIdOnChain,
+      roundIdOnChain,
+    });
+    if (!prizes) return;
+
+    prizes.claimedPrizes = (prizes.claimedPrizes ?? 0) + amount;
+    this.prizesRepository.save(prizes);
+  }
+
+  async setTicketClaim(
+    poolIdOnChain: number,
+    roundIdOnChain: number,
+    userWallet: string,
+    claimedAt: number,
+  ) {
+    const roundExist = await this.poolRoundRepository.findOneBy({
+      roundIdOnChain,
+      pool: {
+        poolIdOnChain,
+      },
+    });
+
+    if (!roundExist) return;
+
+    const tickets = await this.userTicketRepository
+      .createQueryBuilder('userTicket')
+      .leftJoin('userTicket.round', 'round')
+      .where('round.id = :roundId', { roundId: roundExist.id })
+      .andWhere('userTicket.userWallet = :userWallet', { userWallet })
+      .andWhere('userTicket.winningMatch > 0')
+      .getMany();
+
+    await this.userTicketRepository.save(
+      tickets.map((ticket) => ({
+        ...ticket,
+        status: UserTicketStatus.CONFIRMED_CLAIM,
+        claimedAt,
+      })),
+    );
+  }
+
+  async saveTxUserClaim(tx: Partial<TransactionDB>) {
+    await this.transactionRepository
+      .createQueryBuilder()
+      .insert()
+      .into(TransactionDB)
+      .values(tx)
+      .orUpdate(
+        [
+          'fromAddress',
+          'toAddress',
+          'value',
+          'blockTimestamp',
+          'quantity',
+          'type',
+        ],
+        ['transactionHash'],
+      )
+      .execute();
   }
 
   async drawWinningNumber(tx: Transaction) {
@@ -286,6 +394,7 @@ export class CrawlWorkerService {
           round: roundExist,
           code: t,
           transaction: transaction,
+          status: UserTicketStatus.BOUGHT,
         })),
       )
       .orUpdate(['roundId'], ['transactionId', 'userWallet', 'code'])

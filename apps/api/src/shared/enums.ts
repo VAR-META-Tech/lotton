@@ -71,3 +71,9 @@ export enum TransactionType {
   BUY = 'buy',
   CLAIM = 'claim',
 }
+
+export enum UserTicketStatus {
+  BOUGHT = 'bought',
+  CONFIRMING_CLAIM = 'confirmingClaim',
+  CONFIRMED_CLAIM = 'confirmedClaim',
+}

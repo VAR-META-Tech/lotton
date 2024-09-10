@@ -18,7 +18,12 @@ import { QueryPaginationDto } from '@/shared/dto/pagination.query';
 import { AdminJwtGuard } from '../auth/guards/admin_jwt.guard';
 import { UserJwtGuard } from '../auth/guards/user_jwt.guard';
 import { CreatePoolDto } from './dto/create-pool.dto';
-import { ClaimDto, PoolQueryDto, UserPoolDto } from './dto/get-pool.query';
+import {
+  ClaimDto,
+  ConfirmClaimDto,
+  PoolQueryDto,
+  UserPoolDto,
+} from './dto/get-pool.query';
 import { UpdatePoolDto } from './dto/update-pool.dto';
 import { PoolService } from './pool.service';
 
@@ -83,7 +88,20 @@ export class PoolController {
   @UseGuards(UserJwtGuard)
   async claim(@GetUser('user') user: User, @Query() claimDto: ClaimDto) {
     const result = await this.poolService.claim(user, claimDto);
-    console.log({ result });
+    return result;
+  }
+
+  @Get('claim/confirm')
+  @ApiOperation({
+    description: '',
+    summary: 'User confirm claimed prize',
+  })
+  @UseGuards(UserJwtGuard)
+  async confirmClaim(
+    @GetUser('user') user: User,
+    @Query() confirmClaimDto: ConfirmClaimDto,
+  ) {
+    const result = await this.poolService.confirmClaim(user, confirmClaimDto);
     return result;
   }
 
