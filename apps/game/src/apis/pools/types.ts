@@ -146,6 +146,7 @@ export interface IGetPoolJoinedItemTicket {
   code: string;
   winningCode?: string;
   winningMatch?: number;
+  claimed: boolean;
 }
 
 export interface IGetPoolCollectPrizeParams {

@@ -1,14 +1,13 @@
 'use client';
 
 import React from 'react';
-import { Icons } from '@/assets/icons';
 
-import { cn } from '@/lib/utils';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Accordion, AccordionContent, AccordionItem } from '@/components/ui/accordion';
 import { HStack } from '@/components/ui/Utilities';
 
 import { ACCORDION_VALUE } from '../../utils/const';
 import PrizePoolMatchItem from './PrizePoolMatchItem';
+import AccordionTitle from '../AccordionTitle';
 
 const PrizePool = () => {
   const [value, setValue] = React.useState<string>('');
@@ -18,21 +17,7 @@ const PrizePool = () => {
   return (
     <Accordion value={value} onValueChange={setValue} type="single" collapsible className="w-full text-white">
       <AccordionItem value={ACCORDION_VALUE.PRIZE_POOL} className="border-b-0 rounded-xl overflow-hidden">
-        <AccordionTrigger
-          className="text-2xl bg-navigate-tab px-5 py-4 font-normal"
-          suffix={
-            <HStack spacing={12} className="text-gray-color">
-              <span className="text-base">{isOpen ? 'Hide' : 'Detail'}</span>
-              <Icons.chevronDown
-                className={cn('h-4 w-4 shrink-0 transition-transform duration-200', {
-                  'rotate-180': isOpen,
-                })}
-              />
-            </HStack>
-          }
-        >
-          Prize Pool
-        </AccordionTrigger>
+        <AccordionTitle condition={isOpen} title="Prize Pool" />
 
         <AccordionContent className="px-5 py-4 border border-navigate-tab rounded-b-xl space-y-5">
           <div className="space-y-2">
