@@ -71,9 +71,9 @@ export function usePoolContract() {
       const signatureCell = beginCell().storeBuffer(encode).endCell();
 
       const messageBody = beginCell()
-        .storeUint(1449747896, 257)
+        .storeUint(1449747896, 32)
         .storeInt(data.poolId, 257) //poolId
-        .storeInt(data.roundId, 32) //roundId
+        .storeInt(data.roundId, 257) //roundId
         .storeCoins(data.amount) //amount
         .storeAddress(Address.parse(data.receiver)) //receiver
         .storeRef(signatureCell) //signature
