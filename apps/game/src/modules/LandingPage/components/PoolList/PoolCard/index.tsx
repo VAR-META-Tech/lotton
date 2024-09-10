@@ -80,7 +80,7 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
 
   return (
     <div {...props} className={cn('w-full rounded-xl overflow-hidden relative', className)}>
-      <VStack spacing={0} className="bg-navigate-tab py-1.5 h-[5.5rem]">
+      <VStack spacing={8} className="bg-navigate-tab py-1.5 h-[5.5rem]">
         <div className="text-primary text-2xl font-semibold text-center">{pool?.name}</div>
 
         <PoolCountDown

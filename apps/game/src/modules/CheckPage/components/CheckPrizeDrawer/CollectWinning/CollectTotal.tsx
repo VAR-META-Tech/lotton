@@ -1,7 +1,8 @@
 import { HStack, VStack } from '@/components/ui/Utilities';
 import { usePoolContract } from '@/hooks/usePoolContract';
 import { roundNumber } from '@/lib/common';
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
+import CollectItemSkeleton from './CollectItemSkeleton';
 
 interface Props {
   rewardValue: number;
@@ -11,6 +12,7 @@ interface Props {
   feeUsdValue: number;
   totalUsdValue: number;
   tokenSymbol: string;
+  isLoading: boolean;
 }
 
 const CollectTotal: FC<Props> = ({
@@ -21,44 +23,86 @@ const CollectTotal: FC<Props> = ({
   feeUsdValue,
   totalUsdValue,
   tokenSymbol,
+  isLoading,
 }) => {
   const { claimFee } = usePoolContract();
 
+  const showTotalComponent = useMemo(() => {
+    if (!isLoading)
+      return (
+        <VStack>
+          <VStack className="border-t border-t-gray-color">
+            <SubCollectTotalItem
+              title={'Total Rewards'}
+              value={`${roundNumber(rewardValue || 0)} ${tokenSymbol || ''}`}
+              usdValue={String(roundNumber(usdValue || 0))}
+            />
+            <SubCollectTotalItem
+              title={`Claim Fees ${claimFee}%`}
+              value={`${roundNumber(feeValue || 0)} ${tokenSymbol || ''}`}
+              usdValue={String(roundNumber(feeUsdValue || 0))}
+            />
+          </VStack>
+
+          <CollectTotalItem
+            title={'Total Unclaimed Rewards'}
+            value={`${roundNumber(totalValue || 0)} ${tokenSymbol || ''}`}
+            usdValue={String(roundNumber(totalUsdValue || 0))}
+          />
+        </VStack>
+      );
+
+    return (
+      <VStack>
+        <VStack className="border-t border-t-gray-color">
+          <CollectItemSkeleton />
+          <CollectItemSkeleton />
+        </VStack>
+
+        <CollectItemSkeleton />
+      </VStack>
+    );
+  }, [claimFee, feeUsdValue, feeValue, isLoading, rewardValue, tokenSymbol, totalUsdValue, totalValue, usdValue]);
+
+  return showTotalComponent;
+};
+
+export default CollectTotal;
+
+interface ISubCollectTotalItem {
+  title: string;
+  value: string;
+  usdValue: string;
+}
+
+const SubCollectTotalItem: FC<ISubCollectTotalItem> = ({ title, value, usdValue }) => {
   return (
-    <VStack>
-      <VStack className="border-t border-t-gray-color">
-        <VStack>
-          <span className="pt-4">Total Rewards</span>
+    <VStack spacing={12}>
+      <span className="pt-4">{title}</span>
 
-          <HStack pos={'apart'}>
-            <span className="text-primary text-xl">{`${roundNumber(rewardValue || 0)} ${tokenSymbol || ''}`}</span>
+      <HStack pos={'apart'}>
+        <span className="text-primary text-xl">{value}</span>
 
-            <span className="text-gray-color text-sm">~ {roundNumber(usdValue || 0)} USD</span>
-          </HStack>
-        </VStack>
-
-        <VStack>
-          <span>Claim Fees {claimFee}%</span>
-
-          <HStack pos={'apart'}>
-            <span className="text-primary text-xl">{`${roundNumber(feeValue || 0)} ${tokenSymbol || ''}`}</span>
-
-            <span className="text-gray-color text-sm">~ {roundNumber(feeUsdValue || 0)} USD</span>
-          </HStack>
-        </VStack>
-      </VStack>
-
-      <VStack className="border-t border-t-gray-color">
-        <span className="pt-4 font-bold">Total Unclaimed Rewards</span>
-
-        <HStack pos={'apart'} className="font-bold">
-          <span className="text-2xl  bg-gradient-to-r from-primary  to-[#ED9BD6] inline-block text-transparent bg-clip-text">{`${roundNumber(totalValue || 0)} ${tokenSymbol || ''}`}</span>
-
-          <span className="text-gray-color text-sm">~ {roundNumber(totalUsdValue || 0)} USD</span>
-        </HStack>
-      </VStack>
+        <span className="text-gray-color text-sm">~ {usdValue} USD</span>
+      </HStack>
     </VStack>
   );
 };
 
-export default CollectTotal;
+interface ICollectTotalItem extends ISubCollectTotalItem {}
+
+const CollectTotalItem: FC<ICollectTotalItem> = ({ title, value, usdValue }) => {
+  return (
+    <VStack className="border-t border-t-gray-color">
+      <span className="pt-4 font-bold">{title}</span>
+
+      <HStack pos={'apart'} className="font-bold">
+        <span className="text-2xl bg-gradient-to-r from-primary  to-[#ED9BD6] inline-block text-transparent bg-clip-text">
+          {value}
+        </span>
+
+        <span className="text-gray-color text-sm">~ {usdValue} USD</span>
+      </HStack>
+    </VStack>
+  );
+};
