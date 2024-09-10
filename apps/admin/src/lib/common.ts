@@ -171,3 +171,7 @@ const convertTextToAmount = (text: string) => {
 export function isPastDate(date: Date) {
   return differenceInCalendarDays(date, new Date()) < 0;
 }
+
+export function formatPrize(prize: number, tokenDecimals: number) {
+  return Number(prize * 10 ** (-tokenDecimals) || 0).toFixed(prize > 0 ? 3 : 0);
+}

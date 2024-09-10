@@ -1,5 +1,5 @@
-import { getPoolDetail, getPools, getRoundDetail, getRounds, getTokens } from './requests';
-import type { IGetPoolsParams, IGetPoolsListResponse, IGetPoolDetailResponse, IGetRoundsParams, IGetRoundsListResponse, IGetTokenListResponse, IGetRoundDetailResponse } from './types';
+import { getPoolDetail, getPools, getRoundDetail, getRounds, getRoundWinningTicket, getTokens } from './requests';
+import type { IGetPoolsParams, IGetPoolsListResponse, IGetPoolDetailResponse, IGetRoundsParams, IGetRoundsListResponse, IGetTokenListResponse, IGetRoundDetailResponse, IGetRoundsWinningTicketParams, IGetRoundsWinningTicketResponse } from './types';
 import { useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 import type { UseQueryOptions } from '@tanstack/react-query';
@@ -55,6 +55,17 @@ export const useGetRoundDetail = (
   return useQuery({
     queryKey: ['/round/detail', id],
     queryFn: () => getRoundDetail(id),
+    ...options,
+  });
+};
+
+export const useGetRoundWinningTicket = (
+  params: IGetRoundsWinningTicketParams,
+  options?: UseQueryOptions<IGetRoundsWinningTicketResponse, AxiosError, IGetRoundsWinningTicketResponse, any>
+) => {
+  return useQuery({
+    queryKey: ['/rounds/winningTicket', params],
+    queryFn: () => getRoundWinningTicket(params),
     ...options,
   });
 };

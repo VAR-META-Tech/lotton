@@ -40,3 +40,5 @@ export const POOL_STATUS = {
 } as const;
 
 export const BIG_NUMBER = 1000000;
+
+export const tonScanAddress = process.env.NEXT_PUBLIC_TON_SCAN ?? 'https://testnet.tonscan.org';
