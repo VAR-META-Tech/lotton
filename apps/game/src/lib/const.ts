@@ -14,6 +14,7 @@ export const env = {
   CONTRACT_ADDRESS: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? '',
   CLAIM_FEE: process.env.NEXT_PUBLIC_CLAIM_FEE ?? '0',
   signatureMessage,
+  END_POINT_TON_CLIENT: process.env.NEXT_PUBLIC_END_POINT_TON_CLIENT ?? '',
 };
 
 export const isServer = typeof window === 'undefined';
