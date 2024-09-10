@@ -5,7 +5,8 @@ const signatureMessage =
   process.env.NEXT_PUBLIC_SIGNATURE_MESSAGE ??
   'Welcome. By signing this message you are verifying your digital identity. This is completely secure and does not cost anything!';
 
-export const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? 'EQDlsQl0LNXrX1zKaVYjBkgV0jEyQPKFYxa3J30XELEiTra6'
+export const contractAddress =
+  process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? 'EQDlsQl0LNXrX1zKaVYjBkgV0jEyQPKFYxa3J30XELEiTra6';
 
 export const env = {
   isProduction,
@@ -19,7 +20,9 @@ export const isServer = typeof window === 'undefined';
 export const isUseTestnet = env.USE_TESTNET === 'true';
 export const network = isUseTestnet ? 'testnet' : ('mainnet' as Network);
 
-export const GOOGLE_CLIENT_ID = process.env.GOOGLE_ID ?? '146918779218-chupnj1tmp12vmhe0qfq273aaq93khd6.apps.googleusercontent.com';
+export const GOOGLE_CLIENT_ID =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ??
+  '146918779218-chupnj1tmp12vmhe0qfq273aaq93khd6.apps.googleusercontent.com';
 
 export const USER_COOKIES = {
   user: 'user_ton',
