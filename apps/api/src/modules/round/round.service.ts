@@ -76,6 +76,11 @@ export class RoundService {
         .createQueryBuilder('poolRound')
         .leftJoin('poolRound.ticket', 'ticket')
         .leftJoin('poolRound.pool', 'pool')
+        .innerJoin(
+          Prizes,
+          'prizes',
+          'prizes.poolIdOnChain = pool.poolIdOnChain AND poolRound.roundIdOnchain = prizes.roundIdOnchain',
+        )
         .where('poolRound.id = :poolRound', { poolRound: id })
         .select([
           'poolRound.id as id',
@@ -83,13 +88,17 @@ export class RoundService {
           'poolRound.startTime as startTime',
           'poolRound.endTime as endTime',
           'poolRound.winningCode as winningCode',
+          'poolRound.winningBlock as winningBlock',
           'poolRound.createdAt as createdAt',
           'poolRound.updatedAt as updatedAt',
           '"COUNT(ticket.id)" * 1 as totalTickets',
           '"COUNT(DISTINCT ticket.userWallet)" * 1 as totalUsers',
           'poolRound.winningCode AS winningCode',
-          '"COUNT(ticket.id)" * pool.ticketPrice as currentPrizes',
-          '"0" * 1 as previousPrizes', // TODO : calculate previous prizes
+          'prizes.totalTicketAmount as currentPrizes',
+          'prizes.previousPrizes as previousPrizes',
+          'prizes.totalPrizes as totalPrizes',
+          'prizes.winningPrizes as totalWinningPrizes',
+          'SUM(CASE WHEN ticket.winningMatch >= 1 THEN 1 ELSE 0 END) as winningTickets',
         ])
         .groupBy('poolRound.id')
         .getRawOne();
@@ -97,9 +106,7 @@ export class RoundService {
         throw new BadRequestException('round not found');
       }
 
-      console.log('prizes', await this.getPrizes(id));
-
-      return poolRound;
+      return { ...poolRound, matchs: await this.getPrizes(id) };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -112,6 +119,12 @@ export class RoundService {
         .leftJoin('round.pool', 'pool')
         .leftJoin('pool.poolPrizes', 'poolPrizes')
         .leftJoin('round.ticket', 'ticket')
+        .leftJoin('pool.currency', 'token')
+        .innerJoin(
+          Prizes,
+          'prizes',
+          'prizes.poolIdOnChain = pool.poolIdOnChain AND round.roundIdOnchain = prizes.roundIdOnchain',
+        )
         .where('round.id = :roundId', { roundId })
         .select([
           'poolPrizes.id as id',
@@ -119,7 +132,12 @@ export class RoundService {
           'poolPrizes.allocation as allocation',
           'poolPrizes.createdAt as createdAt',
           'poolPrizes.updatedAt as updatedAt',
-          '"COUNT(ticket.id)" * pool.ticketPrice * poolPrizes.allocation / 100 as amount',
+          'token.name as tokenName',
+          'token.symbol as tokenSymbol',
+          'token.decimals as tokenDecimals',
+          'SUM(CASE WHEN ticket.winningMatch = poolPrizes.matchNumber THEN 1 ELSE 0 END) as winningTickets',
+          'FLOOR(prizes.totalPrizes * poolPrizes.allocation / 100) as amount',
+          'FLOOR(FLOOR(prizes.totalPrizes * poolPrizes.allocation / 100) / SUM(CASE WHEN ticket.winningMatch = poolPrizes.matchNumber THEN 1 ELSE 0 END)) as amountPerTicket',
         ])
         .groupBy('poolPrizes.id')
         .getRawMany();

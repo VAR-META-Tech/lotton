@@ -38,6 +38,9 @@ export class PoolRound extends BaseTime {
   @Column({ nullable: true })
   winningCode: string;
 
+  @Column({ nullable: true })
+  winningBlock: string;
+
   @OneToMany(() => UserTicket, (ticket) => ticket.round)
   ticket: UserTicket;
 }

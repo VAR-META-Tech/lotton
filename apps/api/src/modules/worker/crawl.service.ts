@@ -130,6 +130,9 @@ export class CrawlWorkerService {
 
     if (!roundExist) return;
 
+    const txHash = tx.hash().toString('hex');
+
+    roundExist.winningBlock = txHash;
     roundExist.winningCode = tickets?.[0];
     await this.poolRoundRepository.save(roundExist);
 
