@@ -8,7 +8,7 @@ import { SwaggerOperationEnum } from '@/shared/enums';
 
 import { AdminJwtGuard } from '../auth/guards/admin_jwt.guard';
 import { UserJwtGuard } from '../auth/guards/user_jwt.guard';
-import { RoundQueryDto } from './dto/round.query.dto';
+import { RoundQueryDto, WinningTicketQueryDto } from './dto/round.query.dto';
 import { RoundService } from './round.service';
 
 @Controller('rounds')
@@ -25,6 +25,16 @@ export class RoundController {
     @Query() pagination: QueryPaginationDto,
   ) {
     return await this.roundService.findRounds(query, pagination);
+  }
+
+  @ApiOperation({ summary: SwaggerOperationEnum.ADMIN })
+  @Get('winningTicket')
+  @UseGuards(AdminJwtGuard)
+  async findWinningTickets(
+    @Query() query: WinningTicketQueryDto,
+    @Query() pagination: QueryPaginationDto,
+  ) {
+    return await this.roundService.findWinningTickets(query, pagination);
   }
 
   @ApiOperation({ summary: SwaggerOperationEnum.ADMIN })

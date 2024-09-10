@@ -8,7 +8,10 @@ import type { QueryPaginationDto } from '@/shared/dto/pagination.query';
 import { PoolRoundStatusEnum } from '@/shared/enums';
 import { FetchType, paginateEntities } from '@/utils/paginate';
 
-import type { RoundQueryDto } from './dto/round.query.dto';
+import type {
+  RoundQueryDto,
+  WinningTicketQueryDto,
+} from './dto/round.query.dto';
 
 @Injectable()
 export class RoundService {
@@ -34,6 +37,8 @@ export class RoundService {
           'poolRound.*',
           'pool.name as poolName',
           'currency.symbol as symbol',
+          'currency.name as tokenName',
+          'currency.decimals as tokenDecimals',
           '(CASE WHEN prizes.totalPrizes IS NOT NULL AND prizes.totalPrizes > 0 THEN prizes.totalPrizes ELSE 0 END) as prizePool',
         ]);
 
@@ -76,7 +81,7 @@ export class RoundService {
         .createQueryBuilder('poolRound')
         .leftJoin('poolRound.ticket', 'ticket')
         .leftJoin('poolRound.pool', 'pool')
-        .leftJoin('pool.currency','token')
+        .leftJoin('pool.currency', 'token')
         .innerJoin(
           Prizes,
           'prizes',
@@ -160,5 +165,41 @@ export class RoundService {
       userWallet: user.wallet,
     });
     return total;
+  }
+
+  async findWinningTickets(
+    query: WinningTicketQueryDto,
+    pagination: QueryPaginationDto,
+  ) {
+    try {
+      const { roundId, matchNumber } = query;
+      const queryBuilder = this.userTicketRepository
+        .createQueryBuilder('ticket')
+        .innerJoin('ticket.round', 'round')
+        .where('round.id = :roundId', { roundId })
+        .select([
+          'ticket.id as id',
+          'ticket.userWallet as userWallet',
+          'ticket.winningMatch as winningMatch',
+          'ticket.winningCode as winningCode',
+          'ticket.code as ticketCode',
+          'ticket.claimed as claimed',
+          'ticket.createdAt as createdAt',
+          'ticket.updatedAt as updatedAt',
+        ]);
+      if (matchNumber) {
+        queryBuilder.andWhere('ticket.winningMatch = :matchNumber', {
+          matchNumber,
+        });
+      }
+
+      return await paginateEntities<UserTicket>(
+        queryBuilder,
+        pagination,
+        FetchType.RAW,
+      );
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }
