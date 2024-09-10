@@ -27,7 +27,7 @@ export const FAQ_DATA = [
     title: FAQ_LABEL.TICKET_VALUE_SOURCE,
     value: FAQ_VALUE.TICKET_VALUE_SOURCE,
     content: (
-      <VStack spacing={20} className="text-xs text-gray-color container">
+      <VStack spacing={20} className="text-xs text-gray-color">
         <span className="text-justify">
           To obtain the ticket values we take the transaction hash from the transaction the user purchased the tickets
           with. Starting from the right and working our way to the left we get the ticket values depending on how many
@@ -51,7 +51,7 @@ export const FAQ_DATA = [
     title: FAQ_LABEL.WINNING_TICKET_SOURCE,
     value: FAQ_VALUE.WINNING_TICKET_SOURCE,
     content: (
-      <VStack spacing={20} className="text-xs text-gray-color container">
+      <VStack spacing={20} className="text-xs text-gray-color">
         <span className="text-justify">
           Every lottery round has a draw date. At that predefined draw date we take the tast tx of last block of
           epochfirst block produced on that date and get the winning ticket from the hash of that block.
@@ -69,7 +69,7 @@ export const FAQ_DATA = [
     title: FAQ_LABEL.NO_WINNERS,
     value: FAQ_VALUE.NO_WINNERS,
     content: (
-      <VStack spacing={20} className="text-xs text-gray-color container">
+      <VStack spacing={20} className="text-xs text-gray-color">
         <span className="text-justify">
           If you don't claim your prize within the next two rounds, the prize will be distributed to all players in this
           round. Please note that players will need to pay a gas fee to claim their share.
@@ -81,7 +81,7 @@ export const FAQ_DATA = [
     title: FAQ_LABEL.MULTIPLE_MATCHES_NO_PRIZE,
     value: FAQ_VALUE.MULTIPLE_MATCHES_NO_PRIZE,
     content: (
-      <VStack spacing={20} className="text-xs text-gray-color container">
+      <VStack spacing={20} className="text-xs text-gray-color">
         <span className="text-justify">
           If the NOT or TON in the prize pool isn't won, it doesn't go to waste! Unclaimed NOT/TON rolls over to the
           next Lottery round.
@@ -93,7 +93,7 @@ export const FAQ_DATA = [
     title: FAQ_LABEL.SWAP_TICKETS,
     value: FAQ_VALUE.SWAP_TICKETS,
     content: (
-      <VStack spacing={20} className="text-xs text-gray-color container">
+      <VStack spacing={20} className="text-xs text-gray-color">
         <span className="text-justify">
           Tickets are only eligible to win if the numbers/letters match from left to right.
         </span>
@@ -104,7 +104,7 @@ export const FAQ_DATA = [
     title: FAQ_LABEL.CLAIM_PRIZE_MANUALLY,
     value: FAQ_VALUE.CLAIM_PRIZE_MANUALLY,
     content: (
-      <VStack spacing={20} className="text-xs text-gray-color container">
+      <VStack spacing={20} className="text-xs text-gray-color">
         <span className="text-justify">
           No, once purchased you will not be able to convert your tickets back into TON/NOT.
         </span>
@@ -115,7 +115,7 @@ export const FAQ_DATA = [
     title: FAQ_LABEL.TICKET_LIMIT_PER_TRANSACTION,
     value: FAQ_VALUE.TICKET_LIMIT_PER_TRANSACTION,
     content: (
-      <VStack spacing={20} className="text-xs text-gray-color container">
+      <VStack spacing={20} className="text-xs text-gray-color">
         <span className="text-justify">
           You can only buy a maximum of 16 tickets in one purchase, but you can make multiple purchases. There's nothing
           to stop you buying more tickets after your first 16.
