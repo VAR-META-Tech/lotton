@@ -20,7 +20,7 @@ const CollectItem: FC<Props> = ({ roundClaimNumber, code, tokenSymbol, value, us
       </HStack>
 
       <HStack pos={'apart'}>
-        <span className="text-primary text-2xl">{`${roundNumber(value || 0)} ${tokenSymbol || ''}`}</span>
+        <span className="text-primary text-xl">{`${roundNumber(value || 0)} ${tokenSymbol || ''}`}</span>
 
         <span className="text-gray-color text-sm">~ {roundNumber(usdValue || 0)} USD</span>
       </HStack>

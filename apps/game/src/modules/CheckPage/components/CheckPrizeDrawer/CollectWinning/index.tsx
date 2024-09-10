@@ -1,4 +1,4 @@
-import { VStack } from '@/components/ui/Utilities';
+import { Show, VStack } from '@/components/ui/Utilities';
 import { useGetPoolsCollectPrize } from '@/hooks/useGetPoolsCollectPrize';
 import React, { FC, useMemo } from 'react';
 
@@ -10,6 +10,7 @@ import { usePoolContract } from '@/hooks/usePoolContract';
 import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
 import { useGetTokenPrice } from '@/hooks/useGetTokenPrice';
 import { roundNumber } from '@/lib/common';
+import CollectItemSkeleton from './CollectItemSkeleton';
 
 interface Props {
   poolId: number;
@@ -18,7 +19,7 @@ interface Props {
 
 const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
   const { claimFee } = usePoolContract();
-  const { items } = useGetPoolsCollectPrize(999999999999999, poolId, roundId);
+  const { items, isLoading } = useGetPoolsCollectPrize(999999999999999, poolId, roundId);
 
   const { currency } = useGetPoolDetail({
     poolId: poolId,
@@ -45,6 +46,12 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
 
   return (
     <VStack className="container">
+      <Show when={isLoading}>
+        {Array.from({ length: 2 }).map((_, index) => (
+          <CollectItemSkeleton key={index} />
+        ))}
+      </Show>
+
       <VStack>
         {items?.map((item, index) => {
           const winningPrize = Number(fromNano(roundNumber(item?.winningPrize || 0, 0)));

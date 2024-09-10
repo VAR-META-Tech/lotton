@@ -5,9 +5,9 @@ import FaqItem from './FaqItem';
 
 const FaqContent = () => {
   return (
-    <div>
+    <div className="container">
       <div className="border-b border-gray-color">
-        <h2 className="text-base font-bold py-2 mx-2 container">FAQ</h2>
+        <h2 className="text-base font-bold py-2 mx-2">FAQ</h2>
       </div>
 
       {FAQ_DATA?.map((item, index) => (

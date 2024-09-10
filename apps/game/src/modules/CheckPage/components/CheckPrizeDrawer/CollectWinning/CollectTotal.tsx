@@ -28,20 +28,20 @@ const CollectTotal: FC<Props> = ({
     <VStack>
       <VStack className="border-t border-t-gray-color">
         <VStack>
-          <span className="pt-4 font-bold">Total Rewards</span>
+          <span className="pt-4">Total Rewards</span>
 
-          <HStack pos={'apart'} className="font-bold">
-            <span className="text-primary text-2xl">{`${roundNumber(rewardValue || 0)} ${tokenSymbol || ''}`}</span>
+          <HStack pos={'apart'}>
+            <span className="text-primary text-xl">{`${roundNumber(rewardValue || 0)} ${tokenSymbol || ''}`}</span>
 
             <span className="text-gray-color text-sm">~ {roundNumber(usdValue || 0)} USD</span>
           </HStack>
         </VStack>
 
         <VStack>
-          <span className="pt-4 font-bold">Claim Fees {claimFee}%</span>
+          <span>Claim Fees {claimFee}%</span>
 
-          <HStack pos={'apart'} className="font-bold">
-            <span className="text-primary text-2xl">{`${roundNumber(feeValue || 0)} ${tokenSymbol || ''}`}</span>
+          <HStack pos={'apart'}>
+            <span className="text-primary text-xl">{`${roundNumber(feeValue || 0)} ${tokenSymbol || ''}`}</span>
 
             <span className="text-gray-color text-sm">~ {roundNumber(feeUsdValue || 0)} USD</span>
           </HStack>

@@ -23,7 +23,7 @@ const FaqItem: FC<Props> = ({ value, title, content }) => {
   return (
     <Accordion value={currentValue} onValueChange={setValue} type="single" collapsible className="w-full text-white">
       <AccordionItem value={value} className="border-gray-color">
-        <AccordionTrigger className="py-1.5 text-sm font-normal text-left container mx-2" suffix={renderSuffix}>
+        <AccordionTrigger className="py-1.5 text-sm font-normal text-left mx-2" suffix={renderSuffix}>
           {title}
         </AccordionTrigger>
 
