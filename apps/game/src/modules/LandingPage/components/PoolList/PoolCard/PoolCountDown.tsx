@@ -122,8 +122,8 @@ const TimeItem: FC<ITimeItemProps> = ({
 }) => {
   return (
     <VStack spacing={0} className={cn(className)} {...props}>
-      <span className={cn('text-lg', valueClassName)}>{String(value).padStart(2, '0')}</span>
-      <span className={cn('text-xs leading-tight', descriptionClassName)}>{description}</span>
+      <span className={cn('text-lg leading-none', valueClassName)}>{String(value).padStart(2, '0')}</span>
+      <span className={cn('text-xs leading-none', descriptionClassName)}>{description}</span>
     </VStack>
   );
 };
