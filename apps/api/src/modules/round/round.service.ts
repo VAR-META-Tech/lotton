@@ -76,6 +76,7 @@ export class RoundService {
         .createQueryBuilder('poolRound')
         .leftJoin('poolRound.ticket', 'ticket')
         .leftJoin('poolRound.pool', 'pool')
+        .leftJoin('pool.currency','token')
         .innerJoin(
           Prizes,
           'prizes',
@@ -84,6 +85,9 @@ export class RoundService {
         .where('poolRound.id = :poolRound', { poolRound: id })
         .select([
           'poolRound.id as id',
+          'token.name as tokenName',
+          'token.symbol as tokenSymbol',
+          'token.decimals as tokenDecimals',
           'poolRound.roundNumber as roundNumber',
           'poolRound.startTime as startTime',
           'poolRound.endTime as endTime',
