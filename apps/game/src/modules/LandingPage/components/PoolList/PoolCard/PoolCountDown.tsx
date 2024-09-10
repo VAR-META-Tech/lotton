@@ -96,8 +96,8 @@ const PoolCountDown: FC<Props> = ({ roundActive, isBeforeRoundEnd, onForceUpdate
     <div className="text-white text-center font-medium flex justify-center gap-3">
       <TimeItem value={timeLeft.days} description="day" />
       <TimeItem value={timeLeft.hours} description="hour" />
-      <TimeItem value={timeLeft.minutes} description="minute" />
-      <TimeItem value={timeLeft.seconds} description="second" />
+      <TimeItem value={timeLeft.minutes} description="min" />
+      <TimeItem value={timeLeft.seconds} description="sec" />
       {/* <span>s until the draw</span> */}
     </div>
   );
