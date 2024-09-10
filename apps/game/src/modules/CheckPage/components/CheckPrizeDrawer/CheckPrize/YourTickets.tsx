@@ -26,7 +26,7 @@ const YourTickets: FC<IYourTicketsProps> = ({ round }) => {
       <VStack spacing={8}>
         <p className="font-bold">YOUR TICKET</p>
 
-        <VStack spacing={16} justify={'center'}>
+        <VStack spacing={8} justify={'center'}>
           <SummaryTickets
             title="Total tickets:"
             total={Number(round?.totalTicket || 0)}

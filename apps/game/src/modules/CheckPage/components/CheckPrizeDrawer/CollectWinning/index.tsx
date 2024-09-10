@@ -78,6 +78,7 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
         usdValue={totalRewardValue * price}
         feeUsdValue={feeValue * price}
         totalUsdValue={totalValue * price}
+        isLoading={isLoading}
       />
 
       <ClaimAction poolId={poolId} roundId={roundId} />
