@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbo --port 3006",
     "build": "next build",
-    "start": "next start --port 3006",
+    "start": "next start",
     "lint": "next lint",
     "format:write": "prettier --write \"src/**/*.{ts,tsx,mdx}\" --cache",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,mdx}\" --cache"

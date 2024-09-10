@@ -5,7 +5,7 @@ FROM base AS builder
 WORKDIR /app
 COPY . .
 RUN npm install -g turbo
-RUN turbo prune lottery --docker
+RUN turbo prune admin-lottery --docker
 
 FROM base AS installer
 WORKDIR /app
@@ -19,7 +19,7 @@ RUN pnpm install
 COPY --from=builder /app/out/full/ .
 COPY turbo.json turbo.json
 
-RUN pnpm turbo build --filter=lottery...
+RUN pnpm turbo build --filter=admin-lottery...
 
 FROM base AS runner
 WORKDIR /app
@@ -29,14 +29,14 @@ RUN adduser --system --uid 1001 nextjs
 
 USER nextjs
 
-COPY --from=installer --chown=nextjs:nodejs /app/apps/game/package.json /app/apps/game/package.json
-COPY --from=installer --chown=nextjs:nodejs /app/apps/game/next.config.js /app/apps/game/next.config.js
-COPY --from=installer --chown=nextjs:nodejs /app/apps/game/.next /app/apps/game/.next
-COPY --from=installer --chown=nextjs:nodejs /app/apps/game/node_modules /app/apps/game/node_modules
-COPY --from=installer --chown=nextjs:nodejs /app/apps/game/public /app/apps/game/public
+COPY --from=installer --chown=nextjs:nodejs /app/apps/admin/package.json /app/apps/admin/package.json
+COPY --from=installer --chown=nextjs:nodejs /app/apps/admin/next.config.mjs /app/apps/admin/next.config.mjs
+COPY --from=installer --chown=nextjs:nodejs /app/apps/admin/.next /app/apps/admin/.next
+COPY --from=installer --chown=nextjs:nodejs /app/apps/admin/node_modules /app/apps/admin/node_modules
+COPY --from=installer --chown=nextjs:nodejs /app/apps/admin/public /app/apps/admin/public
 COPY --from=installer --chown=nextjs:nodejs /app/node_modules /app/node_modules
 
-WORKDIR /app/apps/game
+WORKDIR /app/apps/admin
 EXPOSE 3000
 
 CMD ["npm", "start"]
