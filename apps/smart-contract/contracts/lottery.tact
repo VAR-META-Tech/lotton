@@ -32,7 +32,7 @@ contract Lottery with Deployable, Ownable {
     }
 
     fun setAdmin(admin: Address) {
-        //self.requireOwner();
+        self.requireOwner();
         self.admin.set(admin, true);
     }
 
@@ -346,7 +346,7 @@ contract Lottery with Deployable, Ownable {
         require(checkSignature(msgHash, msg.signature, self.publicKey!!), "Invalid signature");
 
         let isClaimed: Bool = self.isClaim(msg.poolId, msg.roundId, msg.receiver);
-        require(!isClaimed, "Invalid claim");
+        require(!isClaimed, "Already claimed");
 
         let claimUser = UserClaim{
             user: emptyMap()
@@ -437,6 +437,7 @@ contract Lottery with Deployable, Ownable {
     }
 
     receive(msg: SetPublicKey) {
+        self.requireOwnerOrAdmin();
         self.publicKey = msg.publicKey;
     }
 
@@ -501,16 +502,17 @@ contract Lottery with Deployable, Ownable {
     }
 
     get fun claimData(poolId: Int, roundId: Int): UserClaim? {
-        return self.claimData.get(poolId)!!.info.get(roundId);
+        let poolData = self.claimData.get(poolId);
+        if (poolData != null) {
+            return poolData!!.info.get(roundId);
+        }
+        return null;
     }
 
     get fun isClaim(poolId: Int, roundId: Int, receiver: Address): Bool{
-        let isClaimed: Bool? = self.claimData.get(poolId)!!.info.get(roundId)!!.user.get(receiver);
-        if (isClaimed != null) {
-            let isClaimedValue: Bool = self.claimData.get(poolId)!!.info.get(roundId)!!.user.get(receiver)!!;
-            if(isClaimedValue){
-                return true;
-            }
+        let poolData = self.claimData(poolId, roundId);
+        if (poolData != null) {
+            return poolData!!.user.get(receiver) != null;
         }
         return false;
     }

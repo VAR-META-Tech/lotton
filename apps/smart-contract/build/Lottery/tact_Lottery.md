@@ -1,6 +1,6 @@
 # TACT Compilation Report
 Contract: Lottery
-BOC Size: 5036 bytes
+BOC Size: 4955 bytes
 
 # Types
 Total Types: 34
@@ -225,8 +225,10 @@ Argument: receiver
 41780: Total prize must be less than or equal to 100
 42120: Pool does not exist
 42342: Sequence must be positive
+42504: Already claimed
 45000: Insufficient funds in the contract
 47697: Round is not active
+48401: Invalid signature
 50778: Round is still active
 52453: Initial rounds must be positive
 52657: Prizes must be set

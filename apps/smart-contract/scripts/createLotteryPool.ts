@@ -7,7 +7,7 @@ export async function run(provider: NetworkProvider, args: string[]) {
     const ui = provider.ui();
 
     // const address = Address.parse(args.length > 0 ? args[0] : await ui.input('Lottery address'));
-    const address = Address.parse('EQA1BR-oWvvSGeNs-YetnaALR-CNkG8ZuVfmVyuMjOWkdG-c');
+    const address = Address.parse('EQAgBe0Plj1kzt02MLmqubH9c-E1mJbB0eL2oCk1FU_C1qzE');
 
     if (!(await provider.isContractDeployed(address))) {
         ui.write(`Error: Contract at address ${address} is not deployed!`);
@@ -16,7 +16,33 @@ export async function run(provider: NetworkProvider, args: string[]) {
 
     const lottery = provider.open(Lottery.fromAddress(address));
     const now = Math.floor(Date.now()/1000);
+    let poolId = 2n;
+    let roundId = 1n;
+    let airDropAmount: bigint = 100000000n;
+    let isClaimed = await lottery.getClaimData(poolId, roundId);
+    console.log('isClaimed', isClaimed);
+    //let userClaim = await lottery.getClaimData(poolId, roundId);
+    //console.log('userClaim', userClaim);
+    let claim = await lottery.send(
+        provider.sender(), {
+            value: toNano('0.07'),
+        },
+        {
+            $$type: 'Claim',
+            poolId: poolId,
+            roundId: roundId,
+            amount: airDropAmount,
+            receiver: provider.sender().address!!,
+            signature: beginCell().asSlice()
+        }
+    )
+    await sleep(20000);
+    console.log('claim', claim);
 
+    let userClaim2 = await lottery.getClaimData(poolId, roundId);
+    console.log('userClaim2', userClaim2);
+    let isClaimed2 = await lottery.getIsClaim(poolId, roundId, provider.sender().address!!);
+    console.log('isClaimed2', isClaimed2);
     // await lottery.send(
     //     provider.sender(), {
     //         value: toNano('0.05'),
@@ -52,8 +78,8 @@ export async function run(provider: NetworkProvider, args: string[]) {
     await sleep(20000);
     let pools = await lottery.getCurrentPool();
     let attempt = 1;
-    let poolId = 2n;
-    let roundId = 1n;
+    // let poolId = 2n;
+    // let roundId = 1n;
     console.log('pools', pools);
     console.log('Prizes: ', pools.get(1n)?.prizes);
     while (poolId) {
