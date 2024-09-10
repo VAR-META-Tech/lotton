@@ -1,5 +1,6 @@
 import { request } from '../axios';
 import type {
+  IConfirmClaimParams,
   IGetClaimSignatureData,
   IGetClaimSignatureParams,
   IGetPoolCollectPrizeData,
@@ -57,6 +58,16 @@ export const getPoolCollectPrizeRequest = async (
 export const getClaimSignatureRequest = async (params: IGetClaimSignatureParams): Promise<IGetClaimSignatureData> => {
   const { data } = await request({
     url: '/api/pools/claim/signature',
+    method: 'GET',
+    params,
+  });
+
+  return data;
+};
+
+export const confirmClaimRequest = async (params: IConfirmClaimParams): Promise<any> => {
+  const { data } = await request({
+    url: '/api/pools/claim/confirm',
     method: 'GET',
     params,
   });

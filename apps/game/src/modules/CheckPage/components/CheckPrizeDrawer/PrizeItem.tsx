@@ -3,6 +3,7 @@ import React, { FC, useMemo } from 'react';
 import CheckPrize from './CheckPrize';
 import { Button } from '@/components/ui/button';
 import { IGetPoolJoinedItem, IGetPoolJoinedItemRound } from '@/apis/pools';
+import { USER_TICKET_STATUS } from '../../utils/const';
 
 interface Props {
   handleChangeStep: () => void;
@@ -12,7 +13,7 @@ interface Props {
 
 const PrizeItem: FC<Props> = ({ handleChangeStep, pool, round }) => {
   const isClaimed = useMemo(() => {
-    return round?.ticket?.every((ticket) => !!ticket.claimed);
+    return round?.ticket?.every((ticket) => ticket.status !== USER_TICKET_STATUS.BOUGHT);
   }, [round?.ticket]);
 
   return (

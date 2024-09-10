@@ -19,6 +19,7 @@ interface Props {
 
 const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
   const { claimFee } = usePoolContract();
+  console.log('🚀 ~ claimFee:', claimFee);
   const { items, isLoading } = useGetPoolsCollectPrize(999999999999999, poolId, roundId);
 
   const { currency } = useGetPoolDetail({
@@ -37,7 +38,7 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
   }, [items]);
 
   const feeValue = useMemo(() => {
-    return (Number(totalRewardValue || 0) * Number(claimFee)) / 100;
+    return (totalRewardValue * claimFee) / 100;
   }, [claimFee, totalRewardValue]);
 
   const totalValue = useMemo(() => {
@@ -79,6 +80,7 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
         feeUsdValue={feeValue * price}
         totalUsdValue={totalValue * price}
         isLoading={isLoading}
+        claimFee={claimFee}
       />
 
       <ClaimAction poolId={poolId} roundId={roundId} />

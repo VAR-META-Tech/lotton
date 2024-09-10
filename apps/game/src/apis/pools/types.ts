@@ -147,6 +147,8 @@ export interface IGetPoolJoinedItemTicket {
   winningCode?: string;
   winningMatch?: number;
   claimed: boolean;
+  status: string;
+  claimedAt: string | null;
 }
 
 export interface IGetPoolCollectPrizeParams {
@@ -206,4 +208,8 @@ export interface IGetClaimSignatureRoundExits {
   poolIdOnChain: number;
   roundIdOnChain: number;
   roundEndTime: string;
+}
+
+export interface IConfirmClaimParams {
+  roundId: number;
 }

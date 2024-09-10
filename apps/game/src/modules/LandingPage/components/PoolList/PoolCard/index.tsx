@@ -25,6 +25,7 @@ interface Props extends HTMLAttributes<HTMLDivElement> {
 const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, ...props }) => {
   const forceUpdate = useForceUpdate();
   const [currentRound, setCurrentRound] = useState<number>(0);
+  const [isLoadingCountDown, setIsLoadingCountDown] = useState<boolean>(false);
 
   const { pool, rounds, refetch } = useGetPoolDetail({ poolId: poolId || 0, isActive });
   const roundActive = rounds[currentRound];
@@ -78,6 +79,16 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
     return () => clearInterval(refetchInterval);
   }, [refetch]);
 
+  useEffect(() => {
+    if (!isLoadingCountDown) return;
+
+    const timer = setTimeout(() => {
+      setIsLoadingCountDown(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [isLoadingCountDown]);
+
   return (
     <div {...props} className={cn('w-full rounded-xl overflow-hidden relative', className)}>
       <VStack spacing={8} className="bg-navigate-tab py-1.5 h-[5.5rem]">
@@ -87,10 +98,16 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
           roundActive={roundActive}
           isBeforeRoundEnd={isBeforeRoundEnd}
           onForceUpdate={handleForceUpdate}
+          isLoadingCountDown={isLoadingCountDown}
         />
       </VStack>
 
-      <RoundAction roundActive={roundActive} maxRound={rounds?.length || 0} setCurrentRound={setCurrentRound} />
+      <RoundAction
+        roundActive={roundActive}
+        maxRound={rounds?.length || 0}
+        setCurrentRound={setCurrentRound}
+        setIsLoadingCountDown={setIsLoadingCountDown}
+      />
 
       <div className="border-x-navigate-tab border-x">
         <PoolRound rounds={rounds} roundActive={roundActive} isEndRound={getIsEndRound()} />

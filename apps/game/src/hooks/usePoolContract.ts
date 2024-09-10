@@ -3,10 +3,10 @@ import { useAsyncInitialize } from './useAsyncInitialize';
 import { useTonConnect } from './useTonConnect';
 import { Address, beginCell, OpenedContract } from '@ton/core';
 import Pool from '@/contracts/pool';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { env } from '@/lib/const';
 import { useTonWallet } from '@tonconnect/ui-react';
-import { roundNumber } from '@/lib/common';
+import { onMutateError, roundNumber } from '@/lib/common';
 
 interface IBuyTicket {
   poolId: number;
@@ -60,7 +60,7 @@ export function usePoolContract() {
         value: roundNumber(Number(data?.quantity) * Number(data?.ticketPrice)),
       });
     } catch (error) {
-      throw new Error(error as string);
+      onMutateError(error as string);
     }
   };
 
@@ -81,7 +81,7 @@ export function usePoolContract() {
 
       return await poolContract?.claimPrize(provider, sender, messageBody);
     } catch (error) {
-      throw new Error(error as string);
+      onMutateError(error as string);
     }
   };
 
@@ -91,21 +91,22 @@ export function usePoolContract() {
     });
   };
 
-  useEffect(() => {
-    async function getValue() {
-      if (!poolContract) return;
-      setClaimFee(0);
+  const getClaimFee = useCallback(async () => {
+    if (!poolContract) return;
+    setClaimFee(0);
 
-      const fee = await poolContract.getClaimFee();
+    const fee = await poolContract.getClaimFee();
 
-      setClaimFee(Number(fee));
-    }
-    getValue();
+    setClaimFee(Number(fee));
   }, [poolContract]);
+
+  useEffect(() => {
+    getClaimFee();
+  }, [getClaimFee]);
 
   return {
     address: poolContract?.address.toString(),
-    claimFee: claimFee / 1000 || 0,
+    claimFee: Number(claimFee) / 1000,
     getLastTx,
     buyTicket,
     claimPrize,

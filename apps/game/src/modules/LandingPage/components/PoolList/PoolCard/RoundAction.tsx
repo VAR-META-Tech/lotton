@@ -10,13 +10,15 @@ interface Props {
   maxRound: number;
   roundActive: IGetPoolDetailRound;
   setCurrentRound: Dispatch<SetStateAction<number>>;
+  setIsLoadingCountDown: Dispatch<SetStateAction<boolean>>;
 }
 
-const RoundAction: FC<Props> = ({ maxRound, roundActive, setCurrentRound }) => {
+const RoundAction: FC<Props> = ({ maxRound, roundActive, setCurrentRound, setIsLoadingCountDown }) => {
   const roundNumber = Number(getRoundActiveNumber(roundActive?.roundNumber) || 0);
 
   const handleChangeRound = useCallback(
     (isPlus: boolean) => {
+      setIsLoadingCountDown(true);
       const isMaxRound = maxRound === roundNumber;
       const isMinRound = roundNumber === MIN_ROUND;
 
@@ -28,7 +30,7 @@ const RoundAction: FC<Props> = ({ maxRound, roundActive, setCurrentRound }) => {
         setCurrentRound((prev) => prev - 1);
       }
     },
-    [maxRound, roundNumber, setCurrentRound]
+    [maxRound, roundNumber, setCurrentRound, setIsLoadingCountDown]
   );
 
   return (
