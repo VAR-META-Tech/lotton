@@ -23,6 +23,7 @@ async function setAdmin(lottery: any, provider: any) {
         {
             $$type: 'SetAdmin',
             admin: Address.parse('0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP'),
+            active: true
         }
     );
 }
@@ -54,7 +55,7 @@ async function createPool(lottery: any, provider: any) {
 }
 export async function run(provider: NetworkProvider, args: string[]) {
     const ui = provider.ui();
-    const address = Address.parse('EQCJJ_KzZygj_j3yilsRR5cOLV8rdkDqNJCNHo3wihrsUp7H');
+    const address = Address.parse('EQD38ONDK-h1rZ0Wpl7G-zZ535B2tJ9aWFU1vvuGRRMaiDQO');
     const lottery = provider.open(Lottery.fromAddress(address));
 
 
@@ -63,10 +64,10 @@ export async function run(provider: NetworkProvider, args: string[]) {
         return;
     }
 
-    let poolId = 2n;
+    let poolId = 1n;
     let roundId = 1n;
 
-    // await setAdmin(lottery, provider);
+    await setAdmin(lottery, provider);
     await setPublicKey(lottery, provider);
 
     await createPool(lottery, provider);

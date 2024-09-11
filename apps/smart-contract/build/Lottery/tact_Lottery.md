@@ -1,6 +1,6 @@
 # TACT Compilation Report
 Contract: Lottery
-BOC Size: 5068 bytes
+BOC Size: 5246 bytes
 
 # Types
 Total Types: 34
