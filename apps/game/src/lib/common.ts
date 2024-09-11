@@ -193,7 +193,7 @@ export const getRoundActiveNumber = (value: number): string => {
 
 export const roundNumber = (
   number: string | number,
-  round = 8,
+  round = 6,
   roundMode: RoundingModes = bigDecimal.RoundingModes.DOWN
 ) => {
   const roundedNumber = bigDecimal.round(number, round, roundMode);

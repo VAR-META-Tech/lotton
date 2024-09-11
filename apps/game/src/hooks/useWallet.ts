@@ -1,5 +1,5 @@
 import { useTonWallet } from '@tonconnect/ui-react';
-import { useGetBalanceQuery } from '@/apis/wallet';
+import { useGetAddressBalanceQuery } from '@/apis/wallet';
 import { useCallback, useEffect } from 'react';
 import { useTonConnect } from './useTonConnect';
 import { useAuth } from './useAuth';
@@ -9,7 +9,7 @@ export const useWallet = () => {
   const { tonConnectUI } = useTonConnect();
   const { logout } = useAuth();
 
-  const { data, refetch, ...rest } = useGetBalanceQuery({
+  const { data, refetch, ...rest } = useGetAddressBalanceQuery({
     variables: {
       address: wallet?.account?.address || '',
     },
@@ -34,7 +34,7 @@ export const useWallet = () => {
   return {
     data,
     wallet,
-    balance: Number(data?.result?.balance) / 1e9 || 0,
+    balance: Number(data?.result || 0) / 1e9,
     refetch,
     handleDisconnectWallet,
     ...rest,

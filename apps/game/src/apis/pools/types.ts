@@ -149,6 +149,21 @@ export interface IGetPoolJoinedItemTicket {
   claimed: boolean;
   status: string;
   claimedAt: string | null;
+  transaction: IGetPoolJoinedItemTransaction;
+}
+
+export interface IGetPoolJoinedItemTransaction {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: any;
+  id: number;
+  fromAddress: string;
+  toAddress: string;
+  value: string;
+  quantity: number;
+  blockTimestamp: string;
+  type: string;
+  transactionHash: string;
 }
 
 export interface IGetPoolCollectPrizeParams {

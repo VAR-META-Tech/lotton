@@ -75,8 +75,6 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
         rewardValue={totalRewardValue}
         feeValue={feeValue}
         totalValue={totalValue}
-        usdValue={totalRewardValue * price}
-        feeUsdValue={feeValue * price}
         totalUsdValue={totalValue * price}
         isLoading={loading}
         claimFee={claimFee}

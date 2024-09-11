@@ -36,7 +36,7 @@ export const CheckPage = () => {
   }
 
   return (
-    <div className="container py-10 pb-24 space-y-16">
+    <div className="container py-10 pb-24 space-y-10">
       <CheckWinner />
 
       <PoolList />

@@ -35,10 +35,10 @@ export default class Pool implements Contract {
     messageBody?: Maybe<string | Cell>;
     value: number;
   }) {
-    const BigValue = Big(value);
-    const totalValue = BigValue.add(0.2); // send 0.2 TON for gas
-
     try {
+      const BigValue = Big(value);
+      const totalValue = BigValue.add(0.2); // send 0.2 TON for gas
+
       await provider.internal(via, {
         value: String(totalValue),
         body: messageBody,

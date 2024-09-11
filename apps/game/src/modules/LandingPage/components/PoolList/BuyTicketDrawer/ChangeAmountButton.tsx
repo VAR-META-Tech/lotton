@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { FCC } from '@/types';
 import { FC, HTMLAttributes } from 'react';
@@ -14,19 +15,19 @@ const ChangeAmountButton: FCC<ChangeAmountButtonProps> = ({
   className,
   ...props
 }) => (
-  <button
+  <Button
     disabled={isDisabled}
     type="button"
     className={cn(
-      'bg-white border border-primary rounded-[0.3125rem] w-[2.1875rem] h-[1.6875rem] flex justify-center items-center',
-      { 'border-gray-color': isDisabled },
+      'rounded-[0.3125rem] w-[2.1875rem] h-[1.6875rem] flex justify-center items-center',
+      { '!bg-gray-color': isDisabled },
       className
     )}
     {...props}
   >
-    {Icon && <Icon className={cn('text-primary', { 'text-gray-color': isDisabled })} />}
+    {Icon && <Icon className={cn('text-white', { 'opacity-50': isDisabled })} />}
     {children}
-  </button>
+  </Button>
 );
 
 export default ChangeAmountButton;

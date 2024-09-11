@@ -22,3 +22,4 @@ export const isUseTestnet = env.USE_TESTNET === 'true';
 export const network = isUseTestnet ? 'testnet' : ('mainnet' as Network);
 
 export const TON_API_URL = isUseTestnet ? 'https://testnet.toncenter.com/api/v2' : 'https://toncenter.com/api/v2';
+export const TON_VIEWER_URL = isUseTestnet ? 'https://testnet.tonviewer.com/' : 'https://tonviewer.com/';

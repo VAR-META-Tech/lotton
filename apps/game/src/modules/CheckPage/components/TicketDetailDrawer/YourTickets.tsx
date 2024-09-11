@@ -40,6 +40,7 @@ const YourTickets: FC<IYourTicketsProps> = ({ roundActiveInfo }) => {
                 code={item?.code || ''}
                 ticketNumber={index + 1}
                 matched={getMatch(item?.code || '')}
+                transactionHash={item?.transaction?.transactionHash || ''}
               />
             );
           })}

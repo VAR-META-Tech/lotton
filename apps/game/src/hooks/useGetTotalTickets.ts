@@ -12,7 +12,7 @@ export const useGetTotalTickets = (id: number) => {
   useEffect(() => {
     const refetchInterval = setInterval(() => {
       refetch();
-    }, 15000);
+    }, 10000);
 
     return () => clearInterval(refetchInterval);
   }, [refetch]);
