@@ -1,4 +1,4 @@
-import { Show, VStack } from '@/components/ui/Utilities';
+import { VStack } from '@/components/ui/Utilities';
 import { useGetPoolsCollectPrize } from '@/hooks/useGetPoolsCollectPrize';
 import React, { FC, useMemo } from 'react';
 
@@ -11,6 +11,7 @@ import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
 import { useGetTokenPrice } from '@/hooks/useGetTokenPrice';
 import { roundNumber } from '@/lib/common';
 import CollectItemSkeleton from './CollectItemSkeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Props {
   poolId: number;
@@ -37,49 +38,48 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
     return Number(fromNano(total));
   }, [items]);
 
-  const feeValue = useMemo(() => {
-    return (totalRewardValue * claimFee) / 100;
-  }, [claimFee, totalRewardValue]);
+  const feeValue = useMemo(() => (totalRewardValue * claimFee) / 100, [claimFee, totalRewardValue]);
 
-  const totalValue = useMemo(() => {
-    return Number(totalRewardValue || 0) - Number(feeValue || 0);
-  }, [totalRewardValue, feeValue]);
+  const totalValue = useMemo(() => totalRewardValue - feeValue, [totalRewardValue, feeValue]);
+
+  const loading = useMemo(() => isLoading || !feeValue || !totalValue, [feeValue, isLoading, totalValue]);
+
+  const renderCurrentRound = useMemo(() => {
+    if (loading) {
+      return <Skeleton className="h-6 w-20 bg-background" />;
+    }
+
+    return <span>Round {(!!items?.length && items[0]?.roundNumber) || 0}</span>;
+  }, [items, loading]);
+
+  const renderContent = useMemo(() => {
+    if (loading) {
+      return Array.from({ length: 2 }).map((_, index) => <CollectItemSkeleton key={index} />);
+    }
+
+    return items?.map((item, index) => {
+      const winningPrize = Number(fromNano(roundNumber(item?.winningPrize || 0, 0)));
+
+      return <CollectItem key={`${item?.poolId}-${index}`} code={item?.ticketCode} value={winningPrize} />;
+    });
+  }, [items, loading]);
 
   return (
     <VStack className="container">
-      <Show when={isLoading}>
-        {Array.from({ length: 2 }).map((_, index) => (
-          <CollectItemSkeleton key={index} />
-        ))}
-      </Show>
-
       <VStack>
-        {items?.map((item, index) => {
-          const winningPrize = Number(fromNano(roundNumber(item?.winningPrize || 0, 0)));
-          const winningPrizeUsd = winningPrize * price;
+        {renderCurrentRound}
 
-          return (
-            <CollectItem
-              key={`${item?.poolId}-${index}`}
-              code={item?.ticketCode}
-              value={winningPrize}
-              roundClaimNumber={item?.roundNumber}
-              tokenSymbol={item?.currencySymbol}
-              usdValue={winningPrizeUsd}
-            />
-          );
-        })}
+        {renderContent}
       </VStack>
 
       <CollectTotal
         rewardValue={totalRewardValue}
         feeValue={feeValue}
         totalValue={totalValue}
-        tokenSymbol={items[0]?.currencySymbol}
         usdValue={totalRewardValue * price}
         feeUsdValue={feeValue * price}
         totalUsdValue={totalValue * price}
-        isLoading={isLoading}
+        isLoading={loading}
         claimFee={claimFee}
       />
 

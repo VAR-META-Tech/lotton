@@ -1,30 +1,24 @@
-import { HStack, VStack } from '@/components/ui/Utilities';
+import TonImage from '@/components/TonImage';
+import { HStack } from '@/components/ui/Utilities';
 import { roundNumber } from '@/lib/common';
 import React, { FC } from 'react';
 
 interface Props {
-  roundClaimNumber: number;
   code: string;
-  tokenSymbol: string;
   value: number;
-  usdValue: number;
 }
 
-const CollectItem: FC<Props> = ({ roundClaimNumber, code, tokenSymbol, value, usdValue }) => {
+const CollectItem: FC<Props> = ({ code, value }) => {
   return (
-    <VStack>
-      <HStack pos={'apart'}>
-        <span>Round {roundClaimNumber || 0}</span>
+    <HStack pos={'apart'} align={'start'} spacing={32}>
+      <span>Ticket: {code || ''}</span>
 
-        <span>Ticket: {code || ''}</span>
+      <HStack spacing={4}>
+        <span className="text-primary text-xl">{roundNumber(value || 0)}</span>
+
+        <TonImage width={24} height={24} />
       </HStack>
-
-      <HStack pos={'apart'}>
-        <span className="text-primary text-xl">{`${roundNumber(value || 0)} ${tokenSymbol || ''}`}</span>
-
-        <span className="text-gray-color text-sm">~ {roundNumber(usdValue || 0)} USD</span>
-      </HStack>
-    </VStack>
+    </HStack>
   );
 };
 
