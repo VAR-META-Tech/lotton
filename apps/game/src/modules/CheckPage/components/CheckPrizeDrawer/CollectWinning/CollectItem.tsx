@@ -10,8 +10,8 @@ interface Props {
 
 const CollectItem: FC<Props> = ({ code, value }) => {
   return (
-    <HStack pos={'apart'} align={'start'} spacing={32}>
-      <span>Ticket: {code || ''}</span>
+    <HStack pos={'apart'} align={'center'} spacing={32}>
+      <span className="text-sm">Ticket: {code || ''}</span>
 
       <HStack spacing={4}>
         <span className="text-primary text-xl">{roundNumber(value || 0)}</span>
