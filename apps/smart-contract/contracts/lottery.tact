@@ -18,10 +18,11 @@ contract Lottery with Deployable, Ownable {
     claimData: map<Int, ClaimInfo>;
     claimFeePercent: Int;
 
-    init() {
+    init(adminWallet: Address, publicKey: Int) {
         self.owner = sender();
         self.nextPoolId = 1;
-        self.publicKey = 0;
+        self.admin.set(adminWallet, true);
+        self.publicKey = publicKey;
         self.claimFeePercent = 10 * 1000; // percent-mille
     }
 
@@ -31,9 +32,13 @@ contract Lottery with Deployable, Ownable {
         require(sender() == self.owner || self.isAdmin(sender()), "Only the owner or admin can call this function");
     }
 
-    fun setAdmin(admin: Address) {
+    fun setAdmin(admin: Address, active: Bool) {
         self.requireOwner();
-        self.admin.set(admin, true);
+        if (active == false) {
+            self.admin.set(admin, null);
+        } else {
+            self.admin.set(admin, true);
+        }
     }
 
     fun getLength(content: Slice): Int {
@@ -348,13 +353,18 @@ contract Lottery with Deployable, Ownable {
         let isClaimed: Bool = self.isClaim(msg.poolId, msg.roundId, msg.receiver);
         require(!isClaimed, "Already claimed");
 
-        let claimUser = UserClaim{
-            user: emptyMap()
-        };
-        claimUser.user.set(msg.receiver, true);
+        let userTicket = self.userTicketByAddress(msg.poolId, msg.roundId, msg.receiver);
+        if (userTicket == null) {
+            require(false, "User has no ticket in this round");
+        }
 
         let claimPool = self.claimData.get(msg.poolId);
         if (claimPool == null) {
+            let claimUser = UserClaim{
+                user: emptyMap()
+            };
+            claimUser.user.set(msg.receiver, true);
+
             let claimInfo = ClaimInfo {
                 info: emptyMap()
             };
@@ -362,15 +372,16 @@ contract Lottery with Deployable, Ownable {
             self.claimData.set(msg.poolId, claimInfo);
         } else {
             let claimInfo = claimPool!!.info.get(msg.roundId)!!;
-            if (claimInfo.user.get(msg.receiver) == null){
-                let currentClaimInfo = ClaimInfo {
-                    info: claimPool!!.info
-                };
-                currentClaimInfo.info.set(msg.roundId, claimUser);
-                self.claimData.set(msg.poolId, currentClaimInfo);
-            } else {
-                require(false, "Invalid claim");
-            }
+            let claimUser = UserClaim{
+                user: claimInfo.user
+            };
+            claimUser.user.set(msg.receiver, true);
+
+            let currentClaimInfo = ClaimInfo {
+                info: claimPool!!.info
+            };
+            currentClaimInfo.info.set(msg.roundId, claimUser);
+            self.claimData.set(msg.poolId, currentClaimInfo);
         }
 
         let claimFee: Int = msg.amount * self.claimFeePercent / 100000;
@@ -429,7 +440,7 @@ contract Lottery with Deployable, Ownable {
     }
 
     receive(msg: SetAdmin) {
-        self.setAdmin(msg.admin);
+        self.setAdmin(msg.admin, msg.active);
     }
 
     receive(msg: Claim){
@@ -527,7 +538,6 @@ contract Lottery with Deployable, Ownable {
 }
 
 // ---------------- Structs ---------------- //
-
 struct Pool {
     poolId: Int as uint32;
     creator: Address;
@@ -590,7 +600,6 @@ struct Result {
 }
 
 // ---------------- Messages ---------------- //
-
 message CreatePool {
     jettonWallet: Address;
     ticketPrice: Int as uint32;
@@ -635,6 +644,7 @@ message DrawWinningNumbers {
 
 message SetAdmin {
     admin: Address;
+    active: Bool;
 }
 
 message SetPublicKey {

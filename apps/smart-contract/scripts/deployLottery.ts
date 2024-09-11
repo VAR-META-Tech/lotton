@@ -1,9 +1,12 @@
-import { toNano } from '@ton/core';
+import { Address, toNano } from '@ton/core';
 import { Lottery } from '../wrappers/Lottery';
 import { NetworkProvider } from '@ton/blueprint';
 
 export async function run(provider: NetworkProvider) {
-    const lottery = provider.open(await Lottery.fromInit());
+    let admin = Address.parse('0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP');
+    let publicKey = 35697107194817367972172360094398639751774068753154718602415145470517477976469n;
+
+    const lottery = provider.open(await Lottery.fromInit(admin, publicKey));
 
     await lottery.send(
         provider.sender(),
@@ -18,5 +21,4 @@ export async function run(provider: NetworkProvider) {
 
     await provider.waitForDeploy(lottery.address);
 
-    console.log('ID', await lottery.getCurrentRound());
 }
