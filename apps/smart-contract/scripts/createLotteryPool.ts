@@ -55,7 +55,7 @@ async function createPool(lottery: any, provider: any) {
 }
 export async function run(provider: NetworkProvider, args: string[]) {
     const ui = provider.ui();
-    const address = Address.parse('EQD38ONDK-h1rZ0Wpl7G-zZ535B2tJ9aWFU1vvuGRRMaiDQO');
+    const address = Address.parse('EQCtdn4Gd6v3gnm5uGZiirV-90Xd3KdLDXVZuK1q8Po4ehbW');
     const lottery = provider.open(Lottery.fromAddress(address));
 
 
@@ -70,7 +70,7 @@ export async function run(provider: NetworkProvider, args: string[]) {
     await setAdmin(lottery, provider);
     await setPublicKey(lottery, provider);
 
-    await createPool(lottery, provider);
+    //await createPool(lottery, provider);
 
     await sleep(20000);
     let pools = await lottery.getCurrentPool();

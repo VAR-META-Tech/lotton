@@ -276,6 +276,7 @@ contract Lottery with Deployable, Ownable {
             roundId: roundId,
             poolId: poolId,
             quantity: quantity,
+            totalCost,
             buyer: user,
             tickets: tickets
         }.toCell());
@@ -693,7 +694,8 @@ message TicketBoughtEvent {
     roundId: Int;
     quantity: Int;
     buyer: Address;
-    tickets: String
+    tickets: String;
+    totalCost: Int as coins;
 }
 
 message ClaimedEvent {

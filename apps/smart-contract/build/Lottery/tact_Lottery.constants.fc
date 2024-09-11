@@ -7,11 +7,5 @@ slice __gen_slice_string_96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b786
 ;; String ","
 slice __gen_slice_string_4ee8888d01627a5b474e9faffd54b20b84dcc566933880a09b1be21640019c02() asm "B{b5ee9c724101010100030000022cdd26222c} B>boc <s PUSHSLICE";
 
-;; String "dump(totalCost)"
-slice __gen_slice_string_ec168b434649514b5fb5d8f4a9361fa9c2ce71cf4e4c0c1703f018dd64c57959() asm "B{b5ee9c7241010101001100001e64756d7028746f74616c436f7374299f59adb9} B>boc <s PUSHSLICE";
-
-;; String "dump(context().value)"
-slice __gen_slice_string_c25657de7f608ae0453d544683e492429492a857961aeea8697a8226642f9787() asm "B{b5ee9c7241010101001700002a64756d7028636f6e7465787428292e76616c75652957da40a0} B>boc <s PUSHSLICE";
-
 ;; Comment "return unused excess"
 cell __gen_cell_comment_d7a2e3d435587bd3bb71130beeec92f53b4e8aa34b4016d3cdab8f25049e6cbf() asm "B{b5ee9c7241010101001a0000300000000072657475726e20756e75736564206578636573733f582e4c} B>boc PUSHREF";

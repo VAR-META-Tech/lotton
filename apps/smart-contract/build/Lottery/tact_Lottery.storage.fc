@@ -759,29 +759,30 @@ cell $PoolCreatedEvent$_store_cell((int, int, int, int, int, int, int, cell, sli
 
 ;;
 ;; Type: TicketBoughtEvent
-;; Header: 0x4a768a42
-;; TLB: ticket_bought_event#4a768a42 poolId:int257 roundId:int257 quantity:int257 buyer:address tickets:^string = TicketBoughtEvent
+;; Header: 0x89277a4e
+;; TLB: ticket_bought_event#89277a4e poolId:int257 roundId:int257 quantity:int257 buyer:address tickets:^string totalCost:coins = TicketBoughtEvent
 ;;
 
-builder $TicketBoughtEvent$_store(builder build_0, (int, int, int, slice, slice) v) inline {
-    var (v'poolId, v'roundId, v'quantity, v'buyer, v'tickets) = v;
-    build_0 = store_uint(build_0, 1249282626, 32);
+builder $TicketBoughtEvent$_store(builder build_0, (int, int, int, slice, slice, int) v) inline_ref {
+    var (v'poolId, v'roundId, v'quantity, v'buyer, v'tickets, v'totalCost) = v;
+    build_0 = store_uint(build_0, 2301065806, 32);
     build_0 = build_0.store_int(v'poolId, 257);
     build_0 = build_0.store_int(v'roundId, 257);
     build_0 = build_0.store_int(v'quantity, 257);
     var build_1 = begin_cell();
     build_1 = __tact_store_address(build_1, v'buyer);
     build_1 = build_1.store_ref(begin_cell().store_slice(v'tickets).end_cell());
+    build_1 = build_1.store_coins(v'totalCost);
     build_0 = store_ref(build_0, build_1.end_cell());
     return build_0;
 }
 
-cell $TicketBoughtEvent$_store_cell((int, int, int, slice, slice) v) inline {
+cell $TicketBoughtEvent$_store_cell((int, int, int, slice, slice, int) v) inline {
     return $TicketBoughtEvent$_store(begin_cell(), v).end_cell();
 }
 
-((int, int, int, slice, slice)) $TicketBoughtEvent$_constructor_roundId_poolId_quantity_buyer_tickets(int $roundId, int $poolId, int $quantity, slice $buyer, slice $tickets) inline {
-    return ($poolId, $roundId, $quantity, $buyer, $tickets);
+((int, int, int, slice, slice, int)) $TicketBoughtEvent$_constructor_roundId_poolId_quantity_totalCost_buyer_tickets(int $roundId, int $poolId, int $quantity, int $totalCost, slice $buyer, slice $tickets) inline {
+    return ($poolId, $roundId, $quantity, $buyer, $tickets, $totalCost);
 }
 
 ;;
