@@ -6,7 +6,7 @@ import { Address, beginCell } from '@ton/ton';
 import dayjs from 'dayjs';
 import bigDecimal from 'js-big-decimal';
 import type { SelectQueryBuilder } from 'typeorm';
-import { MoreThan, MoreThanOrEqual, Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 
 import { Causes } from '@/common/exceptions/causes';
 import type { StellaConfig } from '@/configs';
@@ -434,6 +434,7 @@ export class PoolService {
         .createQueryBuilder('pool')
         .leftJoinAndSelect('pool.rounds', 'rounds')
         .leftJoinAndSelect('rounds.ticket', 'ticket')
+        .leftJoinAndSelect('ticket.transaction', 'transaction')
         .where('pool.id IN (:...poolIds)', {
           poolIds: pools.map((pool) => pool?.id ?? 0),
         })

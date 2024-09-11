@@ -176,6 +176,7 @@ export class RoundService {
       const queryBuilder = this.userTicketRepository
         .createQueryBuilder('ticket')
         .innerJoin('ticket.round', 'round')
+        .leftJoin('ticket.transaction', 'transaction')
         .where('round.id = :roundId', { roundId })
         .select([
           'ticket.id as id',
@@ -186,6 +187,7 @@ export class RoundService {
           'ticket.status as status',
           'ticket.createdAt as createdAt',
           'ticket.updatedAt as updatedAt',
+          'transaction.transactionHash as transactionHash',
         ]);
       if (matchNumber) {
         queryBuilder.andWhere('ticket.winningMatch = :matchNumber', {
