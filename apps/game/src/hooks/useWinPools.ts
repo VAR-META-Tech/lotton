@@ -14,6 +14,7 @@ export const useWinPools = (limit = 999999999999999, type: 'winner' | 'joined' =
       pageSizes: limit,
       page: 1,
     },
+    enabled: isLoggedIn,
   });
 
   useEffect(() => {

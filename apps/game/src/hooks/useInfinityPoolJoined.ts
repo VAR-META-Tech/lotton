@@ -18,6 +18,7 @@ export const useInfinityPoolJoined = () => {
       pageSizes: 5,
       page: 1,
     },
+    enabled: isLoggedIn,
   });
 
   const poolList = poolData?.pages?.flatMap((z) => z?.items) ?? [];
