@@ -118,6 +118,7 @@ PROGRAM{
   DECLPROC $Result$_to_tuple
   DECLPROC $Result$_to_opt_tuple
   DECLPROC $Result$_to_opt_external
+  DECLPROC $Lottery$init$_load
   DECLPROC $Lottery$_contract_init
   DECLPROC $Lottery$_contract_load
   DECLPROC $Lottery$_contract_store
@@ -158,12 +159,12 @@ PROGRAM{
   DECLPROC $ClaimedEvent$_constructor_poolId_roundId_amount_receiver
   DECLPROC $Lottery$_fun_claimData
   DECLPROC $Lottery$_fun_isClaim
+  DECLPROC $Lottery$_fun_userTicketByAddress
   DECLPROC $Lottery$_fun_claimPrize
   DECLPROC $Lottery$_fun_admins
   DECLPROC $Lottery$_fun_currentPool
   DECLPROC $Lottery$_fun_poolById
   DECLPROC $Lottery$_fun_usersTicket
-  DECLPROC $Lottery$_fun_userTicketByAddress
   DECLPROC $Lottery$_fun_resultByRound
   DECLPROC $Lottery$_fun_resultByPool
   DECLPROC $Lottery$_fun_publicKey
@@ -944,10 +945,13 @@ PROGRAM{
   $SetAdmin$_load PROCINLINE:<{
     32 LDU
     SWAP
-    3397822855 PUSHINT
+    134190905 PUSHINT
     EQUAL
     129 THROWIFNOT
     __tact_load_address INLINECALLDICT
+    SWAP
+    1 LDI
+    -ROT
   }>
   $SetPublicKey$_load PROCINLINE:<{
     32 LDU
@@ -1328,6 +1332,13 @@ PROGRAM{
     }>ELSE<{
     }>
   }>
+  $Lottery$init$_load PROCINLINE:<{
+    __tact_load_address INLINECALLDICT
+    SWAP
+    257 PUSHINT
+    LDIX
+    -ROT
+  }>
   $Lottery$_contract_init PROCREF:<{
     PUSHNULL
     PUSHNULL
@@ -1336,13 +1347,18 @@ PROGRAM{
     PUSHNULL
     PUSHNULL
     __tact_context_get_sender INLINECALLDICT
-    s0 s6 XCHG
-    s0 s5 XCHG
     1 PUSHINT
-    s5 s4 XCHG2
-    s1 s3 XCHG
-    0 PUSHINT
-    s0 s3 XCHG2
+    267 PUSHINT
+    TRUE
+    s2 PUSH
+    s4 s10 XCHG
+    s2 s3 XCHG
+    s2 s12 XCHG
+    __tact_dict_set_slice_int INLINECALLDICT
+    s6 s8 XCHG
+    s0 s7 XCHG
+    s5 s6 XCHG
+    SWAP
     10000 PUSHINT
   }>
   $Lottery$_contract_load PROCREF:<{
@@ -1357,12 +1373,15 @@ PROGRAM{
       $Lottery$_load INLINECALLDICT
       1 10 BLKDROP2
     }>
-    DROP
     MYADDR
     11 PLDU
     10 PUSHPOW2
     EQUAL
     137 THROWIFNOT
+    $Lottery$init$_load INLINECALLDICT
+    s0 s2 XCHG
+    ENDS
+    SWAP
     $Lottery$_contract_init INLINECALLDICT
   }>
   $Lottery$_contract_store PROCINLINE:<{
@@ -1543,21 +1562,31 @@ PROGRAM{
     132 THROWIFNOT
   }>
   $Lottery$_fun_setAdmin PROCREF:<{
-    10 -ROLL
+    10 2 BLKSWAP
     $Lottery$_fun_requireOwner INLINECALLDICT
-    s1 s8 XCHG
-    267 PUSHINT
-    s0 s11 XCHG2
-    TRUE
-    1 PUSHINT
-    __tact_dict_set_slice_int INLINECALLDICT
+    s0 s10 XCHG
+    0 EQINT
+    IF:<{
+      s1 s7 XCHG
+      267 PUSHINT
+      s0 s11 XCHG2
+      PUSHNULL
+      1 PUSHINT
+      __tact_dict_set_slice_int INLINECALLDICT
+    }>ELSE<{
+      s1 s7 XCHG
+      267 PUSHINT
+      s0 s11 XCHG2
+      TRUE
+      1 PUSHINT
+      __tact_dict_set_slice_int INLINECALLDICT
+    }>
+    s7 s9 XCHG
     s0 s8 XCHG
-    s0 s9 XCHG
-    s6 s7 XCHG
-    s5 s6 XCHG
-    s4 s5 XCHG
-    s3 s4 XCHG
-    s1 s3 s0 XCHG3
+    s5 s7 XCHG
+    s4 s6 XCHG
+    s3 s5 XCHG
+    s4 s3 s0 XCHG3
   }>
   $Pool$_constructor_poolId_creator_rounds_startTime_endTime_sequence_active_prizes PROCINLINE:<{
   }>
@@ -2257,6 +2286,24 @@ PROGRAM{
     1 10 BLKDROP2
     FALSE
   }>
+  $Lottery$_fun_userTicketByAddress PROCREF:<{
+    257 PUSHINT
+    s9 s0 s3 PUXC2
+    __tact_dict_get_int_cell INLINECALLDICT
+    $RoundTicket$_load_opt INLINECALLDICT
+    $RoundTicket$_not_null INLINECALLDICT
+    $RoundTicket$_get_rounds INLINECALLDICT
+    257 PUSHINT
+    ROT
+    __tact_dict_get_int_cell INLINECALLDICT
+    $UserTicket$_load_opt INLINECALLDICT
+    $UserTicket$_not_null INLINECALLDICT
+    $UserTicket$_get_users INLINECALLDICT
+    267 PUSHINT
+    ROT
+    __tact_dict_get_slice_cell INLINECALLDICT
+    $TicketPayoutResponse$_load_opt INLINECALLDICT
+  }>
   $Lottery$_fun_claimPrize PROCREF:<{
     10 5 BLKSWAP
     s14 s13 s12 PUSH3
@@ -2276,22 +2323,29 @@ PROGRAM{
     SWAP
     NOT
     THROWANYIFNOT
-    PUSHNULL
-    $UserClaim$_constructor_user INLINECALLDICT
-    267 PUSHINT
-    s12 PUSH
-    TRUE
-    1 PUSHINT
-    __tact_dict_set_slice_int INLINECALLDICT
-    s2 PUSH
+    s13 s12 s10 PUSH3
+    $Lottery$_fun_userTicketByAddress INLINECALLDICT
+    ISNULL
+    IF:<{
+      25441 PUSHINT
+      THROWANY
+    }>
+    OVER
     257 PUSHINT
-    16 s() PUSH
+    s15 PUSH
     __tact_dict_get_int_cell INLINECALLDICT
     $ClaimInfo$_load_opt INLINECALLDICT
     DUP
     ISNULL
     IF:<{
       DROP
+      PUSHNULL
+      $UserClaim$_constructor_user INLINECALLDICT
+      267 PUSHINT
+      s12 PUSH
+      TRUE
+      1 PUSHINT
+      __tact_dict_set_slice_int INLINECALLDICT
       PUSHNULL
       $ClaimInfo$_constructor_info INLINECALLDICT
       257 PUSHINT
@@ -2311,37 +2365,32 @@ PROGRAM{
       $ClaimInfo$_not_null INLINECALLDICT
       $ClaimInfo$_get_info INLINECALLDICT
       257 PUSHINT
-      16 s() PUSH
+      s15 PUSH
       __tact_dict_get_int_cell INLINECALLDICT
       $UserClaim$_load_opt INLINECALLDICT
       $UserClaim$_not_null INLINECALLDICT
+      $UserClaim$_constructor_user INLINECALLDICT
       267 PUSHINT
-      s14 PUSH
+      s13 PUSH
+      TRUE
       1 PUSHINT
-      __tact_dict_get_slice_int INLINECALLDICT
-      ISNULL
-      IF:<{
-        $ClaimInfo$_not_null INLINECALLDICT
-        $ClaimInfo$_get_info INLINECALLDICT
-        $ClaimInfo$_constructor_info INLINECALLDICT
-        257 PUSHINT
-        s0 s2 XCHG
-        $UserClaim$_store_cell INLINECALLDICT
-        s2 s15 s(-1) XCPUXC
-        __tact_dict_set_int_cell INLINECALLDICT
-        257 PUSHINT
-        SWAP
-        $ClaimInfo$_store_cell INLINECALLDICT
-        s15 PUSH
-        s3 s4 XCHG
-        SWAP
-        __tact_dict_set_int_cell INLINECALLDICT
-      }>ELSE<{
-        2DROP
-        61167 PUSHINT
-        THROWANY
-        SWAP
-      }>
+      __tact_dict_set_slice_int INLINECALLDICT
+      SWAP
+      $ClaimInfo$_not_null INLINECALLDICT
+      $ClaimInfo$_get_info INLINECALLDICT
+      $ClaimInfo$_constructor_info INLINECALLDICT
+      257 PUSHINT
+      s0 s2 XCHG
+      $UserClaim$_store_cell INLINECALLDICT
+      s2 s15 s(-1) XCPUXC
+      __tact_dict_set_int_cell INLINECALLDICT
+      257 PUSHINT
+      SWAP
+      $ClaimInfo$_store_cell INLINECALLDICT
+      s15 PUSH
+      s3 s4 XCHG
+      SWAP
+      __tact_dict_set_int_cell INLINECALLDICT
     }>
     s11 s1 PUSH2
     MUL
@@ -2395,24 +2444,6 @@ PROGRAM{
     __tact_dict_get_int_cell INLINECALLDICT
     $UserTicket$_load_opt INLINECALLDICT
     $UserTicket$_not_null INLINECALLDICT
-  }>
-  $Lottery$_fun_userTicketByAddress PROCREF:<{
-    257 PUSHINT
-    s9 s0 s3 PUXC2
-    __tact_dict_get_int_cell INLINECALLDICT
-    $RoundTicket$_load_opt INLINECALLDICT
-    $RoundTicket$_not_null INLINECALLDICT
-    $RoundTicket$_get_rounds INLINECALLDICT
-    257 PUSHINT
-    ROT
-    __tact_dict_get_int_cell INLINECALLDICT
-    $UserTicket$_load_opt INLINECALLDICT
-    $UserTicket$_not_null INLINECALLDICT
-    $UserTicket$_get_users INLINECALLDICT
-    267 PUSHINT
-    ROT
-    __tact_dict_get_slice_cell INLINECALLDICT
-    $TicketPayoutResponse$_load_opt INLINECALLDICT
   }>
   $Lottery$_fun_resultByRound PROCREF:<{
     257 PUSHINT
@@ -2696,12 +2727,12 @@ PROGRAM{
       TRUE
     }>
     DUP
-    3397822855 PUSHINT
+    134190905 PUSHINT
     EQUAL
     IFJMP:<{
       DROP
       $SetAdmin$_load INLINECALLDICT
-      NIP
+      1 2 BLKDROP2
       $Lottery$_internal_binary_SetAdmin INLINECALLDICT
       TRUE
     }>

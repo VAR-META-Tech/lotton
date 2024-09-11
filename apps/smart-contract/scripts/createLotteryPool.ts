@@ -3,55 +3,32 @@ import { Lottery } from '../wrappers/Lottery';
 import { NetworkProvider, sleep } from '@ton/blueprint';
 import { mnemonicToWalletKey, sign } from '@ton/crypto';
 
-export async function run(provider: NetworkProvider, args: string[]) {
-    const ui = provider.ui();
-
-    // const address = Address.parse(args.length > 0 ? args[0] : await ui.input('Lottery address'));
-    const address = Address.parse('EQAgBe0Plj1kzt02MLmqubH9c-E1mJbB0eL2oCk1FU_C1qzE');
-
-    if (!(await provider.isContractDeployed(address))) {
-        ui.write(`Error: Contract at address ${address} is not deployed!`);
-        return;
-    }
-
-    const lottery = provider.open(Lottery.fromAddress(address));
-    const now = Math.floor(Date.now()/1000);
-    let poolId = 2n;
-    let roundId = 1n;
-    let airDropAmount: bigint = 100000000n;
-    let isClaimed = await lottery.getClaimData(poolId, roundId);
-    console.log('isClaimed', isClaimed);
-    //let userClaim = await lottery.getClaimData(poolId, roundId);
-    //console.log('userClaim', userClaim);
-    let claim = await lottery.send(
+async function setPublicKey(lottery: any, provider: any) {
+    await lottery.send(
         provider.sender(), {
-            value: toNano('0.07'),
+            value: toNano('0.06'),
         },
         {
-            $$type: 'Claim',
-            poolId: poolId,
-            roundId: roundId,
-            amount: airDropAmount,
-            receiver: provider.sender().address!!,
-            signature: beginCell().asSlice()
+            $$type: 'SetPublicKey',
+            publicKey: 35697107194817367972172360094398639751774068753154718602415145470517477976469n
         }
-    )
-    await sleep(20000);
-    console.log('claim', claim);
+    );
+}
 
-    let userClaim2 = await lottery.getClaimData(poolId, roundId);
-    console.log('userClaim2', userClaim2);
-    let isClaimed2 = await lottery.getIsClaim(poolId, roundId, provider.sender().address!!);
-    console.log('isClaimed2', isClaimed2);
-    // await lottery.send(
-    //     provider.sender(), {
-    //         value: toNano('0.05'),
-    //     },
-    //     {
-    //         $$type: 'SetAdmin',
-    //         admin: Address.parse('0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP'),
-    //     }
-    // );
+async function setAdmin(lottery: any, provider: any) {
+    await lottery.send(
+        provider.sender(), {
+            value: toNano('0.05'),
+        },
+        {
+            $$type: 'SetAdmin',
+            admin: Address.parse('0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP'),
+        }
+    );
+}
+
+async function createPool(lottery: any, provider: any) {
+    const now = Math.floor(Date.now()/1000);
     let prizes: Dictionary<number, number> = Dictionary.empty(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8));
     prizes.set(1, 10);
     prizes.set(2, 15);
@@ -74,12 +51,30 @@ export async function run(provider: NetworkProvider, args: string[]) {
             prizes: prizes
         }
     );
+}
+export async function run(provider: NetworkProvider, args: string[]) {
+    const ui = provider.ui();
+    const address = Address.parse('EQCJJ_KzZygj_j3yilsRR5cOLV8rdkDqNJCNHo3wihrsUp7H');
+    const lottery = provider.open(Lottery.fromAddress(address));
+
+
+    if (!(await provider.isContractDeployed(address))) {
+        ui.write(`Error: Contract at address ${address} is not deployed!`);
+        return;
+    }
+
+    let poolId = 2n;
+    let roundId = 1n;
+
+    // await setAdmin(lottery, provider);
+    await setPublicKey(lottery, provider);
+
+    await createPool(lottery, provider);
 
     await sleep(20000);
     let pools = await lottery.getCurrentPool();
     let attempt = 1;
-    // let poolId = 2n;
-    // let roundId = 1n;
+
     console.log('pools', pools);
     console.log('Prizes: ', pools.get(1n)?.prizes);
     while (poolId) {

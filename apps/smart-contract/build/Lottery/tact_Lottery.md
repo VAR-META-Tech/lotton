@@ -1,6 +1,6 @@
 # TACT Compilation Report
 Contract: Lottery
-BOC Size: 4955 bytes
+BOC Size: 5068 bytes
 
 # Types
 Total Types: 34
@@ -110,8 +110,8 @@ TLB: `draw_winning_numbers#d611ad04 poolId:int257 roundId:int257 latestTxHash:^s
 Signature: `DrawWinningNumbers{poolId:int257,roundId:int257,latestTxHash:^string}`
 
 ## SetAdmin
-TLB: `set_admin#ca86a987 admin:address = SetAdmin`
-Signature: `SetAdmin{admin:address}`
+TLB: `set_admin#07ff9739 admin:address active:bool = SetAdmin`
+Signature: `SetAdmin{admin:address,active:bool}`
 
 ## SetPublicKey
 TLB: `set_public_key#c37bfdfe publicKey:int257 = SetPublicKey`
@@ -220,6 +220,7 @@ Argument: receiver
 13687: Pool is not active
 20265: Winning numbers already drawn
 24801: Round is not open for ticket purchases
+25441: User has no ticket in this round
 26690: Invalid prizes
 36876: Round does not exist
 41780: Total prize must be less than or equal to 100
@@ -236,7 +237,6 @@ Argument: receiver
 58319: Only the owner or admin can call this function
 58383: Insufficient funds sent
 59272: Quantity must be positive
-61167: Invalid claim
 
 # Trait Inheritance Diagram
 

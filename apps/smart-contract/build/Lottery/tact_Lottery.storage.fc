@@ -679,14 +679,15 @@ cell $WinningNumbersDrawnEvent$_store_cell((int, int, int) v) inline {
 
 ;;
 ;; Type: SetAdmin
-;; Header: 0xca86a987
-;; TLB: set_admin#ca86a987 admin:address = SetAdmin
+;; Header: 0x07ff9739
+;; TLB: set_admin#07ff9739 admin:address active:bool = SetAdmin
 ;;
 
-(slice, ((slice))) $SetAdmin$_load(slice sc_0) inline {
-    throw_unless(129, sc_0~load_uint(32) == 3397822855);
+(slice, ((slice, int))) $SetAdmin$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 134190905);
     var v'admin = sc_0~__tact_load_address();
-    return (sc_0, (v'admin));
+    var v'active = sc_0~load_int(1);
+    return (sc_0, (v'admin, v'active));
 }
 
 ;;
@@ -846,6 +847,12 @@ builder $Lottery$_store(builder build_0, (slice, cell, cell, int, cell, cell, ce
     return (sc_0, (v'owner, v'admin, v'pools, v'nextPoolId, v'usersTicket, v'result, v'rewardPools, v'publicKey, v'claimData, v'claimFeePercent));
 }
 
+(slice, ((slice, int))) $Lottery$init$_load(slice sc_0) inline {
+    var v'adminWallet = sc_0~__tact_load_address();
+    var v'publicKey = sc_0~load_int(257);
+    return (sc_0, (v'adminWallet, v'publicKey));
+}
+
 (slice, cell, cell, int, cell, cell, cell, int, cell, int) $Lottery$_contract_load() impure inline_ref {
     slice $sc = get_data().begin_parse();
     __tact_context_sys = $sc~load_ref();
@@ -855,7 +862,9 @@ builder $Lottery$_store(builder build_0, (slice, cell, cell, int, cell, cell, ce
     } else {
         ;; Allow only workchain deployments
         throw_unless(137, my_address().preload_uint(11) == 1024);
-        return $Lottery$_contract_init();
+        (slice $adminWallet, int $publicKey) = $sc~$Lottery$init$_load();
+        $sc.end_parse();
+        return $Lottery$_contract_init($adminWallet, $publicKey);
     }
 }
 

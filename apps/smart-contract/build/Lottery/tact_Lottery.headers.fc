@@ -229,7 +229,7 @@ cell $WinningNumbersDrawnEvent$_store_cell((int, int, int) v) inline;
 (slice, ((int, int, slice))) $DrawWinningNumbers$_load(slice sc_0) inline;
 
 ;; $SetAdmin$_load
-(slice, ((slice))) $SetAdmin$_load(slice sc_0) inline;
+(slice, ((slice, int))) $SetAdmin$_load(slice sc_0) inline;
 
 ;; $SetPublicKey$_load
 (slice, ((int))) $SetPublicKey$_load(slice sc_0) inline;
@@ -360,8 +360,11 @@ tuple $Result$_to_opt_tuple(tuple v) inline;
 ;; $Result$_to_opt_external
 tuple $Result$_to_opt_external(tuple v) inline;
 
+;; $Lottery$init$_load
+(slice, ((slice, int))) $Lottery$init$_load(slice sc_0) inline;
+
 ;; $Lottery$_contract_init
-(slice, cell, cell, int, cell, cell, cell, int, cell, int) $Lottery$_contract_init() impure inline_ref;
+(slice, cell, cell, int, cell, cell, cell, int, cell, int) $Lottery$_contract_init(slice $adminWallet, int $publicKey) impure inline_ref;
 
 ;; $Lottery$_contract_load
 (slice, cell, cell, int, cell, cell, cell, int, cell, int) $Lottery$_contract_load() impure inline_ref;
@@ -388,7 +391,7 @@ int $global_random(int $min, int $max) impure inline;
 ((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_requireOwner((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref;
 
 ;; $Lottery$_fun_setAdmin
-((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_setAdmin((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, slice $admin) impure inline_ref;
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_setAdmin((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, slice $admin, int $active) impure inline_ref;
 
 ;; $Pool$_constructor_poolId_creator_rounds_startTime_endTime_sequence_active_prizes
 ((int, slice, cell, int, int, int, int, cell)) $Pool$_constructor_poolId_creator_rounds_startTime_endTime_sequence_active_prizes(int $poolId, slice $creator, cell $rounds, int $startTime, int $endTime, int $sequence, int $active, cell $prizes) inline;
@@ -480,6 +483,9 @@ int $global_random(int $min, int $max) impure inline;
 ;; $Lottery$_fun_isClaim
 ((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_isClaim((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, slice $receiver) impure inline_ref;
 
+;; $Lottery$_fun_userTicketByAddress
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_userTicketByAddress((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, slice $user) impure inline_ref;
+
 ;; $Lottery$_fun_claimPrize
 ((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_claimPrize((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, (int, int, int, slice, slice) $msg) impure inline_ref;
 
@@ -494,9 +500,6 @@ int $global_random(int $min, int $max) impure inline;
 
 ;; $Lottery$_fun_usersTicket
 ((slice, cell, cell, int, cell, cell, cell, int, cell, int), (cell)) $Lottery$_fun_usersTicket((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId) impure inline_ref;
-
-;; $Lottery$_fun_userTicketByAddress
-((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_userTicketByAddress((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, slice $user) impure inline_ref;
 
 ;; $Lottery$_fun_resultByRound
 ((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_resultByRound((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId) impure inline_ref;
