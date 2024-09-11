@@ -19,7 +19,7 @@ const ClaimAction: FC<Props> = ({ poolId, roundId }) => {
   const { user } = useAuth();
   const setIsOpen = useClaimStore.use.setIsOpen();
 
-  const { mutate: confirm } = useConfirmClaimMutation({
+  const { mutate: confirm, isPending } = useConfirmClaimMutation({
     onError: onMutateError,
   });
 
@@ -93,7 +93,7 @@ const ClaimAction: FC<Props> = ({ poolId, roundId }) => {
   return (
     <HStack pos={'center'}>
       <Button
-        loading={loading}
+        loading={loading || isPending}
         onClick={handleClaim}
         size={'lg'}
         className="rounded-lg w-fit bg-primary text-white min-w-52"
