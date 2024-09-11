@@ -20,7 +20,6 @@ interface Props {
 
 const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
   const { claimFee } = usePoolContract();
-  console.log('🚀 ~ claimFee:', claimFee);
   const { items, isLoading } = useGetPoolsCollectPrize(999999999999999, poolId, roundId);
 
   const { currency } = useGetPoolDetail({
@@ -46,10 +45,10 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
 
   const renderCurrentRound = useMemo(() => {
     if (loading) {
-      return <Skeleton className="h-6 w-20 bg-background" />;
+      return <Skeleton className="h-7 w-20 bg-background" />;
     }
 
-    return <span>Round {(!!items?.length && items[0]?.roundNumber) || 0}</span>;
+    return <span className="font-bold text-lg">Round {(!!items?.length && items[0]?.roundNumber) || 0}</span>;
   }, [items, loading]);
 
   const renderContent = useMemo(() => {

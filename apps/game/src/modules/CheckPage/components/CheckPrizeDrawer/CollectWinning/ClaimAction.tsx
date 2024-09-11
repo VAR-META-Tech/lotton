@@ -40,7 +40,7 @@ const ClaimAction: FC<Props> = ({ poolId, roundId }) => {
         const lastTx = await getLastTx();
         const lastTxHash = lastTx?.[0].hash().toString('base64');
 
-        claimPrize({
+        await claimPrize({
           poolId: data?.roundExits?.poolIdOnChain,
           roundId: data?.roundExits?.roundIdOnChain,
           amount: Number(data?.unitPrizes),

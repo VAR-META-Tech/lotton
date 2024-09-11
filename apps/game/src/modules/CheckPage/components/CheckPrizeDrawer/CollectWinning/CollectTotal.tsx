@@ -1,9 +1,10 @@
 import { HStack, VStack } from '@/components/ui/Utilities';
 import { roundNumber } from '@/lib/common';
-import React, { FC, ReactNode, useMemo } from 'react';
-import CollectItemSkeleton from './CollectItemSkeleton';
+import React, { FC, HTMLAttributes, ReactNode, useMemo } from 'react';
 import TonImage from '@/components/TonImage';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+import CollectTotalSkeleton from './CollectTotalSkeleton';
 
 interface Props {
   rewardValue: number;
@@ -30,16 +31,16 @@ const CollectTotal: FC<Props> = ({
     if (isLoading) {
       return (
         <VStack>
-          <VStack className="border-y border-y-gray-color py-4">
-            <CollectItemSkeleton />
-            <CollectItemSkeleton />
+          <VStack spacing={8} className="border-y border-y-gray-color py-4">
+            <CollectTotalSkeleton />
+            <CollectTotalSkeleton />
           </VStack>
 
-          <VStack>
-            <CollectItemSkeleton />
+          <VStack spacing={2}>
+            <CollectTotalSkeleton />
 
             <HStack pos={'right'}>
-              <Skeleton className="h-6 w-28 bg-background" />
+              <Skeleton className="h-4 w-28 bg-background" />
             </HStack>
           </VStack>
         </VStack>
@@ -51,7 +52,8 @@ const CollectTotal: FC<Props> = ({
         <div className="border-t border-t-gray-color">
           <VStack spacing={8} className="pt-4">
             <SubCollectTotalItem
-              title={'Total Rewards'}
+              titleClassName="font-bold"
+              title={'Subtotal Prizes'}
               value={
                 <HStack>
                   <span>{roundNumber(rewardValue || 0)}</span>
@@ -62,7 +64,7 @@ const CollectTotal: FC<Props> = ({
               usdValue={String(roundNumber(usdValue || 0))}
             />
             <SubCollectTotalItem
-              title={`Claim Fees ${claimFee}%`}
+              title={`Fees ${claimFee}%`}
               value={
                 <HStack>
                   <span>-{roundNumber(feeValue || 0)}</span>
@@ -76,7 +78,7 @@ const CollectTotal: FC<Props> = ({
         </div>
 
         <CollectTotalItem
-          title={'Total Unclaimed Rewards'}
+          title={'Total Prizes'}
           value={
             <HStack>
               <span>{roundNumber(totalValue || 0)}</span>
@@ -95,16 +97,17 @@ const CollectTotal: FC<Props> = ({
 
 export default CollectTotal;
 
-interface ISubCollectTotalItem {
+interface ISubCollectTotalItem extends HTMLAttributes<HTMLDivElement> {
   title: string;
   value: string | ReactNode;
   usdValue: string;
+  titleClassName?: ISubCollectTotalItem['className'];
 }
 
-const SubCollectTotalItem: FC<ISubCollectTotalItem> = ({ title, value }) => {
+const SubCollectTotalItem: FC<ISubCollectTotalItem> = ({ title, value, titleClassName }) => {
   return (
     <HStack pos={'apart'}>
-      <span className="text-right">{title}</span>
+      <span className={cn('text-right', titleClassName)}>{title}</span>
       <span className="text-primary text-xl">{value}</span>
     </HStack>
   );
@@ -124,7 +127,7 @@ const CollectTotalItem: FC<ICollectTotalItem> = ({ title, value, usdValue }) => 
       </HStack>
 
       <HStack pos={'right'}>
-        <span className="text-gray-color text-sm">~ {usdValue} USD</span>
+        <span className="text-gray-color text-xs">~ {usdValue} USD</span>
       </HStack>
     </VStack>
   );
