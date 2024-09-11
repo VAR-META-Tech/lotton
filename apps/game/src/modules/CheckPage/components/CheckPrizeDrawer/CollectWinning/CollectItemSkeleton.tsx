@@ -9,15 +9,9 @@ const CollectItemSkeleton: FC<Props> = ({ className }) => {
   return (
     <VStack className={className}>
       <HStack pos={'apart'}>
-        <Skeleton className="bg-background h-6 w-16" />
+        <Skeleton className="bg-background h-7 w-28" />
 
-        <Skeleton className="bg-background h-6 w-24" />
-      </HStack>
-
-      <HStack pos={'apart'}>
-        <Skeleton className="bg-background h-8 w-32" />
-
-        <Skeleton className="bg-background h-5 w-32" />
+        <Skeleton className="bg-background h-7 w-28" />
       </HStack>
     </VStack>
   );
