@@ -92,16 +92,13 @@ export function usePoolContract() {
   };
 
   const getClaimFee = useCallback(async () => {
-    try {
-      if (!poolContract) return;
-      setClaimFee(0);
+    if (!poolContract) return;
 
-      const fee = await poolContract.getClaimFee();
+    setClaimFee(0);
 
-      setClaimFee(Number(fee));
-    } catch (error) {
-      throw new Error(error as string);
-    }
+    const fee = await poolContract.getClaimFee();
+
+    setClaimFee(Number(fee));
   }, [poolContract]);
 
   useEffect(() => {
