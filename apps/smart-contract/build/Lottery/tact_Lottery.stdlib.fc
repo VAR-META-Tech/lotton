@@ -36,6 +36,8 @@ forall X -> X __tact_not_null(X x) impure inline {
 
 (cell, int) __tact_dict_get_ref(cell dict, int key_len, slice index) asm(index dict key_len) "DICTGETREF" "NULLSWAPIFNOT";
 
+() __tact_debug_str(slice value, slice debug_print_1, slice debug_print_2) impure asm "STRDUMP" "DROP" "STRDUMP" "DROP" "STRDUMP" "DROP";
+
 (int, slice, int, slice) __tact_context_get() inline {
     return __tact_context;
 }

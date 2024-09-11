@@ -89,7 +89,7 @@
     }
     $self'pools~__tact_dict_set_int_cell(257, $poolId, $Pool$_store_cell(($pool'poolId, $pool'creator, $pool'rounds, $pool'startTime, $pool'endTime, $pool'sequence, $pool'active, $pool'prizes)));
     $self'usersTicket~__tact_dict_set_int_cell(257, $poolId, $RoundTicket$_store_cell(($roundTickets'rounds)));
-    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_reply(__gen_cell_comment_d7a2e3d435587bd3bb71130beeec92f53b4e8aa34b4016d3cdab8f25049e6cbf());
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_reply(__gen_cell_comment_3fe93897158698e4d473b74414d7493716b0fc3a70310934873f0019daaccab4());
     $global_emit($PoolCreatedEvent$_store_cell($PoolCreatedEvent$_constructor_poolId_ticketPrice_initialRounds_startTime_endTime_active_sequence_rounds_creator_prizes($poolId, $config'ticketPrice, $initialRounds, $config'startTime, $config'endTime, true, $sequence, $pool'rounds, __tact_context_get_sender(), $prizes)));
     return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
 }
@@ -178,6 +178,8 @@
     throw_unless(59272, ($quantity > 0));
     slice $user = __tact_context_get_sender();
     int $totalCost = ($roundInfo'ticketPrice * $quantity);
+    __tact_debug_str(__tact_int_to_string($totalCost), __gen_slice_string_ec168b434649514b5fb5d8f4a9361fa9c2ce71cf4e4c0c1703f018dd64c57959(), "File contracts/lottery.tact:261:9:");
+    __tact_debug_str(__tact_int_to_string($Context$_get_value(__tact_context_get())), __gen_slice_string_c25657de7f608ae0453d544683e492429492a857961aeea8697a8226642f9787(), "File contracts/lottery.tact:262:9:");
     throw_unless(58383, ($Context$_get_value(__tact_context_get()) >= $totalCost));
     slice $tickets = ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_createTicket($user, $poolId, $roundId, $quantity);
     if (($Context$_get_value(__tact_context_get()) > $totalCost)) {
@@ -267,9 +269,14 @@
         $claimInfo'info~__tact_dict_set_int_cell(257, $msg'roundId, $UserClaim$_store_cell(($claimUser'user)));
         $self'claimData~__tact_dict_set_int_cell(257, $msg'poolId, $ClaimInfo$_store_cell(($claimInfo'info)));
     } else {
-        var ($claimInfo'user) = $UserClaim$_not_null($UserClaim$_load_opt(__tact_dict_get_int_cell($ClaimInfo$_get_info($ClaimInfo$_not_null($claimPool)), 257, $msg'roundId)));
-        var ($claimUser'user) = $UserClaim$_constructor_user($claimInfo'user);
-        $claimUser'user~__tact_dict_set_slice_int(267, $msg'receiver, true, 1);
+        tuple $claimInfo = $UserClaim$_load_opt(__tact_dict_get_int_cell($ClaimInfo$_get_info($ClaimInfo$_not_null($claimPool)), 257, $msg'roundId));
+        var ($claimUser'user) = $UserClaim$_constructor_user(null());
+        if ((~ null?($claimInfo))) {
+            ($claimUser'user) = $UserClaim$_constructor_user($UserClaim$_get_user($UserClaim$_not_null($claimInfo)));
+            $claimUser'user~__tact_dict_set_slice_int(267, $msg'receiver, true, 1);
+        } else {
+            $claimUser'user~__tact_dict_set_slice_int(267, $msg'receiver, true, 1);
+        }
         var ($currentClaimInfo'info) = $ClaimInfo$_constructor_info($ClaimInfo$_get_info($ClaimInfo$_not_null($claimPool)));
         $currentClaimInfo'info~__tact_dict_set_int_cell(257, $msg'roundId, $UserClaim$_store_cell(($claimUser'user)));
         $self'claimData~__tact_dict_set_int_cell(257, $msg'poolId, $ClaimInfo$_store_cell(($currentClaimInfo'info)));
@@ -277,7 +284,7 @@
     int $claimFee = (($msg'amount * $self'claimFeePercent) / 100000);
     int $claimAmount = ($msg'amount - $claimFee);
     throw_unless(45000, ($claimAmount < __tact_my_balance()));
-    $global_send($SendParameters$_constructor_to_bounce_value_mode_body($msg'receiver, true, $claimAmount, 65, __gen_cell_comment_33aa034348c38a75d22ed6dd6615ab6d7d57202f6e3ac7526fab87e0a1df25b7()));
+    $global_send($SendParameters$_constructor_to_bounce_value_mode_body($msg'receiver, true, $claimAmount, 65, __gen_cell_comment_3fe93897158698e4d473b74414d7493716b0fc3a70310934873f0019daaccab4()));
     $global_emit($ClaimedEvent$_store_cell($ClaimedEvent$_constructor_poolId_roundId_amount_receiver($msg'poolId, $msg'roundId, $claimAmount, $msg'receiver)));
     return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
 }

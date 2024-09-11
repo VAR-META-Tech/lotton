@@ -1771,7 +1771,7 @@ PROGRAM{
     s9 s11 s0 XCHG3
     s10 s(-1) PUXC
     __tact_dict_set_int_cell INLINECALLDICT
-    B{b5ee9c7241010101001a0000300000000072657475726e20756e75736564206578636573733f582e4c} B>boc PUSHREF
+    B{b5ee9c7241010101000600000800000000e300af0f} B>boc PUSHREF
     s10 s12 XCHG
     5 8 REVERSE
     s7 s6 s0 XCHG3
@@ -2064,6 +2064,27 @@ PROGRAM{
     __tact_context_get_sender INLINECALLDICT
     s1 s2 XCPU
     MUL
+    DUP
+    __tact_int_to_string INLINECALLDICT
+    B{b5ee9c7241010101001100001e64756d7028746f74616c436f7374299f59adb9} B>boc <s PUSHSLICE
+    x{46696c6520636f6e7472616374732f6c6f74746572792e746163743a3236313a393a} PUSHSLICE
+    STRDUMP
+    DROP
+    STRDUMP
+    DROP
+    STRDUMP
+    DROP
+    __tact_context_get INLINECALLDICT
+    $Context$_get_value INLINECALLDICT
+    __tact_int_to_string INLINECALLDICT
+    B{b5ee9c7241010101001700002a64756d7028636f6e7465787428292e76616c75652957da40a0} B>boc <s PUSHSLICE
+    x{46696c6520636f6e7472616374732f6c6f74746572792e746163743a3236323a393a} PUSHSLICE
+    STRDUMP
+    DROP
+    STRDUMP
+    DROP
+    STRDUMP
+    DROP
     58383 PUSHINT
     __tact_context_get INLINECALLDICT
     $Context$_get_value INLINECALLDICT
@@ -2368,13 +2389,29 @@ PROGRAM{
       s15 PUSH
       __tact_dict_get_int_cell INLINECALLDICT
       $UserClaim$_load_opt INLINECALLDICT
-      $UserClaim$_not_null INLINECALLDICT
+      PUSHNULL
       $UserClaim$_constructor_user INLINECALLDICT
-      267 PUSHINT
-      s13 PUSH
-      TRUE
-      1 PUSHINT
-      __tact_dict_set_slice_int INLINECALLDICT
+      OVER
+      ISNULL
+      NOT
+      IF:<{
+        DROP
+        $UserClaim$_not_null INLINECALLDICT
+        $UserClaim$_get_user INLINECALLDICT
+        $UserClaim$_constructor_user INLINECALLDICT
+        267 PUSHINT
+        s13 PUSH
+        TRUE
+        1 PUSHINT
+        __tact_dict_set_slice_int INLINECALLDICT
+      }>ELSE<{
+        NIP
+        267 PUSHINT
+        s13 PUSH
+        TRUE
+        1 PUSHINT
+        __tact_dict_set_slice_int INLINECALLDICT
+      }>
       SWAP
       $ClaimInfo$_not_null INLINECALLDICT
       $ClaimInfo$_get_info INLINECALLDICT
@@ -2405,7 +2442,7 @@ PROGRAM{
     THROWANYIFNOT
     TRUE
     65 PUSHINT
-    B{b5ee9c7241010101001100001e00000000436c61696d207072697a654edb5268} B>boc PUSHREF
+    B{b5ee9c7241010101000600000800000000e300af0f} B>boc PUSHREF
     s13 PUSH
     s3 s1 s3 XCHG3
     s4 PUSH

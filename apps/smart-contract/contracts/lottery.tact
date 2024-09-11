@@ -105,7 +105,7 @@ contract Lottery with Deployable, Ownable {
         self.pools.set(poolId, pool);
         self.usersTicket.set(poolId, roundTickets);
 
-        self.reply("return unused excess".asComment());
+        self.reply("".asComment());
 
         emit(PoolCreatedEvent{
             poolId: poolId,
@@ -371,12 +371,18 @@ contract Lottery with Deployable, Ownable {
             claimInfo.info.set(msg.roundId, claimUser);
             self.claimData.set(msg.poolId, claimInfo);
         } else {
-            let claimInfo = claimPool!!.info.get(msg.roundId)!!;
+            let claimInfo = claimPool!!.info.get(msg.roundId);
             let claimUser = UserClaim{
-                user: claimInfo.user
+                user: emptyMap()
             };
-            claimUser.user.set(msg.receiver, true);
-
+            if (claimInfo != null) {
+                claimUser = UserClaim{
+                    user: claimInfo!!.user
+                };
+                claimUser.user.set(msg.receiver, true);
+            } else {
+                claimUser.user.set(msg.receiver, true);
+            }
             let currentClaimInfo = ClaimInfo {
                 info: claimPool!!.info
             };
@@ -394,7 +400,7 @@ contract Lottery with Deployable, Ownable {
             bounce: true,
             value: claimAmount,
             mode: SendRemainingValue | SendPayGasSeparately,
-            body: "Claim prize".asComment(),
+            body: "".asComment(),
         });
 
         emit(ClaimedEvent{

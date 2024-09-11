@@ -88,6 +88,47 @@ describe('Lottery', () => {
         return userTicket;
     }
 
+    async function claimPrize(claimer: any, airDropAmount: bigint, poolId: bigint, roundId: bigint) {
+        await buyTicket(claimer, poolId, roundId, 1n);
+        let ticket = await lottery.getUserTicketByAddress(poolId, roundId, claimer.address);
+        console.log(`User Ticket ${poolId}-${roundId}: `, ticket);
+
+        const signatureData = beginCell()
+            .storeInt(poolId, 32)
+            .storeInt(roundId, 32)
+            .storeAddress(claimer.address)
+            .storeCoins(airDropAmount)
+            .endCell();
+
+        const keyPair = await mnemonicToWalletKey(mnemonic);
+        const signature = sign(signatureData.hash(), keyPair.secretKey);
+        let signatureCell = beginCell().storeBuffer(signature).asSlice();
+
+
+        let claim = await lottery.send(
+            claimer.getSender(), {
+                value: toNano('0.02'),
+            },
+            {
+                $$type: 'Claim',
+                poolId: poolId,
+                roundId: roundId,
+                amount: airDropAmount,
+                receiver: claimer.address,
+                signature: signatureCell
+            }
+        );
+
+        const claimData = await lottery.getClaimData(poolId, roundId);
+        console.log(`Claim data ${poolId}-${roundId}: `, claimData);
+
+
+        const isClaimData = await lottery.getIsClaim(poolId, roundId, claimer.address);
+        console.log(`Is Claim ${poolId}-${roundId}: `, isClaimData);
+
+        return claim;
+    }
+
     async function setPublicKey() {
         await lottery.send(
             deployer.getSender(), {
@@ -165,6 +206,18 @@ describe('Lottery', () => {
         const getPool = await lottery.getPoolById(1n);
         console.log('getPool', getPool);
         expect(getPool?.poolId).toBe(1n);
+    });
+
+    it('should return roundID', async () => {
+        let round = await lottery.getRoundById(poolId, roundId);
+        console.log('Get round: ', round);
+        expect(round?.roundId).toBe(1n);
+    });
+
+    it('should return roundID 2', async () => {
+        let round = await lottery.getRoundById(poolId, 2n);
+        console.log('Get round: ', round);
+        expect(round?.roundId).toBe(2n);
     });
 
     it('should return user balance is enough', async () => {
@@ -251,66 +304,15 @@ describe('Lottery', () => {
         expect(resultByRound).not.toBeNull();
     })
 
-    it('should claim reward', async () => {
+    it('Claimer1 and Claimer2 claim reward same round', async () => {
         let claimer = await blockchain.treasury('claimer1');
         console.log('claimer 1: ', claimer.address);
         let claimer2 = await blockchain.treasury('claimer2');
         console.log('claimer 2: ', claimer2.address);
 
-        await buyTicket(claimer, poolId, roundId, 1n);
-        await buyTicket(claimer2, poolId, roundId, 1n);
-        console.log('Before claimer balance: ', await claimer.getBalance());
-        console.log('Before claimer2 balance: ', await claimer2.getBalance());
+        // Claimer1 claim round 1
+        let claim = await claimPrize(claimer, toNano(0.01), poolId, roundId);
 
-        let airDropAmount: bigint = toNano(0.01);
-        const signatureData = beginCell()
-            .storeInt(1, 32)
-            .storeInt(1, 32)
-            .storeAddress(claimer.address)
-            .storeCoins(airDropAmount)
-            .endCell();
-        const signatureData2 = beginCell()
-            .storeInt(1, 32)
-            .storeInt(1, 32)
-            .storeAddress(claimer2.address)
-            .storeCoins(airDropAmount)
-            .endCell();
-        const keyPair = await mnemonicToWalletKey(mnemonic);
-        const signature = sign(signatureData.hash(), keyPair.secretKey);
-        let signatureCell = beginCell().storeBuffer(signature).asSlice();
-
-        const signature2 = sign(signatureData2.hash(), keyPair.secretKey);
-        let signatureCell2 = beginCell().storeBuffer(signature2).asSlice();
-
-        let claim = await lottery.send(
-            claimer.getSender(), {
-                value: toNano('0.02'),
-            },
-            {
-                $$type: 'Claim',
-                poolId: poolId,
-                roundId: roundId,
-                amount: airDropAmount,
-                receiver: claimer.address,
-                signature: signatureCell
-            }
-        );
-
-        let claim2 = await lottery.send(
-            claimer2.getSender(), {
-                value: toNano('0.02'),
-            },
-            {
-                $$type: 'Claim',
-                poolId: poolId,
-                roundId: roundId,
-                amount: airDropAmount,
-                receiver: claimer2.address,
-                signature: signatureCell2
-            }
-        );
-        console.log('After claimer balance: ', await claimer.getBalance());
-        console.log('After claimer2 balance: ', await claimer2.getBalance());
         expect(claim.transactions).toHaveTransaction({
             from: claimer.address,
             to: lottery.address,
@@ -318,6 +320,14 @@ describe('Lottery', () => {
             success: true,
         });
 
+        expect(claim.transactions).toHaveTransaction({
+            from: lottery.address,
+            to: claimer.address,
+            success: true,
+        });
+
+        // Claimer2 claim round 1
+        let claim2 = await claimPrize(claimer2, toNano(0.01), poolId, roundId);
         expect(claim2.transactions).toHaveTransaction({
             from: claimer2.address,
             to: lottery.address,
@@ -325,61 +335,18 @@ describe('Lottery', () => {
             success: true,
         });
 
-
-        expect(claim.transactions).toHaveTransaction({
-            from: lottery.address,
-            to: claimer.address,
-            success: true,
-        });
         expect(claim2.transactions).toHaveTransaction({
             from: lottery.address,
             to: claimer2.address,
             success: true,
         });
-
-        const claimData = await lottery.getClaimData(poolId, roundId);
-        console.log('claimData', claimData);
-
-        const isClaimData = await lottery.getIsClaim(poolId, roundId, claimer.address);
-        console.log('is_claim', isClaimData);
-
-        const isClaimData2 = await lottery.getIsClaim(poolId, roundId, claimer2.address);
-        console.log('is_claim2', isClaimData2);
-
     });
     it('should be shown already claimed', async () => {
         let claimer = await blockchain.treasury('wallet');
         console.log('claimer 1: ', claimer.address);
-        console.log('claimer balance 1: ', await claimer.getBalance());
 
-        await buyTicket(claimer, poolId, roundId, 1n);
-
-        let airDropAmount: bigint = toNano(0.01);
-        const signatureData = beginCell()
-            .storeInt(1, 32)
-            .storeInt(1, 32)
-            .storeAddress(claimer.address)
-            .storeCoins(airDropAmount)
-            .endCell();
-        const keyPair = await mnemonicToWalletKey(mnemonic);
-        const signature = sign(signatureData.hash(), keyPair.secretKey);
-        let signatureCell = beginCell().storeBuffer(signature).asSlice();
-
-        let claim = await lottery.send(
-            claimer.getSender(), {
-                value: toNano('0.02'),
-            },
-            {
-                $$type: 'Claim',
-                poolId,
-                roundId,
-                amount: airDropAmount,
-                receiver: claimer.address,
-                signature: signatureCell
-            }
-        );
-        console.log('claimer 2: ', claimer.address);
-        console.log('claimer balance 2: ', await claimer.getBalance());
+        // Claim round 1
+        let claim = await claimPrize(claimer, toNano(0.01), poolId, roundId);
 
         expect(claim.transactions).toHaveTransaction({
             from: claimer.address,
@@ -394,25 +361,8 @@ describe('Lottery', () => {
             success: true,
         });
 
-        const claimData = await lottery.getClaimData(poolId, roundId);
-        console.log('claimData', claimData);
-
-        const isClaimData = await lottery.getIsClaim(poolId, roundId, claimer.address);
-        console.log('is_claim', isClaimData);
-
-        let claim2 = await lottery.send(
-            claimer.getSender(), {
-                value: toNano('0.02'),
-            },
-            {
-                $$type: 'Claim',
-                poolId,
-                roundId,
-                amount: airDropAmount,
-                receiver: claimer.address,
-                signature: signatureCell
-            }
-        );
+        // Claim again
+        let claim2 = await claimPrize(claimer, toNano(0.01), poolId, roundId);
 
         expect(claim2.transactions).toHaveTransaction({
             from: claimer.address,
@@ -427,12 +377,42 @@ describe('Lottery', () => {
             to: claimer.address,
             success: true,
         });
+    });
 
-        const claimData2 = await lottery.getClaimData(poolId, roundId);
-        console.log('claimData2', claimData2);
+    it('one user claim 2 rounds', async () => {
+        let claimer = await blockchain.treasury('claimer1');
 
-        const isClaimData2 = await lottery.getIsClaim(poolId, roundId, claimer.address);
-        console.log('is_claim2', isClaimData2);
+        // Claim round 1
+        let claim = await claimPrize(claimer, toNano(0.01), poolId, roundId);
 
+        expect(claim.transactions).toHaveTransaction({
+            from: claimer.address,
+            to: lottery.address,
+            value: 20000000n,
+            success: true,
+        });
+
+        expect(claim.transactions).toHaveTransaction({
+            from: lottery.address,
+            to: claimer.address,
+            success: true,
+        });
+
+        // Claim round 2
+        await sleep(5000); // waiting for next round
+        let claim2 = await claimPrize(claimer, toNano(0.01), poolId, 2n);
+
+        expect(claim2.transactions).toHaveTransaction({
+            from: claimer.address,
+            to: lottery.address,
+            value: 20000000n,
+            success: true,
+        });
+
+        expect(claim2.transactions).toHaveTransaction({
+            from: lottery.address,
+            to: claimer.address,
+            success: true,
+        });
     });
 });
