@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { HStack } from '@/components/ui/Utilities';
 import { useAuth } from '@/hooks/useAuth';
 import { usePoolContract } from '@/hooks/usePoolContract';
+import { useWinPools } from '@/hooks/useWinPools';
 import { delay, onMutateError } from '@/lib/common';
 import { useClaimStore } from '@/stores/ClaimStore';
 import React, { FC, useState } from 'react';
@@ -20,7 +21,9 @@ const ClaimAction: FC<Props> = ({ poolId, roundId, isLoading }) => {
   const { user } = useAuth();
   const setIsOpen = useClaimStore.use.setIsOpen();
 
-  const { mutate: confirm, isPending } = useConfirmClaimMutation({
+  const { refetch } = useWinPools();
+
+  const { mutateAsync: confirm, isPending: loadingConfirmClaim } = useConfirmClaimMutation({
     onError: onMutateError,
   });
 
@@ -34,7 +37,7 @@ const ClaimAction: FC<Props> = ({ poolId, roundId, isLoading }) => {
     setIsOpen(false);
   };
 
-  const { mutate: getClaimSignature } = useGetClaimSignatureMutation({
+  const { mutate: getClaimSignature, isPending: loadingSignature } = useGetClaimSignatureMutation({
     onSuccess: async (data) => {
       try {
         setLoading(true);
@@ -70,13 +73,13 @@ const ClaimAction: FC<Props> = ({ poolId, roundId, isLoading }) => {
 
         if (newLastTxHash !== lastTxHash) {
           handleTransaction('success', 'Claim successful');
-          confirm({
+          await confirm({
             roundId: roundId,
           });
+          refetch();
         }
       } catch (error) {
         onMutateError(error);
-        setLoading(false);
       } finally {
         setLoading(false);
       }
@@ -94,8 +97,8 @@ const ClaimAction: FC<Props> = ({ poolId, roundId, isLoading }) => {
   return (
     <HStack pos={'center'}>
       <Button
-        disabled={isLoading || loading || isPending}
-        loading={loading || isPending}
+        disabled={isLoading || loading || loadingConfirmClaim || loadingSignature}
+        loading={loading || loadingConfirmClaim || loadingSignature}
         onClick={handleClaim}
         size={'lg'}
         className="rounded-lg w-fit bg-primary text-white min-w-52"

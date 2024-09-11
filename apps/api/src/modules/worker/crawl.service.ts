@@ -338,7 +338,9 @@ export class CrawlWorkerService {
       fromAddress: this.parseAddress(inMsgs.info.src.toString()),
       toAddress: this.parseAddress(tx.inMessage.info.dest.toString()),
       quantity: Number(payloadInMsg.quantity),
-      value: fromNano(inMsgs.info['value']?.coins ?? 0),
+      value: payloadOutMsg?.totalCost
+        ? fromNano(payloadOutMsg?.totalCost)
+        : '0',
       type: TransactionType.BUY,
       blockTimestamp: tx.lt.toString(),
       transactionHash: txHash,

@@ -9,16 +9,17 @@ import {
 } from '@ton/core';
 
 export function loadTicketBoughtEvent(slice: Slice) {
-  const sc_0 = slice;
-  if (sc_0.loadUint(32) !== 1249282626) {
+  let sc_0 = slice;
+  if (sc_0.loadUint(32) !== 2301065806) {
     throw Error('Invalid prefix');
   }
-  const _poolId = sc_0.loadIntBig(257);
-  const _roundId = sc_0.loadIntBig(257);
-  const _quantity = sc_0.loadIntBig(257);
-  const sc_1 = sc_0.loadRef().beginParse();
-  const _buyer = sc_1.loadAddress();
-  const _tickets = sc_1.loadStringRefTail();
+  let _poolId = sc_0.loadIntBig(257);
+  let _roundId = sc_0.loadIntBig(257);
+  let _quantity = sc_0.loadIntBig(257);
+  let sc_1 = sc_0.loadRef().beginParse();
+  let _buyer = sc_1.loadAddress();
+  let _tickets = sc_1.loadStringRefTail();
+  let _totalCost = sc_1.loadCoins();
   return {
     $$type: 'TicketBoughtEvent' as const,
     poolId: _poolId,
@@ -26,6 +27,7 @@ export function loadTicketBoughtEvent(slice: Slice) {
     quantity: _quantity,
     buyer: _buyer,
     tickets: _tickets,
+    totalCost: _totalCost,
   };
 }
 

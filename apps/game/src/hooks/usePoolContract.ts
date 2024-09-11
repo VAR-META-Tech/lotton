@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { env } from '@/lib/const';
 import { useTonWallet } from '@tonconnect/ui-react';
 import { roundNumber } from '@/lib/common';
+import { useQuery } from '@tanstack/react-query';
 
 interface IBuyTicket {
   poolId: number;
@@ -24,7 +25,6 @@ interface IClaimPrize {
 }
 
 export function usePoolContract() {
-  const [claimFee, setClaimFee] = useState(0);
   const client = useTonClient();
   const wallet = useTonWallet();
   const { sender } = useTonConnect();
@@ -41,6 +41,16 @@ export function usePoolContract() {
 
     return client.open(contract) as OpenedContract<Pool>;
   }, [client]);
+
+  const { data: claimFee = 0 } = useQuery({
+    queryKey: ['claimFee'],
+    queryFn: async () => {
+      if (!poolContract) return;
+      const fee = await poolContract.getClaimFee();
+      return fee;
+    },
+    enabled: !!poolContract,
+  });
 
   const buyTicket = async (data: IBuyTicket) => {
     try {
@@ -90,20 +100,6 @@ export function usePoolContract() {
       limit: 1,
     });
   };
-
-  const getClaimFee = useCallback(async () => {
-    if (!poolContract) return;
-
-    setClaimFee(0);
-
-    const fee = await poolContract.getClaimFee();
-
-    setClaimFee(Number(fee));
-  }, [poolContract]);
-
-  useEffect(() => {
-    getClaimFee();
-  }, [getClaimFee]);
 
   return {
     address: poolContract?.address.toString(),

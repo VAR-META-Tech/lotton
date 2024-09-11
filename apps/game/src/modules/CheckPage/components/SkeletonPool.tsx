@@ -2,7 +2,7 @@ import React from 'react';
 
 export const SkeletonPool = () => {
   return (
-    <div className="animate-pulse shadow-lg border w-full relative max-w-lg grid grid-cols-6">
+    <div className="animate-pulse shadow-lg border w-full relative grid grid-cols-6">
       <div className="bg-background-2 col-span-6 border flex items-center px-4 py-1">
         <div className="bg-slate-200 w-32 rounded-md h-7" />
       </div>

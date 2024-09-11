@@ -34,13 +34,13 @@ const PoolRound: FC<Props> = ({ roundActive, isEndRound = false }) => {
                 {!!endTime && `Draw ${format(new Date(endTime * 1000), 'MMM dd, yyyy, HH:mm a')}`}
               </div>
 
-              {!!isEndRound && (
+              {/* {!!isEndRound && (
                 <Link href={'#'} target="_blank" className="text-xs text-primary flex gap-2 items-center">
                   <span>Winning Ticket Block</span>
 
                   <Icons.newTab size={12} />
                 </Link>
-              )}
+              )} */}
             </div>
           </HStack>
         </motion.div>
