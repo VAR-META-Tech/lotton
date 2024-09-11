@@ -247,10 +247,10 @@ builder $PoolCreatedEvent$_store(builder build_0, (int, int, int, int, int, int,
 cell $PoolCreatedEvent$_store_cell((int, int, int, int, int, int, int, cell, slice, cell) v) inline;
 
 ;; $TicketBoughtEvent$_store
-builder $TicketBoughtEvent$_store(builder build_0, (int, int, int, slice, slice) v) inline;
+builder $TicketBoughtEvent$_store(builder build_0, (int, int, int, slice, slice, int) v) inline_ref;
 
 ;; $TicketBoughtEvent$_store_cell
-cell $TicketBoughtEvent$_store_cell((int, int, int, slice, slice) v) inline;
+cell $TicketBoughtEvent$_store_cell((int, int, int, slice, slice, int) v) inline;
 
 ;; $ClaimedEvent$_store
 builder $ClaimedEvent$_store(builder build_0, (int, int, int, slice) v) inline;
@@ -444,8 +444,8 @@ int $global_random(int $min, int $max) impure inline;
 ;; $SendParameters$_constructor_to_value_mode
 ((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline;
 
-;; $TicketBoughtEvent$_constructor_roundId_poolId_quantity_buyer_tickets
-((int, int, int, slice, slice)) $TicketBoughtEvent$_constructor_roundId_poolId_quantity_buyer_tickets(int $roundId, int $poolId, int $quantity, slice $buyer, slice $tickets) inline;
+;; $TicketBoughtEvent$_constructor_roundId_poolId_quantity_totalCost_buyer_tickets
+((int, int, int, slice, slice, int)) $TicketBoughtEvent$_constructor_roundId_poolId_quantity_totalCost_buyer_tickets(int $roundId, int $poolId, int $quantity, int $totalCost, slice $buyer, slice $tickets) inline;
 
 ;; $Lottery$_fun_buyTicket
 ((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_buyTicket((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, int $quantity) impure inline_ref;

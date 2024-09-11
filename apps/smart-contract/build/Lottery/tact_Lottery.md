@@ -1,6 +1,6 @@
 # TACT Compilation Report
 Contract: Lottery
-BOC Size: 5246 bytes
+BOC Size: 5101 bytes
 
 # Types
 Total Types: 34
@@ -134,8 +134,8 @@ TLB: `round_created#b994e298 roundId:int257 poolId:int257 ticketPrice:uint32 sta
 Signature: `RoundCreated{roundId:int257,poolId:int257,ticketPrice:uint32,startTime:uint32,endTime:uint32}`
 
 ## TicketBoughtEvent
-TLB: `ticket_bought_event#4a768a42 poolId:int257 roundId:int257 quantity:int257 buyer:address tickets:^string = TicketBoughtEvent`
-Signature: `TicketBoughtEvent{poolId:int257,roundId:int257,quantity:int257,buyer:address,tickets:^string}`
+TLB: `ticket_bought_event#89277a4e poolId:int257 roundId:int257 quantity:int257 buyer:address tickets:^string totalCost:coins = TicketBoughtEvent`
+Signature: `TicketBoughtEvent{poolId:int257,roundId:int257,quantity:int257,buyer:address,tickets:^string,totalCost:coins}`
 
 ## ClaimedEvent
 TLB: `claimed_event#369f3352 poolId:int257 roundId:int257 amount:coins receiver:address = ClaimedEvent`

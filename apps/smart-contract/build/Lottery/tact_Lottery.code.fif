@@ -146,7 +146,7 @@ PROGRAM{
   DECLPROC $TicketPayoutResponse$_constructor_ticket
   DECLPROC $Lottery$_fun_createTicket
   DECLPROC $SendParameters$_constructor_to_value_mode
-  DECLPROC $TicketBoughtEvent$_constructor_roundId_poolId_quantity_buyer_tickets
+  DECLPROC $TicketBoughtEvent$_constructor_roundId_poolId_quantity_totalCost_buyer_tickets
   DECLPROC $Lottery$_fun_buyTicket
   DECLPROC $Result$_constructor_rounds
   DECLPROC $WinningNumbersDrawnEvent$_constructor_poolId_roundId_winningNumber
@@ -1010,14 +1010,14 @@ PROGRAM{
     $PoolCreatedEvent$_store INLINECALLDICT
     ENDC
   }>
-  $TicketBoughtEvent$_store PROCINLINE:<{
-    1249282626 PUSHINT
-    s0 s6 XCHG2
+  $TicketBoughtEvent$_store PROCREF:<{
+    2301065806 PUSHINT
+    s0 s7 XCHG2
     32 STU
-    s1 s4 XCHG
+    s1 s5 XCHG
     257 PUSHINT
     STIX
-    s1 s2 XCHG
+    s1 s3 XCHG
     257 PUSHINT
     STIX
     257 PUSHINT
@@ -1031,13 +1031,15 @@ PROGRAM{
     ENDC
     ROT
     STREF
+    ROT
+    STGRAMS
     ENDC
     SWAP
     STREF
   }>
   $TicketBoughtEvent$_store_cell PROCINLINE:<{
     NEWC
-    5 -ROLL
+    6 -ROLL
     $TicketBoughtEvent$_store INLINECALLDICT
     ENDC
   }>
@@ -2006,8 +2008,9 @@ PROGRAM{
     PUSHNULL
     PUSHNULL
   }>
-  $TicketBoughtEvent$_constructor_roundId_poolId_quantity_buyer_tickets PROCINLINE:<{
-    s3 s4 XCHG
+  $TicketBoughtEvent$_constructor_roundId_poolId_quantity_totalCost_buyer_tickets PROCINLINE:<{
+    s4 s5 XCHG
+    ROT
   }>
   $Lottery$_fun_buyTicket PROCREF:<{
     s10 PUSH
@@ -2064,27 +2067,6 @@ PROGRAM{
     __tact_context_get_sender INLINECALLDICT
     s1 s2 XCPU
     MUL
-    DUP
-    __tact_int_to_string INLINECALLDICT
-    B{b5ee9c7241010101001100001e64756d7028746f74616c436f7374299f59adb9} B>boc <s PUSHSLICE
-    x{46696c6520636f6e7472616374732f6c6f74746572792e746163743a3236313a393a} PUSHSLICE
-    STRDUMP
-    DROP
-    STRDUMP
-    DROP
-    STRDUMP
-    DROP
-    __tact_context_get INLINECALLDICT
-    $Context$_get_value INLINECALLDICT
-    __tact_int_to_string INLINECALLDICT
-    B{b5ee9c7241010101001700002a64756d7028636f6e7465787428292e76616c75652957da40a0} B>boc <s PUSHSLICE
-    x{46696c6520636f6e7472616374732f6c6f74746572792e746163743a3236323a393a} PUSHSLICE
-    STRDUMP
-    DROP
-    STRDUMP
-    DROP
-    STRDUMP
-    DROP
     58383 PUSHINT
     __tact_context_get INLINECALLDICT
     $Context$_get_value INLINECALLDICT
@@ -2102,23 +2084,23 @@ PROGRAM{
     IF:<{
       __tact_context_get INLINECALLDICT
       $Context$_get_value INLINECALLDICT
-      s0 s12 XCHG2
+      s12 PUSH
       SUB
-      s12 s(-1) PUXC
+      s13 s(-1) PUXC
       2 PUSHINT
       $SendParameters$_constructor_to_value_mode INLINECALLDICT
       $global_send INLINECALLDICT
-    }>ELSE<{
-      s11 POP
     }>
-    s4 s13 XCHG
-    s3 s14 XCHG
-    s12 s11 s10 XCHG3
-    $TicketBoughtEvent$_constructor_roundId_poolId_quantity_buyer_tickets INLINECALLDICT
+    s5 s14 XCHG
+    s4 s15 XCHG
+    s3 s13 XCHG
+    s11 s12 s0 XCHG3
+    $TicketBoughtEvent$_constructor_roundId_poolId_quantity_totalCost_buyer_tickets INLINECALLDICT
     $TicketBoughtEvent$_store_cell INLINECALLDICT
     $global_emit INLINECALLDICT
     5 5 BLKSWAP
     s3 s4 XCHG
+    SWAP
   }>
   $Result$_constructor_rounds PROCINLINE:<{
   }>
