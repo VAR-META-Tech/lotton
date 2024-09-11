@@ -94,7 +94,7 @@ const ClaimAction: FC<Props> = ({ poolId, roundId, isLoading }) => {
   return (
     <HStack pos={'center'}>
       <Button
-        disabled={isLoading}
+        disabled={isLoading || loading || isPending}
         loading={loading || isPending}
         onClick={handleClaim}
         size={'lg'}
