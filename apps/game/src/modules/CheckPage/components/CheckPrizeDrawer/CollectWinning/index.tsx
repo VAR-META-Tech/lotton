@@ -80,7 +80,7 @@ const CollectWinning: FC<Props> = ({ poolId, roundId }) => {
         claimFee={claimFee}
       />
 
-      <ClaimAction poolId={poolId} roundId={roundId} />
+      <ClaimAction isLoading={loading} poolId={poolId} roundId={roundId} />
     </VStack>
   );
 };

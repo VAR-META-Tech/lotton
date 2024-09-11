@@ -11,9 +11,10 @@ import { toast } from 'sonner';
 interface Props {
   poolId: number;
   roundId: number;
+  isLoading: boolean;
 }
 
-const ClaimAction: FC<Props> = ({ poolId, roundId }) => {
+const ClaimAction: FC<Props> = ({ poolId, roundId, isLoading }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { claimPrize, getLastTx } = usePoolContract();
   const { user } = useAuth();
@@ -93,6 +94,7 @@ const ClaimAction: FC<Props> = ({ poolId, roundId }) => {
   return (
     <HStack pos={'center'}>
       <Button
+        disabled={isLoading}
         loading={loading || isPending}
         onClick={handleClaim}
         size={'lg'}
