@@ -54,6 +54,7 @@ const CollectTotal: FC<Props> = ({ rewardValue, feeValue, totalValue, totalUsdVa
             <SubCollectTotalItem
               title={`Fees ${claimFee}%`}
               titleClassName="font-extralight text-sm"
+              valueClassName="text-sm"
               value={
                 <HStack spacing={8}>
                   <span>-{roundNumber(feeValue || 0)}</span>
