@@ -24,7 +24,7 @@ const CheckWinner = () => {
 
     if (!poolList?.length) {
       return (
-        <VStack spacing={4} justify={'center'} align={'center'}>
+        <VStack spacing={4} align={'center'} className="bg-[#FFCA3A] border p-4 rounded-lg shadow-sm text-black">
           <span className="text-center text-2xl">No prizes to collect...</span>
           <span className="text-center text-2xl">Better luck next time!</span>
         </VStack>
@@ -32,15 +32,11 @@ const CheckWinner = () => {
     }
 
     return (
-      <VStack spacing={16} align={'center'}>
-        <Title title="Are you a winner?" />
+      <VStack spacing={16} align={'center'} className="bg-[#FFCA3A] border p-4 rounded-lg shadow-sm">
+        <Title title="You have already won!" className="text-black" />
 
-        <Button
-          onClick={() => setIsOpen(true)}
-          size={'lg'}
-          className="rounded-lg w-fit bg-gradient-to-r from-primary to-[#ED9BD6] text-white"
-        >
-          CHECK NOW
+        <Button onClick={() => setIsOpen(true)} size={'lg'} className="rounded-lg w-fit bg-secondary text-white">
+          WATCH PRIZES
         </Button>
 
         <CheckPrizeDrawer poolList={poolList} />

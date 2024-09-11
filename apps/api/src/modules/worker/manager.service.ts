@@ -85,6 +85,7 @@ export class ManagerService {
       this.poolRoundRepository,
       this.configService,
       this.userTicketRepository,
+      this.prizesRepository,
     );
   }
 

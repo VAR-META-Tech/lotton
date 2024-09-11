@@ -474,6 +474,9 @@ export class PoolService {
           winningMatch: 1,
         })
         .having('ticket.id IS NOT NULL')
+        .andHaving('ticket.status = :status', {
+          status: UserTicketStatus.BOUGHT,
+        })
         .getMany(),
       this.getTotalTicketsRound(queryBuilder),
     ]);

@@ -57,7 +57,7 @@ export const RoundButton: FCC<IRoundButtonProps> = ({ children, isDisabled, ...p
     <button
       disabled={isDisabled}
       className={cn('active:opacity-40', {
-        'opacity-30': isDisabled,
+        'opacity-30 active:opacity-30': isDisabled,
       })}
       {...props}
     >

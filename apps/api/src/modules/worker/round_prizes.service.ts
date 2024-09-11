@@ -10,10 +10,10 @@ import {
   TupleBuilder,
   WalletContractV4,
 } from '@ton/ton';
-import { MoreThanOrEqual, type Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, type Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
-import type { Pool, PoolRound, UserTicket } from '@/database/entities';
+import type { Pool, PoolRound, Prizes, UserTicket } from '@/database/entities';
 import { PoolStatusEnum, UserTicketStatus } from '@/shared/enums';
 import { getLogger } from '@/utils/logger';
 
@@ -41,6 +41,7 @@ export class RoundPrizesService {
     private poolRoundRepository: Repository<PoolRound>,
     private configService: ConfigService<StellaConfig>,
     private userTicketRepository: Repository<UserTicket>,
+    private prizesRepository: Repository<Prizes>,
   ) {
     this.tonClient = new TonClient({
       endpoint: this.configService.get('contract.rpcEndpoint', {
@@ -91,7 +92,58 @@ export class RoundPrizesService {
     // await this.publicKey();
 
     this.revertStatusTicketClaim();
+    this.drawRound();
+    this.airdropPool();
+  }
 
+  getPoolsAirdrop() {
+    return this.poolRepository.findBy({
+      status: PoolStatusEnum.ACTIVE,
+      endTime: LessThanOrEqual(dayjs().subtract(5, 'minutes').unix()),
+    });
+  }
+
+  getPrizes(poolIdOnChain: number) {
+    return this.prizesRepository
+      .createQueryBuilder('prize')
+      .where('prize.poolIdOnChain = :poolIdOnChain', { poolIdOnChain })
+      .select([
+        'winningPrizes',
+        'claimedPrizes',
+        'poolIdOnChain',
+        'roundIdOnChain',
+      ])
+      .getRawMany();
+  }
+
+  getTotalPrizesPool(poolIdOnChain: number) {
+    return this.prizesRepository
+      .createQueryBuilder('prize')
+      .where('prize.poolIdOnChain = :poolIdOnChain', { poolIdOnChain })
+      .orderBy('prize.roundIdOnChain', 'DESC')
+      .select(['totalPrizes'])
+      .getRawOne();
+  }
+
+  async airdropPool() {
+    const pools = await this.getPoolsAirdrop();
+    for (const pool of pools) {
+      const [prizes, totalPrizes] = await Promise.all([
+        this.getPrizes(pool.poolIdOnChain),
+        this.getTotalPrizesPool(pool.poolIdOnChain),
+      ]);
+      const remainWinningPrize = prizes.reduce(
+        (acc, prize) =>
+          (acc += (prize.winningPrizes ?? 0) - (prize.claimedPrizes ?? 0)),
+        0,
+      );
+
+      const airdropPrize = totalPrizes?.totalPrizes + remainWinningPrize;
+      console.log(pool.id, airdropPrize);
+    }
+  }
+
+  async drawRound() {
     const pools = await this.getPoolsAvailable();
     for (const pool of pools) {
       const rounds = await this.getRoundsAvailable(pool.id);

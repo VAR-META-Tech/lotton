@@ -36,7 +36,7 @@ export const useInfinityPoolJoinedQuery = createInfiniteQuery<IGetPoolJoinedData
   queryKey: ['infinite:/api/pools/joined'],
   fetcher: (variables, { pageParam = 1 }) => getPoolJoinedRequest({ ...variables, page: pageParam }),
   getNextPageParam: (lastPage) => {
-    if (lastPage?.meta?.currentPage === lastPage?.meta?.totalPages) return null;
+    if (lastPage?.meta?.currentPage >= lastPage?.meta?.totalPages) return null;
     return lastPage?.meta?.currentPage + 1;
   },
   initialPageParam: 1,
