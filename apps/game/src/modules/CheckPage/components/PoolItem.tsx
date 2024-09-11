@@ -1,17 +1,18 @@
-import { memo, useCallback, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { HStack } from '@/components/ui/Utilities';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-import { IGetPoolJoinedItem, IGetPoolJoinedItemRound } from '@/apis/pools';
-import { Carousel } from '@/components/ui/carousel';
-import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
-import { getRoundActiveNumber } from '@/lib/common';
-import BuyTicketDrawer from '@/modules/LandingPage/components/PoolList/BuyTicketDrawer';
-import { ChangeRoundAction } from './ChangeRoundAction';
 import { DrawTime } from './DrawTime';
 import { TicketDetailDrawer } from './TicketDetailDrawer';
+import { IGetPoolJoinedItem, IGetPoolJoinedItemRound } from '@/apis/pools';
+import BuyTicketDrawer from '@/modules/LandingPage/components/PoolList/BuyTicketDrawer';
+import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
+import { getRoundActiveNumber } from '@/lib/common';
+import { Carousel } from '@/components/ui/carousel';
+import { useDetailTicketStore } from '@/stores/DetailTicketStore';
+import { ChangeRoundAction } from './ChangeRoundAction';
 
 type Props = {
   pool: IGetPoolJoinedItem;
@@ -19,6 +20,8 @@ type Props = {
 
 export const PoolItem = ({ pool }: Props) => {
   const [activeRound, setActiveRound] = useState<number>(0);
+  const setPoolId = useDetailTicketStore.use.setPoolId();
+  const store = useDetailTicketStore.use.store();
 
   const { pool: poolDetail, rounds: roundsDetail } = useGetPoolDetail({
     isActive: true,
@@ -26,25 +29,34 @@ export const PoolItem = ({ pool }: Props) => {
   });
 
   // pool joined
-  const rounds = pool?.rounds || [];
+  const rounds = useMemo(() => pool?.rounds || [], [pool?.rounds]);
   const roundActive = rounds[activeRound];
 
   // pool detail
   const roundDetailActive = roundsDetail[activeRound];
   const totalTickets = roundActive?.totalTicket ?? 0;
 
-  const handleChangeRoundActive = useCallback(
-    (upRound: boolean) => {
-      if (upRound) {
-        if (activeRound + 1 >= rounds.length) return;
-        setActiveRound(activeRound + 1);
-      } else {
-        if (activeRound - 1 < 0) return;
-        setActiveRound(activeRound - 1);
-      }
-    },
-    [activeRound, rounds.length]
-  );
+  useEffect(() => {
+    if (!store?.roundId) return;
+
+    const indexRound = rounds?.findIndex((round) => {
+      return round?.id === store?.roundId;
+    });
+
+    if (indexRound < 0) return;
+
+    setActiveRound(indexRound || 0);
+  }, [rounds, store?.roundId]);
+
+  const handleChangeRoundActive = (upRound: boolean) => {
+    if (upRound) {
+      if (activeRound + 1 >= rounds.length) return;
+      setActiveRound(activeRound + 1);
+    } else {
+      if (activeRound - 1 < 0) return;
+      setActiveRound(activeRound - 1);
+    }
+  };
 
   return (
     <div className="shadow-lg w-full grid grid-cols-6 relative">
@@ -75,9 +87,10 @@ export const PoolItem = ({ pool }: Props) => {
         </motion.div>
 
         <Carousel>
-          <TicketDetailDrawer pool={pool} activeRound={activeRound} setActiveRound={setActiveRound}>
-            <Button className="mx-auto rounded-lg text-white">View your tickets</Button>
-          </TicketDetailDrawer>
+          <Button onClick={() => setPoolId(pool?.id)} className="mx-auto rounded-lg text-white">
+            View your tickets
+          </Button>
+          <TicketDetailDrawer pool={pool} activeRound={activeRound} setActiveRound={setActiveRound} />
         </Carousel>
       </div>
 

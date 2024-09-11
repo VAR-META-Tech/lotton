@@ -27,17 +27,13 @@ const getDefaultTimeLeft = (): TimeLeft => ({
 });
 
 const PoolCountDown: FC<Props> = ({ roundActive, isBeforeRoundEnd, onForceUpdate, isLoadingCountDown }) => {
-  const endTime = useMemo(() => Number(roundActive?.endTime || 0), [roundActive?.endTime]);
   const setPoolId = useBuyTicketStore.use.setPoolId();
 
+  const endTime = useMemo(() => Number(roundActive?.endTime || 0), [roundActive?.endTime]);
+
   const calculateTimeLeft = useCallback((): TimeLeft => {
-    if (!endTime) return getDefaultTimeLeft();
-
-    const targetDate = new Date(Number(endTime) * 1000).getTime();
     const now = Date.now();
-
-    if (isNaN(targetDate)) return getDefaultTimeLeft();
-
+    const targetDate = new Date(endTime * 1000).getTime();
     const difference = targetDate - now;
 
     if (difference <= 0) return getDefaultTimeLeft();
@@ -53,7 +49,7 @@ const PoolCountDown: FC<Props> = ({ roundActive, isBeforeRoundEnd, onForceUpdate
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft);
 
   useEffect(() => {
-    if (!endTime || isNaN(new Date(Number(endTime) * 1000).getTime())) return;
+    if (!endTime) return;
 
     const timer = setInterval(() => {
       const newTimeLeft = calculateTimeLeft();
@@ -61,7 +57,6 @@ const PoolCountDown: FC<Props> = ({ roundActive, isBeforeRoundEnd, onForceUpdate
 
       if (newTimeLeft.days === 0 && newTimeLeft.hours === 0 && newTimeLeft.minutes === 0 && newTimeLeft.seconds === 0) {
         clearInterval(timer);
-
         setTimeout(() => {
           onForceUpdate();
           setPoolId(undefined);
@@ -72,70 +67,63 @@ const PoolCountDown: FC<Props> = ({ roundActive, isBeforeRoundEnd, onForceUpdate
     return () => clearInterval(timer);
   }, [endTime, calculateTimeLeft, onForceUpdate, setPoolId]);
 
-  const isEnd = timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0;
+  const renderCountdown = () => {
+    if (isLoadingCountDown) {
+      return (
+        <HStack pos="center" align="center" className="text-white font-medium flex-1">
+          <Skeleton className="h-9 w-32 bg-gray-color" />
+        </HStack>
+      );
+    }
 
-  if (isLoadingCountDown) {
-    return (
-      <HStack pos="center" align="center" className="text-white font-medium flex-1">
-        <Skeleton className="h-9 w-32 bg-gray-color" />
-      </HStack>
-    );
-  }
-  if (isEnd && !roundActive?.winningCode) {
-    return (
-      <HStack pos="center" align="center" className="text-white font-medium flex-1">
-        Drawing
-      </HStack>
-    );
-  }
+    if (timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0 && timeLeft.seconds === 0) {
+      return (
+        <HStack pos="center" align="center" className="text-white font-medium flex-1">
+          {roundActive?.winningCode ? 'Closed' : 'Drawing'}
+        </HStack>
+      );
+    }
 
-  if (isEnd) {
-    return (
-      <HStack pos="center" align="center" className="text-white font-medium flex-1 ">
-        Closed
-      </HStack>
-    );
-  }
+    if (!isBeforeRoundEnd) {
+      return (
+        <HStack pos="center" align="center" className="text-white font-medium flex-1">
+          Upcoming
+        </HStack>
+      );
+    }
 
-  if (!isBeforeRoundEnd)
     return (
-      <HStack pos="center" align="center" className="text-white font-medium flex-1 ">
-        Upcoming
-      </HStack>
+      <div className="text-white text-center font-medium flex justify-center gap-3">
+        <TimeItem value={timeLeft.days} description="day" />
+        <TimeItem value={timeLeft.hours} description="hour" />
+        <TimeItem value={timeLeft.minutes} description="min" />
+        <TimeItem value={timeLeft.seconds} description="sec" />
+      </div>
     );
+  };
 
-  return (
-    <div className="text-white text-center font-medium flex justify-center gap-3">
-      <TimeItem value={timeLeft.days} description="day" />
-      <TimeItem value={timeLeft.hours} description="hour" />
-      <TimeItem value={timeLeft.minutes} description="min" />
-      <TimeItem value={timeLeft.seconds} description="sec" />
-      {/* <span>s until the draw</span> */}
-    </div>
-  );
+  return renderCountdown();
 };
 
 export default memo(PoolCountDown);
 
-interface ITimeItemProps extends HTMLAttributes<HTMLDivElement> {
+interface TimeItemProps extends HTMLAttributes<HTMLDivElement> {
   value: number;
   description: string;
-  valueClassName?: ITimeItemProps['className'];
-  descriptionClassName?: ITimeItemProps['className'];
+  valueClassName?: string;
+  descriptionClassName?: string;
 }
 
-const TimeItem: FC<ITimeItemProps> = ({
+const TimeItem: FC<TimeItemProps> = ({
   value,
   description,
   valueClassName,
   descriptionClassName,
   className,
   ...props
-}) => {
-  return (
-    <VStack spacing={0} className={cn(className)} {...props}>
-      <span className={cn('text-lg leading-none', valueClassName)}>{String(value).padStart(2, '0')}</span>
-      <span className={cn('text-xs leading-none', descriptionClassName)}>{description}</span>
-    </VStack>
-  );
-};
+}) => (
+  <VStack spacing={0} className={cn(className)} {...props}>
+    <span className={cn('text-lg leading-none', valueClassName)}>{String(value).padStart(2, '0')}</span>
+    <span className={cn('text-xs leading-none', descriptionClassName)}>{description}</span>
+  </VStack>
+);

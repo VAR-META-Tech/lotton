@@ -7,7 +7,7 @@ export const ACCORDION_VALUE = {
 };
 
 export const MAX_TICKET = 16;
-export const MIN_TICKET = 0;
+export const MIN_TICKET = 1;
 
 export const MIN_ROUND = 1;
 

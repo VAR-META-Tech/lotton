@@ -10,34 +10,23 @@ interface Props {
   rewardValue: number;
   feeValue: number;
   totalValue: number;
-  usdValue: number;
-  feeUsdValue: number;
   totalUsdValue: number;
   isLoading: boolean;
   claimFee: number;
 }
 
-const CollectTotal: FC<Props> = ({
-  rewardValue,
-  feeValue,
-  totalValue,
-  usdValue,
-  feeUsdValue,
-  totalUsdValue,
-  isLoading,
-  claimFee,
-}) => {
+const CollectTotal: FC<Props> = ({ rewardValue, feeValue, totalValue, totalUsdValue, isLoading, claimFee }) => {
   const showTotalComponent = useMemo(() => {
     if (isLoading) {
       return (
         <VStack>
           <VStack spacing={8} className="border-y border-y-gray-color py-4">
             <CollectTotalSkeleton />
-            <CollectTotalSkeleton />
+            <CollectTotalSkeleton titleClassName="h-5" />
           </VStack>
 
           <VStack spacing={2}>
-            <CollectTotalSkeleton />
+            <CollectTotalSkeleton titleClassName="h-8" valueClassName="h-8" />
 
             <HStack pos={'right'}>
               <Skeleton className="h-4 w-28 bg-background" />
@@ -52,27 +41,26 @@ const CollectTotal: FC<Props> = ({
         <div className="border-t border-t-gray-color">
           <VStack spacing={8} className="pt-4">
             <SubCollectTotalItem
-              titleClassName="font-bold"
+              className="font-bold"
               title={'Subtotal Prizes'}
               value={
-                <HStack>
+                <HStack spacing={8}>
                   <span>{roundNumber(rewardValue || 0)}</span>
 
                   <TonImage width={24} height={24} />
                 </HStack>
               }
-              usdValue={String(roundNumber(usdValue || 0))}
             />
             <SubCollectTotalItem
               title={`Fees ${claimFee}%`}
+              titleClassName="font-extralight text-sm"
               value={
-                <HStack>
+                <HStack spacing={8}>
                   <span>-{roundNumber(feeValue || 0)}</span>
 
                   <TonImage width={24} height={24} />
                 </HStack>
               }
-              usdValue={String(roundNumber(feeUsdValue || 0))}
             />
           </VStack>
         </div>
@@ -90,7 +78,7 @@ const CollectTotal: FC<Props> = ({
         />
       </VStack>
     );
-  }, [claimFee, feeUsdValue, feeValue, isLoading, rewardValue, totalUsdValue, totalValue, usdValue]);
+  }, [claimFee, feeValue, isLoading, rewardValue, totalUsdValue, totalValue]);
 
   return showTotalComponent;
 };
@@ -100,28 +88,35 @@ export default CollectTotal;
 interface ISubCollectTotalItem extends HTMLAttributes<HTMLDivElement> {
   title: string;
   value: string | ReactNode;
-  usdValue: string;
   titleClassName?: ISubCollectTotalItem['className'];
+  valueClassName?: ISubCollectTotalItem['className'];
 }
 
-const SubCollectTotalItem: FC<ISubCollectTotalItem> = ({ title, value, titleClassName }) => {
+const SubCollectTotalItem: FC<ISubCollectTotalItem> = ({ title, value, titleClassName, valueClassName, className }) => {
   return (
-    <HStack pos={'apart'}>
+    <HStack pos={'apart'} className={className}>
       <span className={cn('text-right', titleClassName)}>{title}</span>
-      <span className="text-primary text-xl">{value}</span>
+      <span className={cn('text-primary text-lg', valueClassName)}>{value}</span>
     </HStack>
   );
 };
 
-interface ICollectTotalItem extends ISubCollectTotalItem {}
+interface ICollectTotalItem extends ISubCollectTotalItem {
+  usdValue: string;
+}
 
-const CollectTotalItem: FC<ICollectTotalItem> = ({ title, value, usdValue }) => {
+const CollectTotalItem: FC<ICollectTotalItem> = ({ title, value, usdValue, titleClassName, valueClassName }) => {
   return (
     <VStack spacing={0} className="border-t border-t-gray-color pt-4 ">
       <HStack pos={'apart'}>
-        <span className="font-bold">{title}</span>
+        <span className={cn('font-bold text-2xl', titleClassName)}>{title}</span>
 
-        <span className="text-2xl bg-gradient-to-r from-primary font-bold to-[#ED9BD6] inline-block text-transparent bg-clip-text">
+        <span
+          className={cn(
+            'text-2xl bg-gradient-to-r from-primary font-bold to-[#ED9BD6] inline-block text-transparent bg-clip-text',
+            valueClassName
+          )}
+        >
           {value}
         </span>
       </HStack>

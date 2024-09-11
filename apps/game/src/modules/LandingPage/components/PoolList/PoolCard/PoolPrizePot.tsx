@@ -82,14 +82,14 @@ const PoolPrizePot: FC<Props> = ({ pool, roundActive, isEndRound = false, isBefo
               />
 
               <div className="border-y border-y-navigate-tab py-4">
-                <UserTicketCount holdingTicket={data || 0} />
+                <UserTicketCount holdingTicket={data || 0} poolId={pool?.id || 0} roundId={roundActive?.id || 0} />
               </div>
             </VStack>
           </motion.div>
         </AnimatePresence>
       </VStack>
     );
-  }, [roundActiveNumber, roundActive?.winningCode, data]);
+  }, [roundActiveNumber, roundActive?.winningCode, roundActive?.id, data, pool?.id]);
 
   const renderContent = useMemo(() => {
     if (!isEndRound) {

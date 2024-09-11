@@ -116,7 +116,6 @@ const BuyTicketForm: FC<Props> = ({ pool, roundActive }) => {
       <VStack spacing={24}>
         <TicketPriceSection
           ticketPrice={ticketPrice}
-          tokenSymbol={tokenSymbol}
           amount={amount}
           isMin={isMin}
           isMax={isMax}

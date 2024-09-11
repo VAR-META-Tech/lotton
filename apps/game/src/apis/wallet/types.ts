@@ -1,13 +1,13 @@
-export interface IGetBalanceParams {
+export interface IGetAddressInformationParams {
   address: string;
 }
 
-export interface IGetBalanceResponse {
+export interface IGetAddressInformationResponse {
   ok: boolean;
-  result: IGetBalanceResult;
+  result: IGetAddressInformationResult;
 }
 
-export interface IGetBalanceResult {
+export interface IGetAddressInformationResult {
   '@type': string;
   balance: string;
   code: string;
@@ -35,7 +35,7 @@ export interface IBlockId {
   file_hash: string;
 }
 
-export interface IGetExtendedAddressInformationParams extends IGetBalanceParams {}
+export interface IGetExtendedAddressInformationParams extends IGetAddressInformationParams {}
 
 export interface IGetExtendedAddressInformationResponse {
   ok: boolean;
@@ -78,4 +78,11 @@ export interface IGetExtendedAddressInformationAccountState {
   '@type': string;
   wallet_id: string;
   seqno: number;
+}
+
+export interface IGetAddressBalanceParams extends IGetAddressInformationParams {}
+
+export interface IGetAddressBalanceResponse {
+  ok: boolean;
+  result: string;
 }

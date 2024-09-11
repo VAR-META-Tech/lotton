@@ -11,7 +11,6 @@ import { MAX_TICKET } from '@/modules/LandingPage/utils/const';
 
 interface Props {
   ticketPrice: number;
-  tokenSymbol: string;
   amount: number;
   isMin: boolean;
   isMax: boolean;
@@ -23,7 +22,7 @@ interface Props {
   }>;
 }
 
-const TicketPriceSection: FC<Props> = ({ ticketPrice, tokenSymbol, amount, isMin, isMax, onAmountChange, errors }) => {
+const TicketPriceSection: FC<Props> = ({ ticketPrice, amount, isMin, isMax, onAmountChange, errors }) => {
   const { setValue } = useFormContext<BuyTicketType>();
 
   const handleChangeMaxAmount = () => {
@@ -41,7 +40,7 @@ const TicketPriceSection: FC<Props> = ({ ticketPrice, tokenSymbol, amount, isMin
             <ChangeAmountButton isDisabled={isMax} onClick={() => onAmountChange(true)} icon={Icons.plus} />
 
             <ChangeAmountButton isDisabled={false} className="w-16" onClick={handleChangeMaxAmount}>
-              <span className="text-primary">MAX</span>
+              <span className="text-white">MAX</span>
             </ChangeAmountButton>
           </HStack>
         </HStack>
@@ -51,8 +50,8 @@ const TicketPriceSection: FC<Props> = ({ ticketPrice, tokenSymbol, amount, isMin
       <HStack pos="apart">
         <span className="text-base font-medium">Ticket Price:</span>
         <HStack spacing={8}>
+          <span className="text-2xl">{prettyNumber(ticketPrice)}</span>
           <Image src="/images/tokens/ton_symbol.webp" width={24} height={24} alt="ton" />
-          <span className="text-2xl">{`${prettyNumber(ticketPrice)} ${tokenSymbol}`}</span>
         </HStack>
       </HStack>
     </VStack>

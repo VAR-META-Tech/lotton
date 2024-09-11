@@ -2,29 +2,43 @@ import { Spinner } from '@/components/ui/spinner';
 import { HStack, VStack } from '@/components/ui/Utilities';
 import { useAuth } from '@/hooks/useAuth';
 import { ROUTES } from '@/lib/routes';
-import Link from 'next/link';
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { ConnectWallet } from '../../ConnectWallet';
+import { useDetailTicketStore } from '@/stores/DetailTicketStore';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   holdingTicket: number;
+  poolId: number;
+  roundId: number;
 }
 
-const UserTicketCount: FC<Props> = ({ holdingTicket }) => {
+const UserTicketCount: FC<Props> = ({ holdingTicket, poolId, roundId }) => {
+  const router = useRouter();
   const { isLoggedIn, status } = useAuth();
+  const setPoolId = useDetailTicketStore.use.setPoolId();
+  const setRoundId = useDetailTicketStore.use.setRoundId();
+
+  const handleNavigate = useCallback(() => {
+    router.push(ROUTES.CHECK);
+    setPoolId(poolId);
+    setRoundId(roundId);
+  }, [poolId, roundId, router, setPoolId, setRoundId]);
 
   const renderComponent = useMemo(() => {
     if (status === 'waiting') return <Spinner className="w-8 h-8 text-white" />;
 
     if (isLoggedIn) {
       return (
-        <VStack className="text-xs" align="center" spacing={0}>
+        <VStack className="text-xs h-10" align="center" spacing={0}>
           <span className="text-center">
             You have <span className="text-sm">{holdingTicket}</span> ticket this round{' '}
           </span>
-          <Link href={ROUTES.CHECK} className="text-sm font-bold text-primary text-center">
-            View your tickets
-          </Link>
+          {!!holdingTicket && (
+            <button onClick={handleNavigate} className="text-sm font-bold text-primary text-center">
+              View your tickets
+            </button>
+          )}
         </VStack>
       );
     }
@@ -34,7 +48,7 @@ const UserTicketCount: FC<Props> = ({ holdingTicket }) => {
         <ConnectWallet />
       </HStack>
     );
-  }, [holdingTicket, isLoggedIn, status]);
+  }, [handleNavigate, holdingTicket, isLoggedIn, status]);
 
   return <div>{renderComponent}</div>;
 };

@@ -6,7 +6,7 @@ import Pool from '@/contracts/pool';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { env } from '@/lib/const';
 import { useTonWallet } from '@tonconnect/ui-react';
-import { onMutateError, roundNumber } from '@/lib/common';
+import { roundNumber } from '@/lib/common';
 
 interface IBuyTicket {
   poolId: number;
@@ -60,7 +60,7 @@ export function usePoolContract() {
         value: roundNumber(Number(data?.quantity) * Number(data?.ticketPrice)),
       });
     } catch (error) {
-      onMutateError(error as string);
+      throw new Error(error as string);
     }
   };
 
@@ -81,7 +81,7 @@ export function usePoolContract() {
 
       return await poolContract?.claimPrize(provider, sender, messageBody);
     } catch (error) {
-      onMutateError(error as string);
+      throw new Error(error as string);
     }
   };
 
@@ -92,12 +92,16 @@ export function usePoolContract() {
   };
 
   const getClaimFee = useCallback(async () => {
-    if (!poolContract) return;
-    setClaimFee(0);
+    try {
+      if (!poolContract) return;
+      setClaimFee(0);
 
-    const fee = await poolContract.getClaimFee();
+      const fee = await poolContract.getClaimFee();
 
-    setClaimFee(Number(fee));
+      setClaimFee(Number(fee));
+    } catch (error) {
+      throw new Error(error as string);
+    }
   }, [poolContract]);
 
   useEffect(() => {
