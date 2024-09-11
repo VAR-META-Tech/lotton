@@ -173,7 +173,7 @@ export const CreatePool = () => {
   
     methods.setValue('endTime', startDate);
   }, [startTime, sequency, totalRound]);
-  
+
   return (
     <VStack className="mx-4 md:mx-10 mb-24 bg-white rounded-sm min-h-[12.5rem] p-8 md:px-24 md:py-12">
        {/* <Button onClick={testLastTx}>Test get last TX</Button> */}
