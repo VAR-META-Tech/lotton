@@ -26,13 +26,13 @@ export const HOW_TO_PLAY_ITEMS = [
     title: 'Receive TON testnet',
     description: (
       <ul className="text-gray-color text-xs">
-        <li>
+        <li className="text-justify">
           1. Set up Tonkeeper wallet and add a testnet wallet by following the instructions:{' '}
           <Link href={TESTGIVER_TON_BOT_URL} target="_blank" className="underline">
             link
           </Link>
         </li>
-        <li>
+        <li className="text-justify">
           2. Access{' '}
           <Link href={TONKEEPER_DOC_URL} target="_blank" className="underline">
             link
