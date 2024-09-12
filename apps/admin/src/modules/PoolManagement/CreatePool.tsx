@@ -7,6 +7,8 @@ import { useCreatePool } from '@/apis/pool/mutations';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import { Address, Dictionary } from '@ton/core';
+import { useTonWallet } from '@tonconnect/ui-react';
+import dayjs from 'dayjs';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { parseUnits } from 'viem';
@@ -39,7 +41,8 @@ export const CreatePool = () => {
   const queryClient = useQueryClient();
   const { createPool, getLastTx } = useCounterContract();
   const [loading, setLoading] = useState<boolean>(false);
-  const { connected } = useTonConnect();
+  const wallet = useTonWallet();
+  const connected = !!wallet;
 
   const methods = useForm<PoolSchema>({
     resolver: zodResolver(poolSchema),
@@ -164,11 +167,12 @@ export const CreatePool = () => {
 
     if (isNaN(sequencyNum) || isNaN(totalRoundNum)) return;
 
-    const startDate = new Date(startTime);
-
-    startDate.setDate(startDate.getDate() + sequencyNum * Number(totalRoundNum));
-
-    methods.setValue('endTime', startDate);
+    methods.setValue(
+      'endTime',
+      dayjs(startTime)
+        .add(sequencyNum * totalRoundNum, 'seconds')
+        .toDate()
+    );
   }, [startTime, sequency, totalRound]);
 
   return (
