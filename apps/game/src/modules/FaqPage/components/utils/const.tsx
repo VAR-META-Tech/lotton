@@ -7,7 +7,7 @@ export const FAQ_VALUE = {
   NO_WINNERS: 'What if there are no winners?',
   MULTIPLE_MATCHES_NO_PRIZE: `My ticket matches several numbers but I can't claim a prize`,
   SWAP_TICKETS: 'Can I swap my tickets back to TON/NOT?',
-  CLAIM_PRIZE_MANUALLY: 'Do I need to manually claim the prize?',
+  CLAIM_PRIZE_MANUALLY: 'If I win, do I need to manually claim the prize?',
   TICKET_LIMIT_PER_TRANSACTION: 'Why can I only buy 16 tickets per transaction?',
 };
 
@@ -18,7 +18,7 @@ export const FAQ_LABEL = {
   NO_WINNERS: 'What if there are no winners?',
   MULTIPLE_MATCHES_NO_PRIZE: `My ticket matches several numbers but I can't claim a prize`,
   SWAP_TICKETS: 'Can I swap my tickets back to TON/NOT?',
-  CLAIM_PRIZE_MANUALLY: 'Do I need to manually claim the prize?',
+  CLAIM_PRIZE_MANUALLY: 'If I win, do I need to manually claim the prize?',
   TICKET_LIMIT_PER_TRANSACTION: 'Why can I only buy 16 tickets per transaction?',
 };
 
@@ -29,21 +29,13 @@ export const FAQ_DATA = [
     content: (
       <VStack spacing={20} className="text-xs text-gray-color">
         <span className="text-justify">
-          To obtain the ticket values we take the transaction hash from the transaction the user purchased the tickets
-          with. Starting from the right and working our way to the left we get the ticket values depending on how many
-          tickets were purchased in that transaction.
+          Your ticket consists of 4 characters, a combination of numbers and uppercase letters. After you complete the
+          payment, the system will automatically generate these characters randomly on the blockchain (on-chain) to form
+          a ticket.
         </span>
-
-        <div className="space-y-2">
-          <span className="text-justify">Here is an example:</span>
-          <ul className="list-disc pl-4">
-            <li>
-              Ticket Price: 10 NOT User sent 40 NOT and produced this transaction hash:
-              6771975b6b2671850bcd8de6bd48915b674d3d5990a5fc4fbf770298cb25d87a
-            </li>
-            <li>Ticket 1: D87A Ticket 2: CB25 Ticket 3: 0298 Ticket 4: BF77</li>
-          </ul>
-        </div>
+        <span className="text-justify">
+          This ticket is then stored directly on the blockchain to ensure transparency and safety.
+        </span>
       </VStack>
     ),
   },
@@ -53,33 +45,28 @@ export const FAQ_DATA = [
     content: (
       <VStack spacing={20} className="text-xs text-gray-color">
         <span className="text-justify">
-          Every lottery round has a draw date. At that predefined draw date we take the tast tx of last block of
-          epochfirst block produced on that date and get the winning ticket from the hash of that block.
+          After the ticket purchase period ends, the system will randomly generate a winning ticket directly on the TON
+          blockchain. This process ensures fairness and transparency in determining winning tickets.
         </span>
-
-        <VStack spacing={8}>
-          <span className="text-justify">For example, if that block was:</span>
-          <span className="text-justify">6771975b6b2671850bcd8de6bd48915b674d3d5990a5fc4fbf770298cb25d87a</span>
-          <span className="text-justify">the winning ticket would be: D87A</span>
-        </VStack>
+      </VStack>
+    ),
+  },
+  {
+    title: FAQ_LABEL.UNCLAIMED_PRIZE,
+    value: FAQ_VALUE.UNCLAIMED_PRIZE,
+    content: (
+      <VStack spacing={20} className="text-xs text-gray-color">
+        <span className="text-justify">
+          The system will automatically calculate the prize amount for each winner. Winners can claim their rewards at
+          any time they want. However, it should be noted that when receiving rewards, the system will deduct a 10% fee
+          from the total prize value.
+        </span>
       </VStack>
     ),
   },
   {
     title: FAQ_LABEL.NO_WINNERS,
     value: FAQ_VALUE.NO_WINNERS,
-    content: (
-      <VStack spacing={20} className="text-xs text-gray-color">
-        <span className="text-justify">
-          If you don't claim your prize within the next two rounds, the prize will be distributed to all players in this
-          round. Please note that players will need to pay a gas fee to claim their share.
-        </span>
-      </VStack>
-    ),
-  },
-  {
-    title: FAQ_LABEL.MULTIPLE_MATCHES_NO_PRIZE,
-    value: FAQ_VALUE.MULTIPLE_MATCHES_NO_PRIZE,
     content: (
       <VStack spacing={20} className="text-xs text-gray-color">
         <span className="text-justify">
@@ -90,12 +77,23 @@ export const FAQ_DATA = [
     ),
   },
   {
+    title: FAQ_LABEL.MULTIPLE_MATCHES_NO_PRIZE,
+    value: FAQ_VALUE.MULTIPLE_MATCHES_NO_PRIZE,
+    content: (
+      <VStack spacing={20} className="text-xs text-gray-color">
+        <span className="text-justify">
+          Tickets are only eligible to win if the numbers/letters match from left to right.
+        </span>
+      </VStack>
+    ),
+  },
+  {
     title: FAQ_LABEL.SWAP_TICKETS,
     value: FAQ_VALUE.SWAP_TICKETS,
     content: (
       <VStack spacing={20} className="text-xs text-gray-color">
         <span className="text-justify">
-          Tickets are only eligible to win if the numbers/letters match from left to right.
+          No, once purchased you will not be able to convert your tickets back into TON/NOT.{' '}
         </span>
       </VStack>
     ),
@@ -106,7 +104,8 @@ export const FAQ_DATA = [
     content: (
       <VStack spacing={20} className="text-xs text-gray-color">
         <span className="text-justify">
-          No, once purchased you will not be able to convert your tickets back into TON/NOT.
+          Yes, you will need to click the "Check Now" button under the "Are you a winner?" section of the Check tab. You
+          can also view your tickets from previous rounds in the section below "Finished Rounds".
         </span>
       </VStack>
     ),
