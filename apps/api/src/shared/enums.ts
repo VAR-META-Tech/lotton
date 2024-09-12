@@ -77,3 +77,11 @@ export enum UserTicketStatus {
   CONFIRMING_CLAIM = 'confirmingClaim',
   CONFIRMED_CLAIM = 'confirmedClaim',
 }
+
+export enum TelegramBotAction {
+  COMMAND_FAQ = '/faq',
+  COMMAND_START = '/start',
+  COMMAND_HELP = '/help',
+  CALLBACK_FAQ = 'faq',
+  CALLBACK_HELP = 'help',
+}
