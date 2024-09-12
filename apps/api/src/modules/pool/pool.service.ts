@@ -228,11 +228,12 @@ export class PoolService {
 
   async find(pagination: QueryPaginationDto, query: PoolQueryDto) {
     try {
-      const { status, search } = query;
+      const { status, search, order } = query;
 
       const queryBuilder = this.poolRepository
         .createQueryBuilder('pool')
-        .where('status = :status', { status: PoolStatusEnum.ACTIVE });
+        .where('status = :status', { status: PoolStatusEnum.ACTIVE })
+        .orderBy('pool.id', order);
 
       if (search) {
         queryBuilder.andWhere('pool.name LIKE :search ', {
@@ -285,10 +286,37 @@ export class PoolService {
 
       const pool = await poolQueryBuilder
         .clone()
-        .leftJoinAndSelect('pool.currency', 'token')
+        .leftJoinAndSelect('pool.currency', 'currency')
         .leftJoinAndSelect('pool.rounds', 'rounds')
         .leftJoinAndSelect('pool.poolPrizes', 'poolPrizes')
         .where('pool.id = :poolId', { poolId: id })
+        .select([
+          'rounds.id',
+          'rounds.roundIdOnChain',
+          'rounds.roundNumber',
+          'rounds.startTime',
+          'rounds.endTime',
+          'rounds.winningCode',
+          'rounds.winningBlock',
+          'currency.name',
+          'currency.decimals',
+          'currency.symbol',
+          'poolPrizes.id',
+          'poolPrizes.matchNumber',
+          'poolPrizes.allocation',
+          'pool.createdAt',
+          'pool.updatedAt',
+          'pool.deletedAt',
+          'pool.id',
+          'pool.poolIdOnChain',
+          'pool.name',
+          'pool.startTime',
+          'pool.endTime',
+          'pool.sequency',
+          'pool.totalRounds',
+          'pool.status',
+          'pool.ticketPrice',
+        ])
         .getOne();
 
       pool.rounds = await Promise.all(

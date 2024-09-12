@@ -23,7 +23,7 @@ export class RoundService {
   ) {}
   async findRounds(query: RoundQueryDto, pagination: QueryPaginationDto) {
     try {
-      const { status, search, poolId } = query;
+      const { status, search, poolId, order } = query;
       const queryBuilder = this.roundRepository
         .createQueryBuilder('poolRound')
         .leftJoin('poolRound.pool', 'pool')
@@ -40,7 +40,8 @@ export class RoundService {
           'currency.name as tokenName',
           'currency.decimals as tokenDecimals',
           '(CASE WHEN prizes.totalPrizes IS NOT NULL AND prizes.totalPrizes > 0 THEN prizes.totalPrizes ELSE 0 END) as prizePool',
-        ]);
+        ])
+        .orderBy('poolRound.id', order);
 
       if (search) {
         queryBuilder.andWhere('poolRound.winningCode LIKE :search ', {

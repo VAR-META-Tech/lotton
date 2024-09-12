@@ -9,7 +9,7 @@ import {
   Min,
 } from 'class-validator';
 
-import { PoolRoundStatusEnum } from '@/shared/enums';
+import { PoolRoundStatusEnum, SortEnum } from '@/shared/enums';
 
 export class RoundQueryDto {
   @ApiProperty({
@@ -28,6 +28,14 @@ export class RoundQueryDto {
   @IsString()
   @IsOptional()
   search?: string;
+
+  @ApiProperty({
+    description: 'order',
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(SortEnum)
+  order?: SortEnum = SortEnum.ASC;
 
   @ApiProperty({
     description: 'poolId',

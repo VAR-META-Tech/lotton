@@ -8,14 +8,17 @@ export const poolFilterSchema = z.object({
 });
 
 export type PoolFilterSchema = z.infer<typeof poolFilterSchema>;
+  
+export interface CommonQuery  {
+  page?: number;
+  pageSizes?: number;
+  order?: 'DESC' | 'ASC'
+}
 
-export interface IGetAllPoolParams {
+export interface IGetAllPoolParams extends CommonQuery {
   search?: string;
   status?: string;
   name?: string;
-  page?: number;
-  pageSizes?: number;
-  sort?: string;
 }
 
 const poolNumberValidation = (fieldName: string) =>

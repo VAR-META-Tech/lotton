@@ -13,6 +13,7 @@ export interface IGetPoolsParams {
   page?: number;
   pageSizes?: number;
   status?: string;
+  order?: 'DESC' | 'ASC'
 }
 
 export interface IPoolItem {
@@ -93,6 +94,7 @@ export interface IGetRoundsParams {
   page?: number;
   pageSizes?: number;
   status?: string;
+  order?: 'DESC' | 'ASC'
 }
 
 export interface IGetRoundsWinningTicketParams {
