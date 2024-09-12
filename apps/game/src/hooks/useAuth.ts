@@ -1,6 +1,7 @@
 import { ILoginByWalletUser } from '@/apis/auth';
 import { convertTonWalletToBase64 } from '@/lib/common';
 import { useUserStore } from '@/stores';
+import { useTonWallet } from '@tonconnect/ui-react';
 
 interface ISetUserData {
   accessToken: string;
@@ -14,6 +15,9 @@ export const useAuth = () => {
   const user = useUserStore.use.user();
   const status = useUserStore.use.status();
 
+  const wallet = useTonWallet();
+  const connected = !!wallet;
+
   const setAccessToken = useUserStore.use.setAccessToken();
   const setRefreshToken = useUserStore.use.setRefreshToken();
   const setUser = useUserStore.use.setUser();
@@ -26,7 +30,7 @@ export const useAuth = () => {
   };
 
   return {
-    isLoggedIn: !!accessToken && !!refreshToken && !!user && status === 'ready',
+    isLoggedIn: !!accessToken && !!refreshToken && !!user && status === 'ready' && connected,
     accessToken,
     refreshToken,
     user,

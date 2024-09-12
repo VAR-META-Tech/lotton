@@ -72,11 +72,11 @@ const ClaimAction: FC<Props> = ({ poolId, roundId, isLoading }) => {
         // }
 
         // if (newLastTxHash !== lastTxHash) {
-        handleTransaction('success', 'Transaction claim in progress');
         await confirm({
           roundId: roundId,
         });
         refetch();
+        handleTransaction('success', 'Transaction claim in progress');
         // }
       } catch (error) {
         onMutateError(error);

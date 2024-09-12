@@ -27,7 +27,7 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
   const [currentRound, setCurrentRound] = useState<number>(0);
   const [isLoadingCountDown, setIsLoadingCountDown] = useState<boolean>(false);
 
-  const { pool, rounds, refetch } = useGetPoolDetail({ poolId: poolId || 0, isActive });
+  const { pool, rounds } = useGetPoolDetail({ poolId: poolId || undefined, isActive });
   const roundActive = rounds[currentRound];
 
   const getIsEndRound = () => {
@@ -63,21 +63,12 @@ const PoolCard: FC<Props> = ({ poolId, isShow, setIsShow, className, isActive, .
 
   useEffect(() => {
     const currentActiveRound = getCurrentRound();
-
-    setCurrentRound(currentActiveRound);
+    if (currentActiveRound > -1) setCurrentRound(currentActiveRound);
   }, [getCurrentRound]);
 
   const handleForceUpdate = useCallback(() => {
     forceUpdate();
   }, [forceUpdate]);
-
-  useEffect(() => {
-    const refetchInterval = setInterval(() => {
-      refetch();
-    }, 10000);
-
-    return () => clearInterval(refetchInterval);
-  }, [refetch]);
 
   useEffect(() => {
     if (!isLoadingCountDown) return;

@@ -22,7 +22,7 @@ const PaymentSummary: FC<Props> = ({ totalAmount, tokenSymbol, balance, price, e
       <span className="text-base font-bold">You pay:</span>
       <HStack spacing={8} align="center">
         <span className="text-2xl">{prettyNumber(roundNumber(totalAmount))}</span>
-        <Image src="/images/tokens/ton_symbol.webp" width={30} height={30} alt="ton" />
+        <Image src="/images/tokens/ton_symbol.webp" width={24} height={24} alt="ton" />
       </HStack>
     </HStack>
     <HStack pos="apart">

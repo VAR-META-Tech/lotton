@@ -1,13 +1,12 @@
-import { useTonClient } from './useTonClient';
-import { useAsyncInitialize } from './useAsyncInitialize';
-import { useTonConnect } from './useTonConnect';
-import { Address, beginCell, OpenedContract } from '@ton/core';
 import Pool from '@/contracts/pool';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { env } from '@/lib/const';
-import { useTonWallet } from '@tonconnect/ui-react';
 import { roundNumber } from '@/lib/common';
+import { env } from '@/lib/const';
 import { useQuery } from '@tanstack/react-query';
+import { Address, beginCell, OpenedContract, toNano } from '@ton/core';
+import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
+import { useMemo } from 'react';
+import { useAsyncInitialize } from './useAsyncInitialize';
+import { useTonClient } from './useTonClient';
 
 interface IBuyTicket {
   poolId: number;
@@ -27,7 +26,7 @@ interface IClaimPrize {
 export function usePoolContract() {
   const client = useTonClient();
   const wallet = useTonWallet();
-  const { sender } = useTonConnect();
+  const [tonConnectUI] = useTonConnectUI();
 
   const provider = useMemo(() => {
     if (!client) return;
@@ -53,25 +52,26 @@ export function usePoolContract() {
   });
 
   const buyTicket = async (data: IBuyTicket) => {
-    try {
-      if (!provider || !wallet) return;
+    if (!provider || !wallet) return;
 
-      const messageBody = beginCell()
-        .storeUint(3748203161, 32)
-        .storeInt(data?.poolId, 257) //poolId
-        .storeInt(data?.roundId, 257) //roundId
-        .storeInt(data?.quantity, 257) //quantity
-        .endCell();
+    const messageBody = beginCell()
+      .storeUint(3748203161, 32)
+      .storeInt(data?.poolId, 257) //poolId
+      .storeInt(data?.roundId, 257) //roundId
+      .storeInt(data?.quantity, 257) //quantity
+      .endCell();
 
-      return await poolContract?.buyTicket({
-        provider,
-        via: sender,
-        messageBody,
-        value: roundNumber(Number(data?.quantity) * Number(data?.ticketPrice)),
-      });
-    } catch (error) {
-      throw new Error(error as string);
-    }
+    const tx = {
+      validUntil: Math.floor(Date.now() / 1000) + 360,
+      messages: [
+        {
+          address: env.CONTRACT_ADDRESS,
+          amount: toNano(roundNumber(Number(data?.quantity) * Number(data?.ticketPrice) + 0.5)).toString(),
+          payload: messageBody.toBoc().toString('base64'), // payload with comment in body
+        },
+      ],
+    };
+    return await tonConnectUI.sendTransaction(tx);
   };
 
   const claimPrize = async (data: IClaimPrize) => {
@@ -89,7 +89,18 @@ export function usePoolContract() {
         .storeRef(signatureCell) //signature
         .endCell();
 
-      return await poolContract?.claimPrize(provider, sender, messageBody);
+      const tx = {
+        validUntil: Math.floor(Date.now() / 1000) + 360,
+        messages: [
+          {
+            address: env.CONTRACT_ADDRESS,
+            amount: toNano('0.05').toString(),
+            payload: messageBody.toBoc().toString('base64'), // payload with comment in body
+          },
+        ],
+      };
+
+      return await tonConnectUI.sendTransaction(tx);
     } catch (error) {
       throw new Error(error as string);
     }

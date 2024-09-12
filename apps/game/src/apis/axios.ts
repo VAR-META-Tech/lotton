@@ -4,8 +4,8 @@ import axios from 'axios';
 
 import { env } from '@/lib/const';
 import { refreshTokenRequest } from './auth';
-import Router from 'next/router';
-import { ROUTES } from '@/lib/routes';
+// import Router from 'next/router';
+// import { ROUTES } from '@/lib/routes';
 
 export const request = axios.create({
   baseURL: env.API_URL,
@@ -24,16 +24,12 @@ const onRefreshToken = async () => {
 
       return data?.accessToken;
     } catch (e) {
-      store?.setAccessToken('');
-      store?.setRefreshToken('');
-      Router.replace(ROUTES.HOME);
+      // Router.replace(ROUTES.HOME);
       store?.logout();
     }
   } else {
-    Router.replace(ROUTES.HOME);
+    // Router.replace(ROUTES.HOME);
     store?.logout();
-    store?.setAccessToken('');
-    store?.setRefreshToken('');
   }
 
   return null;
@@ -47,18 +43,21 @@ const handleSuccess = (res: AxiosResponse) => {
 };
 
 const handleError = async (error: any) => {
-  const originalRequest = error.config!;
+  // const originalRequest = error.config!;
   const data = error?.response?.data as any;
 
-  if (data?.meta?.message === 'Unauthorized' && data?.meta?.code === 401 && !originalRequest?._retry) {
-    originalRequest._retry = true;
+  // if (data?.meta?.code === 401 && !originalRequest?._retry) {
+  //   originalRequest._retry = true;
 
-    const token = await onRefreshToken();
+  //   const token = await onRefreshToken();
 
-    axios.defaults.headers.Authorization = `Bearer ${token}`;
+  //   axios.defaults.headers.Authorization = `Bearer ${token}`;
 
-    return request(originalRequest);
-  }
+  //   return request(originalRequest);
+  // }
+
+  const store = useUserStore.getState();
+  store?.logout();
 
   return Promise.reject(data?.meta || data || error);
 };
