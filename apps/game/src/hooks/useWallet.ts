@@ -14,17 +14,18 @@ export const useWallet = () => {
       address: wallet?.account?.address || '',
     },
     enabled: !!wallet,
+    refetchOnMount: true,
   });
 
-  useEffect(() => {
-    if (wallet) return;
+  // useEffect(() => {
+  //   if (wallet) return;
 
-    const refetchInterval = setInterval(() => {
-      refetch();
-    }, 5000);
+  //   const refetchInterval = setInterval(() => {
+  //     refetch();
+  //   }, 5000);
 
-    return () => clearInterval(refetchInterval);
-  }, [refetch, wallet]);
+  //   return () => clearInterval(refetchInterval);
+  // }, [refetch, wallet]);
 
   const handleDisconnectWallet = useCallback(async () => {
     logout();
