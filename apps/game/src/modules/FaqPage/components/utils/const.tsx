@@ -6,7 +6,7 @@ export const FAQ_VALUE = {
   UNCLAIMED_PRIZE: `What happens if I didn't claim my prize?`,
   NO_WINNERS: 'What if there are no winners?',
   MULTIPLE_MATCHES_NO_PRIZE: `My ticket matches several numbers but I can't claim a prize`,
-  SWAP_TICKETS: 'Can I swap my tickets back to VYFI?',
+  SWAP_TICKETS: 'Can I swap my tickets back to TON/NOT?',
   CLAIM_PRIZE_MANUALLY: 'Do I need to manually claim the prize?',
   TICKET_LIMIT_PER_TRANSACTION: 'Why can I only buy 16 tickets per transaction?',
 };
@@ -17,7 +17,7 @@ export const FAQ_LABEL = {
   UNCLAIMED_PRIZE: `What happens if I didn't claim my prize?`,
   NO_WINNERS: 'What if there are no winners?',
   MULTIPLE_MATCHES_NO_PRIZE: `My ticket matches several numbers but I can't claim a prize`,
-  SWAP_TICKETS: 'Can I swap my tickets back to VYFI?',
+  SWAP_TICKETS: 'Can I swap my tickets back to TON/NOT?',
   CLAIM_PRIZE_MANUALLY: 'Do I need to manually claim the prize?',
   TICKET_LIMIT_PER_TRANSACTION: 'Why can I only buy 16 tickets per transaction?',
 };
