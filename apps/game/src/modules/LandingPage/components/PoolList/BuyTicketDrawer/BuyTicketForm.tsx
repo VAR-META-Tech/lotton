@@ -80,8 +80,8 @@ const BuyTicketForm: FC<Props> = ({ pool, roundActive }) => {
 
     setLoading(true);
     try {
-      const lastTx = await getLastTx();
-      const lastTxHash = lastTx?.[0].hash().toString('base64');
+      // const lastTx = await getLastTx();
+      // const lastTxHash = lastTx?.[0].hash().toString('base64');
 
       await buyTicket({
         poolId: pool?.poolIdOnChain || 0,
@@ -90,20 +90,20 @@ const BuyTicketForm: FC<Props> = ({ pool, roundActive }) => {
         ticketPrice,
       });
 
-      let newTxHash = lastTxHash;
-      while (newTxHash === lastTxHash) {
-        await delay(5000);
-        const updatedTx = await getLastTx();
-        if (updatedTx?.[0].hash().toString('base64') === newTxHash) continue;
+      // let newTxHash = lastTxHash;
+      // while (newTxHash === lastTxHash) {
+      //   await delay(5000);
+      //   const updatedTx = await getLastTx();
+      //   if (updatedTx?.[0].hash().toString('base64') === newTxHash) continue;
 
-        const isAborted = (updatedTx?.[0]?.description as any)?.aborted;
+      //   const isAborted = (updatedTx?.[0]?.description as any)?.aborted;
 
-        if (isAborted) return handleTransaction('error', 'Buy tickets unsuccessful');
+      //   if (isAborted) return handleTransaction('error', 'Buy tickets unsuccessful');
 
-        newTxHash = updatedTx?.[0].hash().toString('base64');
-      }
+      //   newTxHash = updatedTx?.[0].hash().toString('base64');
+      // }
 
-      handleTransaction('success', 'Buy tickets successful');
+      handleTransaction('success', 'Transaction buy tickets in progress');
     } catch (error) {
       onMutateError(error);
     } finally {

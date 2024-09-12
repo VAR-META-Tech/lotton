@@ -6,9 +6,14 @@ import { useGetTokens } from '@/apis/pool';
 import { useCreatePool } from '@/apis/pool/mutations';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
+import { Address, Dictionary } from '@ton/core';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { parseUnits } from 'viem';
 
+import { ROUTES } from '@/lib/routes';
+import { useCounterContract } from '@/hooks/useCounterContract';
+import { useTonConnect } from '@/hooks/useTonConnect';
 import { Button } from '@/components/ui/button';
 import { SelectField, TextField } from '@/components/ui/FormField';
 import { DateTimePickerField } from '@/components/ui/FormField/DateTimePickerField';
@@ -16,21 +21,17 @@ import FormWrapper from '@/components/ui/FormWrapper';
 import { HStack, VStack } from '@/components/ui/Utilities';
 
 import { poolSchema, PoolSchema } from './components/types';
-import { ROUTES } from '@/lib/routes';
-import { useCounterContract } from '@/hooks/useCounterContract';
-import { Address, Dictionary } from '@ton/core';
-import { parseUnits } from 'viem';
-import { useTonConnect } from '@/hooks/useTonConnect';
 
 export const SEQUENCY_OPTIONS = [
-  { label: '1 day', value: '1' },
-  { label: '3 days', value: '3' },
-  { label: '1 week', value: '7' },
-  { label: '2 weeks', value: '14' },
-  { label: '1 month', value: '30' },
-  { label: '2 months', value: '60' },
-  { label: '3 months', value: '90' },
-  { label: '6 months', value: '180' },
+  { label: '2 minutes', value: '120' },
+  { label: '1 day', value: '86400' },
+  { label: '3 days', value: '259200' },
+  { label: '1 week', value: '604800' },
+  { label: '2 weeks', value: '1209600' },
+  { label: '1 month', value: '2592000' },
+  { label: '2 months', value: '5184000' },
+  { label: '3 months', value: '7776000' },
+  { label: '6 months', value: '15552000' },
 ];
 
 export const CreatePool = () => {
@@ -66,77 +67,73 @@ export const CreatePool = () => {
 
   const { mutateAsync: createPoolMutate, isPending: isPendingCreate } = useCreatePool({
     onSuccess: () => {
-      setLoading(true)
+      setLoading(true);
       // queryClient.invalidateQueries({ queryKey: ['/pools'] });
       // route.push(ROUTES.POOL);
       // toast.success('Create new pool successfully!');
     },
     onError: (error) => {
-      setLoading(false)
+      setLoading(false);
       toast.error(`${error.message}`);
     },
   });
-  
+
   const handleSubmit = async (values: PoolSchema) => {
     try {
-      await createPoolMutate(
-        {
-          name: values.name,
-          currency: Number(values.currency),
-          sequency: Number(values.sequency) * 86400,
-          totalRounds: Number(values.totalRounds),
-          startTime: String(new Date(values.startTime).getTime() / 1000),
-          ticketPrice: Number(parseUnits(values.ticketPrice, 9)),
-          poolPrizes: [
-            {
-              matchNumber: 1,
-              allocation: Number(values.match1),
-            },
-            {
-              matchNumber: 2,
-              allocation: Number(values.match2),
-            },
-            {
-              matchNumber: 3,
-              allocation: Number(values.match3),
-            },
-            {
-              matchNumber: 4,
-              allocation: Number(values.match4),
-            },
-          ],
-        },
-      );
-  
+      await createPoolMutate({
+        name: values.name,
+        currency: Number(values.currency),
+        sequency: Number(values.sequency),
+        totalRounds: Number(values.totalRounds),
+        startTime: String(new Date(values.startTime).getTime() / 1000),
+        ticketPrice: Number(parseUnits(values.ticketPrice, 9)),
+        poolPrizes: [
+          {
+            matchNumber: 1,
+            allocation: Number(values.match1),
+          },
+          {
+            matchNumber: 2,
+            allocation: Number(values.match2),
+          },
+          {
+            matchNumber: 3,
+            allocation: Number(values.match3),
+          },
+          {
+            matchNumber: 4,
+            allocation: Number(values.match4),
+          },
+        ],
+      });
+
       setLoading(true);
       const lastTx = await getLastTx();
       const lastTxHash = lastTx?.[0].hash().toString('base64');
-  
+
       let prizes = Dictionary.empty(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8));
       prizes.set(1, Number(values.match1));
       prizes.set(2, Number(values.match2));
       prizes.set(3, Number(values.match3));
       prizes.set(4, Number(values.match4));
-  
+
       await createPool({
-        jettonWallet: Address.parse(
-          '0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP',
-        ),
+        jettonWallet: Address.parse('0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP'),
         ticketPrice: BigInt(parseUnits(values.ticketPrice, 9)),
         initialRounds: BigInt(Number(values.totalRounds)),
         startTime: BigInt(new Date(values.startTime).getTime() / 1000),
         endTime: BigInt(new Date(values.endTime).getTime() / 1000),
-        sequence: BigInt(Number(values.sequency) * 86400),
+        sequence: BigInt(Number(values.sequency)),
         active: true,
         prizes,
       });
-  
+
       let newLastTxHash = lastTxHash;
       while (newLastTxHash === lastTxHash) {
         await new Promise((resolve) => setTimeout(resolve, 5000));
         const updatedLastTx = await getLastTx();
         const isAbortedTx = (updatedLastTx?.[0]?.description as any)?.aborted;
-  
+
         if (isAbortedTx) {
           toast.error('Something went wrong!');
           setLoading(false);
@@ -144,7 +141,7 @@ export const CreatePool = () => {
         }
         newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
       }
-  
+
       setLoading(false);
       route.push(ROUTES.POOL);
       queryClient.invalidateQueries({ queryKey: ['/pools'] });
@@ -164,19 +161,19 @@ export const CreatePool = () => {
 
     const sequencyNum = Number(sequency);
     const totalRoundNum = Number(totalRound);
-  
+
     if (isNaN(sequencyNum) || isNaN(totalRoundNum)) return;
 
     const startDate = new Date(startTime);
 
-    startDate.setDate(startDate.getDate() + (sequencyNum * Number(totalRoundNum)));
-  
+    startDate.setDate(startDate.getDate() + sequencyNum * Number(totalRoundNum));
+
     methods.setValue('endTime', startDate);
   }, [startTime, sequency, totalRound]);
 
   return (
     <VStack className="mx-4 md:mx-10 mb-24 bg-white rounded-sm min-h-[12.5rem] p-8 md:px-24 md:py-12">
-       {/* <Button onClick={testLastTx}>Test get last TX</Button> */}
+      {/* <Button onClick={testLastTx}>Test get last TX</Button> */}
       <div>
         <FormWrapper methods={methods} onSubmit={handleSubmit}>
           <VStack>

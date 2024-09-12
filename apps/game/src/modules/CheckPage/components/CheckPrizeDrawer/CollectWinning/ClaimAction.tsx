@@ -41,8 +41,8 @@ const ClaimAction: FC<Props> = ({ poolId, roundId, isLoading }) => {
     onSuccess: async (data) => {
       try {
         setLoading(true);
-        const lastTx = await getLastTx();
-        const lastTxHash = lastTx?.[0].hash().toString('base64');
+        // const lastTx = await getLastTx();
+        // const lastTxHash = lastTx?.[0].hash().toString('base64');
 
         await claimPrize({
           poolId: data?.roundExits?.poolIdOnChain,
@@ -52,32 +52,32 @@ const ClaimAction: FC<Props> = ({ poolId, roundId, isLoading }) => {
           signature: data?.signature,
         });
 
-        let newLastTxHash = lastTxHash;
-        while (newLastTxHash === lastTxHash) {
-          await delay(5000);
-          const updatedLastTx = await getLastTx();
+        // let newLastTxHash = lastTxHash;
+        // while (newLastTxHash === lastTxHash) {
+        //   await delay(5000);
+        //   const updatedLastTx = await getLastTx();
 
-          if (updatedLastTx?.[0].hash().toString('base64') === newLastTxHash) {
-            continue;
-          }
+        //   if (updatedLastTx?.[0].hash().toString('base64') === newLastTxHash) {
+        //     continue;
+        //   }
 
-          const isAbortedTx = (updatedLastTx?.[0]?.description as any)?.aborted;
+        //   const isAbortedTx = (updatedLastTx?.[0]?.description as any)?.aborted;
 
-          if (isAbortedTx) {
-            handleTransaction('error', 'Claimed failed');
-            return;
-          }
+        //   if (isAbortedTx) {
+        //     handleTransaction('error', 'Claimed failed');
+        //     return;
+        //   }
 
-          newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
-        }
+        //   newLastTxHash = updatedLastTx?.[0].hash().toString('base64');
+        // }
 
-        if (newLastTxHash !== lastTxHash) {
-          handleTransaction('success', 'Claim successful');
-          await confirm({
-            roundId: roundId,
-          });
-          refetch();
-        }
+        // if (newLastTxHash !== lastTxHash) {
+        handleTransaction('success', 'Transaction claim in progress');
+        await confirm({
+          roundId: roundId,
+        });
+        refetch();
+        // }
       } catch (error) {
         onMutateError(error);
       } finally {
