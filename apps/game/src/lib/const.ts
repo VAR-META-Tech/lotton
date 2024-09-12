@@ -23,3 +23,6 @@ export const network = isUseTestnet ? 'testnet' : ('mainnet' as Network);
 
 export const TON_API_URL = isUseTestnet ? 'https://testnet.toncenter.com/api/v2' : 'https://toncenter.com/api/v2';
 export const TON_VIEWER_URL = isUseTestnet ? 'https://testnet.tonviewer.com/' : 'https://tonviewer.com/';
+
+export const TESTGIVER_TON_BOT_URL = 'https://t.me/testgiver_ton_bot';
+export const TONKEEPER_DOC_URL = 'https://tonkeeper.helpscoutdocs.com/article/100-how-switch-to-the-testnet';
