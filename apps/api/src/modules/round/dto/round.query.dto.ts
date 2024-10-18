@@ -1,8 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
-import { PoolRoundStatusEnum } from '@/shared/enums';
+import { PoolRoundStatusEnum, SortEnum } from '@/shared/enums';
 
 export class RoundQueryDto {
   @ApiProperty({
@@ -23,6 +30,14 @@ export class RoundQueryDto {
   search?: string;
 
   @ApiProperty({
+    description: 'order',
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(SortEnum)
+  order?: SortEnum = SortEnum.ASC;
+
+  @ApiProperty({
     description: 'poolId',
     required: false,
   })
@@ -31,4 +46,26 @@ export class RoundQueryDto {
   @IsOptional()
   @Type(() => Number)
   poolId?: number;
+}
+
+export class WinningTicketQueryDto {
+  @ApiProperty({
+    description: 'roundId',
+    required: true,
+  })
+  @IsNumber()
+  @Min(1)
+  @IsNotEmpty()
+  @Type(() => Number)
+  roundId?: number;
+
+  @ApiProperty({
+    description: 'roundId',
+    required: false,
+  })
+  @IsNumber()
+  @Min(1)
+  @IsOptional()
+  @Type(() => Number)
+  matchNumber?: number;
 }

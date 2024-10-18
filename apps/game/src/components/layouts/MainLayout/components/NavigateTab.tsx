@@ -16,7 +16,7 @@ interface ITab {
 }
 
 const TABS: ITab[] = [
-  { icon: Icons.home, name: 'Home', href: ROUTES.LANDING },
+  { icon: Icons.home, name: 'Home', href: ROUTES.HOME },
   { icon: Icons.ticketStar, name: 'Check', href: ROUTES.CHECK },
   { icon: Icons.document, name: 'FAQ', href: ROUTES.FAQ },
   { icon: Icons.wallet, name: 'Wallet', href: ROUTES.WALLET },

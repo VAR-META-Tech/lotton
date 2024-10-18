@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { cn } from '@/lib/utils';
 import { useCommonCarousel } from '@/hooks/useCommonCarousel';
@@ -14,7 +14,10 @@ import Empty from '@/components/Empty';
 
 const PoolList = () => {
   const [isShow, setIsShow] = useState(false);
-  const { pools, isLoading } = useGetPools();
+  const { pools, isLoading, refetch } = useGetPools({
+    status: 'ongoing',
+  });
+
   const { carouselRef, selectedIndex, scrollSnaps, onDotButtonClick } = useCommonCarousel();
 
   const renderPools = React.useCallback(() => {
@@ -29,7 +32,12 @@ const PoolList = () => {
     }
 
     if (!pools?.length) {
-      return <Empty />;
+      return (
+        <Empty
+          textClassName="text-center max-w-96"
+          emptyText={`Stay tuned! Exciting new lottery pools are coming soon. We're working hard to bring you the best opportunities to win big.`}
+        />
+      );
     }
 
     return (
@@ -62,6 +70,14 @@ const PoolList = () => {
       </div>
     );
   }, [isLoading, onDotButtonClick, scrollSnaps, selectedIndex]);
+
+  useEffect(() => {
+    const refetchInterval = setInterval(() => {
+      refetch();
+    }, 30000);
+
+    return () => clearInterval(refetchInterval);
+  }, [refetch]);
 
   return (
     <div className="space-y-4">

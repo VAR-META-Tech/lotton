@@ -1,182 +1,144 @@
-import React, { FC, HTMLAttributes, useMemo } from 'react';
-import Image from 'next/image';
-import { Icons } from '@/assets/icons';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { MAX_TICKET, MIN_TICKET } from '@/modules/LandingPage/utils/const';
-import { FCC } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { onMutateError, prettyNumber } from '@/lib/common';
-import { cn } from '@/lib/utils';
+import { delay, onMutateError } from '@/lib/common';
 import { Button } from '@/components/ui/button';
-import { HStack, VStack } from '@/components/ui/Utilities';
+import { VStack } from '@/components/ui/Utilities';
 import { usePoolContract } from '@/hooks/usePoolContract';
 import { useWallet } from '@/hooks/useWallet';
 import { useForm } from 'react-hook-form';
 import { buyTicketSchema, BuyTicketType } from '@/modules/LandingPage/types/schema';
-import { IGetPoolDetailCurrency } from '@/apis/pools';
+import { IGetPoolDetailData, IGetPoolDetailRound } from '@/apis/pools';
 import { FormWrapper } from '@/components/ui/form';
+import { toast } from 'sonner';
+import { useBuyTicketStore } from '@/stores/BuyTicketStore';
+import { useQueryClient } from '@tanstack/react-query';
+import { fromNano } from '@ton/core';
+import { useGetTokenPrice } from '@/hooks/useGetTokenPrice';
+import TicketPriceSection from './TicketPriceSection';
+import PaymentSummary from './PaymentSummary';
 
 interface Props {
-  ticketPrice: number;
-  roundId: number;
-  currency: IGetPoolDetailCurrency | undefined;
-  poolIdOnChain: number;
+  pool?: IGetPoolDetailData;
+  roundActive: IGetPoolDetailRound;
 }
 
-const BuyTicketForm: FC<Props> = ({ ticketPrice, roundId, currency, poolIdOnChain }) => {
-  const { buyTicket } = usePoolContract();
-  const { balance } = useWallet();
+const BuyTicketForm: FC<Props> = ({ pool, roundActive }) => {
+  const queryClient = useQueryClient();
+  const [loading, setLoading] = useState(false);
+  const { buyTicket, getLastTx } = usePoolContract();
+  const { balance: balanceValue } = useWallet();
+  const clearStore = useBuyTicketStore.use.clear();
 
   const form = useForm<BuyTicketType>({
     resolver: zodResolver(buyTicketSchema),
-    defaultValues: {
-      amount: 0,
-    },
+    defaultValues: { amount: 1, balance: 0 },
   });
 
+  const { price } = useGetTokenPrice(pool?.currency?.id || 0);
   const {
     setValue,
     watch,
     formState: { errors },
-    setError,
     clearErrors,
+    setError,
   } = form;
+  const [amount, balance] = watch(['amount', 'balance']);
 
-  const [amount] = watch(['amount']);
-
+  const ticketPrice = useMemo(() => Number(fromNano(pool?.ticketPrice || 0)), [pool?.ticketPrice]);
+  const totalAmount = useMemo(() => Number(amount) * ticketPrice, [amount, ticketPrice]);
+  const tokenSymbol = pool?.currency?.symbol || '';
   const isMax = amount === MAX_TICKET;
   const isMin = amount === MIN_TICKET;
 
-  const onAmountChange = (type: 'plus' | 'minus') => {
+  useEffect(() => {
+    setValue('balance', balanceValue || 0);
+  }, [balanceValue, setValue]);
+
+  const handleAmountChange = (isIncrement: boolean) => {
     clearErrors('amount');
+    if ((isMin && !isIncrement) || (isMax && isIncrement)) return;
+    setValue('amount', amount + (isIncrement ? 1 : -1));
+  };
 
-    if ((isMin && type === 'minus') || (isMax && type === 'plus')) return;
+  const handleTransaction = (status: 'success' | 'error', message: string) => {
+    toast[status](message);
 
-    if (type === 'plus') {
-      setValue('amount', amount + 1);
+    queryClient.refetchQueries({
+      queryKey: ['/api/pools'],
+    });
+
+    clearStore();
+  };
+
+  const handleSubmit = async () => {
+    if (totalAmount > balanceValue) {
+      setError('balance', { type: 'custom', message: 'Insufficient TON balance' });
       return;
     }
 
-    setValue('amount', amount - 1);
-  };
-
-  const totalAmount = useMemo(() => {
-    if (!amount || !ticketPrice) return 0;
-
-    return Number(amount) * Number(ticketPrice);
-  }, [amount, ticketPrice]);
-
-  const handleSubmit = async () => {
+    setLoading(true);
     try {
-      if (!amount) {
-        setError('amount', {
-          type: 'custom',
-          message: 'This amount is required',
-        });
-        return;
-      }
+      // const lastTx = await getLastTx();
+      // const lastTxHash = lastTx?.[0].hash().toString('base64');
 
-      buyTicket({
-        poolId: poolIdOnChain || 0,
+      await buyTicket({
+        poolId: pool?.poolIdOnChain || 0,
         quantity: amount,
-        roundId: roundId,
+        roundId: roundActive.roundIdOnChain,
+        ticketPrice,
       });
+
+      // let newTxHash = lastTxHash;
+      // while (newTxHash === lastTxHash) {
+      //   await delay(5000);
+      //   const updatedTx = await getLastTx();
+      //   if (updatedTx?.[0].hash().toString('base64') === newTxHash) continue;
+
+      //   const isAborted = (updatedTx?.[0]?.description as any)?.aborted;
+
+      //   if (isAborted) return handleTransaction('error', 'Buy tickets unsuccessful');
+
+      //   newTxHash = updatedTx?.[0].hash().toString('base64');
+      // }
+
+      handleTransaction('success', 'Transaction buy tickets in progress');
     } catch (error) {
       onMutateError(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <FormWrapper form={form} onSubmit={handleSubmit}>
       <VStack spacing={24}>
-        <VStack spacing={20} className="text-white border-b-[1px] border-b-gray-color pb-6">
-          <HStack pos={'apart'}>
-            <span className="text-base font-medium">Ticket Price:</span>
+        <TicketPriceSection
+          ticketPrice={ticketPrice}
+          amount={amount}
+          isMin={isMin}
+          isMax={isMax}
+          onAmountChange={handleAmountChange}
+          errors={errors}
+        />
 
-            <HStack spacing={8}>
-              <Image src={'/images/tokens/ton_symbol.webp'} width={24} height={24} alt="ton" />
-
-              <span className="text-2xl">{`${prettyNumber(ticketPrice)} ${currency?.symbol || ''}`}</span>
-            </HStack>
-          </HStack>
-
-          <VStack spacing={2}>
-            <HStack pos={'apart'}>
-              <span className="text-base font-medium">Amount</span>
-
-              <HStack spacing={8}>
-                <ChangeAmountButton isDisabled={isMin} onClick={() => onAmountChange('minus')}>
-                  <Icons.minus
-                    className={cn('text-primary', {
-                      'text-gray-color': isMin,
-                    })}
-                  />
-                </ChangeAmountButton>
-
-                <span className="text-2xl font-semibold w-8 text-center">{amount}</span>
-
-                <ChangeAmountButton isDisabled={isMax} onClick={() => onAmountChange('plus')}>
-                  <Icons.plus
-                    className={cn('text-primary', {
-                      'text-gray-color': isMax,
-                    })}
-                  />
-                </ChangeAmountButton>
-              </HStack>
-            </HStack>
-            {errors?.amount?.message && (
-              <span className="text-red-500 text-right text-xs">{errors?.amount?.message}</span>
-            )}
-          </VStack>
+        <PaymentSummary
+          totalAmount={totalAmount}
+          tokenSymbol={tokenSymbol}
+          balance={balance}
+          price={price}
+          errors={errors}
+        />
+        <VStack className="mt-4">
+          <span className="text-center text-xs italic text-white">Limit of 16 tickets per transaction</span>
+          <Button loading={loading} type="submit" size="lg" className="text-base font-medium text-white">
+            Buy
+          </Button>
         </VStack>
-
-        <VStack spacing={0}>
-          <HStack pos={'apart'} className="text-white">
-            <span className="text-base font-bold">You pay:</span>
-
-            <HStack spacing={8}>
-              <Image src={currency?.icon || '/images/tokens/ton_symbol.webp'} width={24} height={24} alt="ton" />
-
-              <span className="text-2xl">{`${prettyNumber(totalAmount)} ${currency?.symbol || ''}`}</span>
-            </HStack>
-          </HStack>
-          <HStack pos={'apart'}>
-            <span className="text-xs text-white">{`${currency?.symbol || ''} balance: ${prettyNumber(
-              Number(balance || 0).toFixed(6)
-            )} TON`}</span>
-
-            <span className="text-base text-gray-color">{`~ ${prettyNumber(0)} USD`}</span>
-          </HStack>
-        </VStack>
-
-        <Button type="submit" size={'lg'} className="text-base font-medium mt-10 text-white">
-          Buy
-        </Button>
       </VStack>
     </FormWrapper>
   );
 };
 
 export default BuyTicketForm;
-
-interface IChangeAmountButtonProps extends HTMLAttributes<HTMLButtonElement> {
-  isDisabled: boolean;
-}
-
-const ChangeAmountButton: FCC<IChangeAmountButtonProps> = ({ isDisabled, children, ...props }) => {
-  return (
-    <button
-      disabled={isDisabled}
-      type="button"
-      className={cn(
-        'bg-white border border-primary rounded-[0.3125rem] w-[2.1875rem] h-[1.6875rem] flex justify-center items-center',
-        {
-          'border-gray-color': isDisabled,
-        }
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};

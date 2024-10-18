@@ -1,8 +1,9 @@
 import type { ScheduledTask } from 'node-cron';
 import cron from 'node-cron';
-import type { DataSource } from 'typeorm';
+import type { Repository } from 'typeorm';
 
-import { type NetworkToken, TokenPrice } from '@/database/entities';
+import type { Token } from '@/database/entities';
+import { TokenPrice } from '@/database/entities';
 import { getLogger } from '@/utils/logger';
 
 import type { TokenPriceService } from '../services/token_price.service';
@@ -12,8 +13,8 @@ const logger = getLogger('CrawlTokenPriceService');
 export class CrawlTokenPriceService {
   private cronTask: ScheduledTask;
   constructor(
-    private networkToken: NetworkToken,
-    private dataSource: DataSource,
+    private token: Token,
+    private tokenPriceRepository: Repository<TokenPrice>,
     private tokenPriceService: TokenPriceService,
   ) {
     this.init();
@@ -25,7 +26,7 @@ export class CrawlTokenPriceService {
 
   // Every minute
   handleCron() {
-    this.cronTask = cron.schedule('* * * * *', async () => {
+    this.cronTask = cron.schedule('*/30 * * * *', async () => {
       try {
         await this.crawlTokenPrice();
       } catch (error) {
@@ -37,21 +38,32 @@ export class CrawlTokenPriceService {
 
   async crawlTokenPrice() {
     try {
+      if (!this.token.symbol) {
+        throw new Error('Token symbol is missing');
+      }
+
       const data = await this.tokenPriceService.getPrice(
-        this.networkToken.token.symbol,
-        'USDT',
+        this.token.symbol,
+        'USD',
       );
 
       if (data) {
-        await this.dataSource.transaction(async (manager) => {
-          await manager.save(TokenPrice, {
-            token: this.networkToken.token,
-            price: data.last,
-          });
-        });
+        await this.tokenPriceRepository
+          .createQueryBuilder()
+          .insert()
+          .into(TokenPrice)
+          .values({
+            id: null,
+            token: this.token,
+            price: data.rates[this.token.symbol].prices.USD.toString(),
+          })
+          .orUpdate(['price'], ['tokenId'])
+          .execute();
 
         logger.info(
-          `Crawl Token Price Success: ${this.networkToken.token.name} ${data.last} $`,
+          `Crawl Token Price Success: ${this.token.name} ${
+            data.rates[this.token.symbol].prices.USD
+          } $`,
         );
       }
     } catch (error) {

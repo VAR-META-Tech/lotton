@@ -17,7 +17,7 @@ const MainLayout: FCC = ({ children }) => {
 
   const { mutate: loginByWallet } = useLoginByWalletMutation({
     onSuccess: (data) => {
-      toast.success('Connect wallet successful');
+      // toast.success('Connect wallet successful');
       setUserData({
         accessToken: data?.tokens?.accessToken,
         refreshToken: data?.tokens?.refreshToken,

@@ -27,10 +27,10 @@ export class Pool extends BaseTime {
   @ManyToOne(() => Token)
   currency: Token;
 
-  @Column()
+  @Column({ type: 'bigint' })
   startTime: number;
 
-  @Column()
+  @Column({ type: 'bigint' })
   endTime: number;
 
   @Column()
@@ -46,7 +46,7 @@ export class Pool extends BaseTime {
   })
   status: PoolStatusEnum;
 
-  @Column({ type: 'decimal' })
+  @Column({ type: 'bigint' })
   ticketPrice: number;
 
   @OneToMany(() => PoolPrize, (poolPrize) => poolPrize.pool)

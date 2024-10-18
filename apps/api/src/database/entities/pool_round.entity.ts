@@ -11,7 +11,7 @@ import { Pool, UserTicket } from '.';
 import { BaseTime } from './base/time.entity';
 
 @Entity()
-@Index('pr', ['roundIdOnChain'])
+@Index('poolRound', ['pool', 'roundIdOnChain'], { unique: true })
 export class PoolRound extends BaseTime {
   @PrimaryGeneratedColumn()
   id: number;
@@ -23,20 +23,23 @@ export class PoolRound extends BaseTime {
   })
   pool: Pool;
 
-  @Column({ nullable: true, unique: true })
+  @Column({ nullable: true })
   roundIdOnChain: number;
 
-  @Column({ unique: true })
+  @Column()
   roundNumber: number;
 
-  @Column()
+  @Column({ type: 'bigint' })
   startTime: number;
 
-  @Column()
+  @Column({ type: 'bigint' })
   endTime: number;
 
   @Column({ nullable: true })
   winningCode: string;
+
+  @Column({ nullable: true })
+  winningBlock: string;
 
   @OneToMany(() => UserTicket, (ticket) => ticket.round)
   ticket: UserTicket;

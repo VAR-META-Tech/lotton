@@ -59,3 +59,29 @@ export enum BinanceIntervalEnum {
   ONE_WEEK = '1w',
   ONE_MONTH = '1M',
 }
+
+export enum EVENT_HEADER {
+  CREATE_POOL_EVENT = 2095598070,
+  BUY_TICKETS_EVENT = 3748203161,
+  DRAW_WINNING_NUMBER = 3591482628,
+  USER_CLAIM_PRIZE = 1449747896,
+}
+
+export enum TransactionType {
+  BUY = 'buy',
+  CLAIM = 'claim',
+}
+
+export enum UserTicketStatus {
+  BOUGHT = 'bought',
+  CONFIRMING_CLAIM = 'confirmingClaim',
+  CONFIRMED_CLAIM = 'confirmedClaim',
+}
+
+export enum TelegramBotAction {
+  COMMAND_FAQ = '/faq',
+  COMMAND_START = '/start',
+  COMMAND_HELP = '/help',
+  CALLBACK_FAQ = 'faq',
+  CALLBACK_HELP = 'help',
+}

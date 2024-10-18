@@ -1,28 +1,52 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { HStack } from '@/components/ui/Utilities';
+import { motion } from 'framer-motion';
 
-import { ChangeRoundAction } from './ChangeRoundAction';
 import { DrawTime } from './DrawTime';
 import { TicketDetailDrawer } from './TicketDetailDrawer';
-import { IGetPoolJoinedItem } from '@/apis/pools';
+import { IGetPoolJoinedItem, IGetPoolJoinedItemRound } from '@/apis/pools';
 import BuyTicketDrawer from '@/modules/LandingPage/components/PoolList/BuyTicketDrawer';
+import { useGetPoolDetail } from '@/hooks/useGetPoolDetail';
+import { getRoundActiveNumber } from '@/lib/common';
+import { Carousel } from '@/components/ui/carousel';
+import { useDetailTicketStore } from '@/stores/DetailTicketStore';
+import { ChangeRoundAction } from './ChangeRoundAction';
 
 type Props = {
   pool: IGetPoolJoinedItem;
 };
 
 export const PoolItem = ({ pool }: Props) => {
-  const [activeRound, setActiveRound] = useState(0);
-  const rounds = pool?.rounds || [];
-  const roundActive = rounds[activeRound];
-  const roundActiveNumber = roundActive?.roundNumber;
+  const [activeRound, setActiveRound] = useState<number>(0);
+  const setPoolId = useDetailTicketStore.use.setPoolId();
+  const store = useDetailTicketStore.use.store();
 
-  const roundActiveNumberLabel = roundActive
-    ? `${roundActiveNumber < 10 ? `0${roundActiveNumber}` : roundActiveNumber}`
-    : '00';
+  const { pool: poolDetail, rounds: roundsDetail } = useGetPoolDetail({
+    isActive: true,
+    poolId: pool?.id || 0,
+  });
+
+  // pool joined
+  const rounds = useMemo(() => pool?.rounds || [], [pool?.rounds]);
+  const roundActive = rounds[activeRound];
+
+  // pool detail
+  const roundDetailActive = roundsDetail[activeRound];
+  const totalTickets = roundActive?.totalTicket ?? 0;
+
+  useEffect(() => {
+    if (!store?.roundId) return;
+
+    const indexRound = rounds?.findIndex((round) => {
+      return round?.id === store?.roundId;
+    });
+
+    if (indexRound < 0) return;
+
+    setActiveRound(indexRound || 0);
+  }, [rounds, store?.roundId]);
 
   const handleChangeRoundActive = (upRound: boolean) => {
     if (upRound) {
@@ -35,47 +59,62 @@ export const PoolItem = ({ pool }: Props) => {
   };
 
   return (
-    <div className="shadow-lg border w-full max-w-lg grid grid-cols-6">
-      <div className="bg-background-2 col-span-2 border flex items-center justify-center p-4">
-        <div className="font-semibold text-primary text-[1.625rem] text-center">{pool?.name || ''}</div>
+    <div className="shadow-lg w-full grid grid-cols-6 relative">
+      <div className="bg-primary col-span-6 py-1 px-4">
+        <div className="font-semibold text-black text-lg">{pool?.name || ''}</div>
       </div>
 
-      <div className="col-span-4 p-4 flex flex-col gap-4">
-        <HStack pos={'apart'} spacing={16}>
-          <RoundNumber roundNumber={roundActiveNumberLabel} />
-
-          <ChangeRoundAction activeRound={activeRound} onClick={handleChangeRoundActive} rounds={rounds} />
-        </HStack>
-
-        <DrawTime endTime={roundActive?.endTime || ''} />
-
-        <TicketDetailDrawer pool={pool} roundActiveNumber={roundActiveNumber}>
-          <Button className="mx-auto rounded-lg text-white">View your tickets</Button>
-        </TicketDetailDrawer>
+      <div className="absolute right-4 top-12">
+        <ChangeRoundAction activeRound={activeRound} onClick={handleChangeRoundActive} rounds={rounds} />
       </div>
 
-      <BuyTicketDrawer poolId={pool?.id} roundId={roundActive?.id} poolIdOnChain={pool?.poolIdOnChain} />
+      <div className="bg-background col-span-6 p-4 border border-t-0 border-primary flex flex-col gap-4 items-center">
+        <motion.div
+          className="flex flex-col gap-4 items-center"
+          key={activeRound}
+          initial={{ x: '-10%', opacity: 0.5 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: '10%', opacity: 0.5 }}
+          transition={{ duration: 0.5 }}
+        >
+          <RoundNumber roundActive={roundActive} />
+
+          <DrawTime endTime={Number(roundActive?.endTime || 0)} />
+
+          <p className="text-sm">
+            You bought {totalTickets} {totalTickets > 1 ? 'tickets' : 'ticket'}
+          </p>
+        </motion.div>
+
+        <Carousel>
+          <Button onClick={() => setPoolId(pool?.id)} className="mx-auto rounded-lg text-white">
+            View your tickets
+          </Button>
+          <TicketDetailDrawer pool={pool} activeRound={activeRound} setActiveRound={setActiveRound} />
+        </Carousel>
+      </div>
+
+      <BuyTicketDrawer pool={poolDetail} roundActive={roundDetailActive} />
     </div>
   );
 };
 
-const RoundNumber = ({ roundNumber }: { roundNumber: string }) => (
-  <HStack spacing={16}>
-    <span className="font-medium">Round</span>
+const RoundNumber = ({ roundActive }: { roundActive: IGetPoolJoinedItemRound }) => {
+  const roundActiveNumber = getRoundActiveNumber(roundActive?.roundNumber || 0);
 
-    <motion.div
-      key={roundNumber}
-      initial={{ x: '-10%', opacity: 0.5 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: '10%', opacity: 0 }}
-    >
-      <HStack
-        pos={'center'}
-        align={'center'}
-        className="min-w-[2.9375rem] text-center h-[1.75rem] bg-background-2 rounded-md"
-      >
-        {roundNumber}
-      </HStack>
-    </motion.div>
-  </HStack>
-);
+  return (
+    <HStack spacing={16}>
+      <span className="font-medium">Round</span>
+
+      <div>
+        <HStack
+          pos={'center'}
+          align={'center'}
+          className="min-w-[2.9375rem] text-center h-[1.75rem] bg-background-2 rounded-md"
+        >
+          {roundActiveNumber}
+        </HStack>
+      </div>
+    </HStack>
+  );
+};

@@ -10,6 +10,9 @@ import { format } from 'date-fns'
 import { convertToTimestamp } from '@/lib/utils'
 import { IGetRoundsListResponse } from '@/apis/pool'
 import { IGetAllPoolParams } from './types'
+import Link from 'next/link'
+import { ROUTES } from '@/lib/routes'
+import { formatPrize } from '@/lib/common'
 
 type Props = {
   rounds: IGetRoundsListResponse,
@@ -55,24 +58,24 @@ const RoundList = ({rounds, isFetching, handlePageChange, paramsQuery}: Props) =
                 <TableCell className="text-center border border-[#D4D4D4]">{round?.roundNumber}</TableCell>
 
                 <TableCell className="text-center border border-[#D4D4D4]">
-                  {round?.startTime ? format(convertToTimestamp(round?.startTime), 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
+                  {round?.startTime ? format(Number(round?.startTime) * 1000, 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
                 </TableCell>
                 <TableCell className="text-center border border-[#D4D4D4]">
-                  {round?.endTime ? format(convertToTimestamp(round?.endTime), 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
+                  {round?.endTime ? format(Number(round?.endTime) * 1000, 'dd-MM-yyyy HH:mm:ss') : 'N/A'}
                 </TableCell>
 
-                <TableCell className="text-center border border-[#D4D4D4]">{round?.prizePool ?? '-'} {round?.symbol}</TableCell>
+                <TableCell className="text-center border border-[#D4D4D4]">{formatPrize(Number(round?.prizePool), Number(round?.tokenDecimals)) ?? '-'} {round?.symbol}</TableCell>
 
                 <TableCell className="text-center border border-[#D4D4D4]">
-                  <Status endTime={round?.endTime} startTime={round?.startTime} />
+                  <Status endTime={Number(round?.endTime)} startTime={Number(round?.startTime)} />
                 </TableCell>
                 
                 <TableCell className="text-center border border-[#D4D4D4]">
-                  {/* <Link href={`${ROUTES.POOL}/${round.id}`}> */}
-                    <Button className='min-w-20 min-h-4 rounded-sm bg-[#1D4ED8]' disabled>
+                  <Link href={`${ROUTES.ROUND}/${round.id}`}>
+                    <Button className='min-w-20 min-h-4 rounded-sm bg-[#1D4ED8]'>
                       View
                     </Button>
-                  {/* </Link> */}
+                  </Link>
                 </TableCell>
               </TableRow>
             ))}

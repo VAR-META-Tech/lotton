@@ -3,16 +3,17 @@
 import { VStack } from "@/components/ui/Utilities";
 import PoolFilter from "./components/Filter";
 import { useCallback, useState } from "react";
-import { IGetAllPoolParams, PoolFilterSchema } from "./components/types";
+import { CommonQuery, IGetAllPoolParams, PoolFilterSchema } from "./components/types";
 import { IGetPoolsListResponse, IGetRoundsListResponse, useGetPools, useGetRounds } from "@/apis/pool";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PoolList from './components/PoolList';
 import RoundList from './components/RoundList';
 
-const DEFAULT_QUERY = {
+const DEFAULT_QUERY: CommonQuery = {
   page: 1,
   pageSizes: 10,
-};
+  order: 'DESC'
+} ;
 
 export const PoolManagement = () => {
   const [paramsQuery, setParamsQuery] = useState<IGetAllPoolParams>(DEFAULT_QUERY);

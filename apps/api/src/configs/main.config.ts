@@ -18,11 +18,16 @@ export class MainConfig {
   @IsString()
   apiPrefix: string;
 
+  @IsNotEmpty()
+  @IsString()
+  appUrl: string;
+
   constructor() {
     this.port = Number(process.env.PORT) || 3000;
     this.workerPort = Number(process.env.WORKER_PORT) || 3001;
     this.isProduction = process.env.PRODUCTION === 'true';
     this.apiPrefix = 'api';
+    this.appUrl = process.env.APP_URL || 'https://lotton.var-meta.com';
   }
 }
 

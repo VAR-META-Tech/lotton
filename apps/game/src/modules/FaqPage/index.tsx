@@ -1,7 +1,9 @@
 import React from 'react';
 
-import FaqContent from './components/FaqContent';
-import FaqHead from './components/FaqHead';
+import dynamic from 'next/dynamic';
+
+const FaqContent = dynamic(() => import('./components/FaqContent'));
+const FaqHead = dynamic(() => import('./components/FaqHead'));
 
 const FaqPage = () => {
   return (

@@ -64,7 +64,7 @@ const Sidebar = () => {
         <p className='text-2xl font-bold h-[4rem] text-white py-4 px-8'>ADMIN PORTAL</p>
 
         <VStack spacing={8}>
-          {menuConfigs.map((menu, index) => (
+          {menuConfigs.filter((item) => item.active === true).map((menu, index) => (
             <MenuLink
               key={index}
               href={menu.link}

@@ -45,7 +45,15 @@ export const PoolDetail = () => {
 
   const { mutate: deletePoolMutate } = useDeletePool();
 
-  const { mutate: updatePoolMutate, isPending: isPendingUpdate } = useUpdatePool();
+  const { mutate: updatePoolMutate, isPending: isPendingUpdate } = useUpdatePool({
+    onSuccess: () => {
+      route.push(ROUTES.POOL);
+      toast.success('Update pool successful');
+    },
+    onError: (error) => {
+      toast.error(`${error.message}`);
+    },
+  });
 
   const { data: tokenList } = useGetTokens({});
 
@@ -65,7 +73,7 @@ export const PoolDetail = () => {
         currency: Number(values.currency),
         sequency: Number(values.sequency),
         totalRounds: Number(values.totalRounds) + qtyRound,
-        startTime: new Date(values.startTime).toISOString(),
+        startTime: String(new Date(values.startTime).getTime() / 1000),
         ticketPrice: Number(values.ticketPrice),
         poolPrizes: [
           {
@@ -86,14 +94,6 @@ export const PoolDetail = () => {
           },
         ],
       }
-    }, {
-      onSuccess: () => {
-        route.push(ROUTES.POOL);
-        toast.success('Update pool successful');
-      },
-      onError: (error) => {
-        toast.error(`${error.message}`);
-      },
     })
   };
 
@@ -128,8 +128,8 @@ export const PoolDetail = () => {
       totalRounds: String(poolDetail?.data?.totalRounds) || '0',
       upcomingRound: String(poolDetail?.data?.rounds?.filter((round) => convertToTimestamp(round.startTime) > now).length),
       ticketPrice: String(poolDetail?.data?.ticketPrice),
-      startTime: new Date(poolDetail?.data?.startTime ?? ''),
-      endTime: new Date(poolDetail?.data?.endTime ?? ''),
+      startTime: new Date(Number(poolDetail?.data?.startTime) * 1000 ?? ''),
+      endTime: new Date(Number(poolDetail?.data?.endTime) * 1000 ?? ''),
       match1: String(poolDetail?.data?.poolPrizes[0]?.allocation) || '0',
       match2: String(poolDetail?.data?.poolPrizes[1]?.allocation) || '0',
       match3: String(poolDetail?.data?.poolPrizes[2]?.allocation) || '0',

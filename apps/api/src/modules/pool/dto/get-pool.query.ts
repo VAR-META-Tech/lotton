@@ -8,7 +8,7 @@ import {
   IsString,
 } from 'class-validator';
 
-import { PoolRoundStatusEnum } from '@/shared/enums';
+import { PoolRoundStatusEnum, SortEnum } from '@/shared/enums';
 
 export class PoolQueryDto {
   @ApiProperty({
@@ -28,6 +28,14 @@ export class PoolQueryDto {
   @IsString()
   @IsOptional()
   search?: string;
+
+  @ApiProperty({
+    description: 'orderBy',
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(SortEnum)
+  order?: SortEnum = SortEnum.ASC;
 }
 
 export enum UserPoolType {
@@ -57,7 +65,18 @@ export class ClaimDto {
   poolId: number;
 
   @ApiProperty({
-    description: 'Pool id',
+    description: 'Round id',
+    required: false,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  roundId: number;
+}
+
+export class ConfirmClaimDto {
+  @ApiProperty({
+    description: 'Round id',
     required: false,
   })
   @IsNumber()

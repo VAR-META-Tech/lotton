@@ -1,15 +1,18 @@
 import { Icons } from '@/assets/icons';
 import { HStack } from '@/components/ui/Utilities';
+import { TON_VIEWER_URL } from '@/lib/const';
 import { cn } from '@/lib/utils';
 import { FCC } from '@/types';
+import Link from 'next/link';
 
 interface ITicketMatchProps {
   code: string;
   ticketNumber: number;
   matched: number;
+  transactionHash: string;
 }
 
-const TicketMatch: FCC<ITicketMatchProps> = ({ code, ticketNumber, matched = 0 }) => {
+const TicketMatch: FCC<ITicketMatchProps> = ({ code, ticketNumber, matched = 0, transactionHash }) => {
   const codeSplit = code.split('');
 
   const getMatchedTitle = () => {
@@ -20,7 +23,7 @@ const TicketMatch: FCC<ITicketMatchProps> = ({ code, ticketNumber, matched = 0 }
 
   return (
     <div className="grid grid-cols-10 gap-[.625rem] items-center">
-      <div className="col-span-2">{`Ticket ${ticketNumber}`}</div>
+      <div className="col-span-2 text-nowrap">{`Ticket ${ticketNumber}`}</div>
       <div className="col-span-7">
         <HStack
           pos={'apart'}
@@ -44,9 +47,9 @@ const TicketMatch: FCC<ITicketMatchProps> = ({ code, ticketNumber, matched = 0 }
           <p className="absolute top-0 text-primary -translate-y-full">{getMatchedTitle()}</p>
         </HStack>
       </div>
-      <div className="col-span-1">
+      <Link href={`${TON_VIEWER_URL}/transaction/${transactionHash}`} target="_blank" className="col-span-1">
         <Icons.newTab className="text-gray-color" />
-      </div>
+      </Link>
     </div>
   );
 };

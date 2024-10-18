@@ -1,0 +1,647 @@
+#pragma version =0.4.4;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+#include "tact_Lottery.headers.fc";
+#include "tact_Lottery.stdlib.fc";
+#include "tact_Lottery.constants.fc";
+#include "tact_Lottery.storage.fc";
+
+;;
+;; Contract Lottery functions
+;;
+
+(slice, cell, cell, int, cell, cell, cell, int, cell, int) $Lottery$_contract_init(slice $adminWallet, int $publicKey) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = (null(), null(), null(), null(), null(), null(), null(), null(), null(), null());
+    $self'owner = __tact_context_get_sender();
+    $self'nextPoolId = 1;
+    $self'admin~__tact_dict_set_slice_int(267, $adminWallet, true, 1);
+    $self'publicKey = $publicKey;
+    $self'claimFeePercent = 10000;
+    return ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent);
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_isAdmin((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, slice $address) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), __tact_not_null(__tact_dict_get_slice_int($self'admin, 267, $address, 1)));
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_requireOwnerOrAdmin((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    throw_unless(58319, ( (( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) )) ? (true) : (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_isAdmin(__tact_context_get_sender())) ));
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_requireOwner((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    throw_unless(132, ( __tact_slice_eq_bits($self'owner, __tact_context_get_sender()) ));
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_setAdmin((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, slice $admin, int $active) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_requireOwner();
+    if (($active == false)) {
+        $self'admin~__tact_dict_set_slice_int(267, $admin, null(), 1);
+    } else {
+        $self'admin~__tact_dict_set_slice_int(267, $admin, true, 1);
+    }
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_verifyPoolPrizes((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, cell $prizes) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    int $totalPrize = 0;
+    int $index = 1;
+    repeat (4) {
+        int $prize = __tact_dict_get_uint_uint($prizes, 8, $index, 8);
+        if ((~ null?($prize))) {
+            $totalPrize = $totalPrize + __tact_not_null($prize);
+        }
+        $index = $index + 1;
+    }
+    throw_unless(41780, ($totalPrize <= 100));
+    throw_unless(52657, ($index > 0));
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), true);
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_createPool((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $initialRounds, int $sequence, (int, int, int, int, int, int) $config, cell $prizes) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    var (($config'roundId, $config'poolId, $config'ticketPrice, $config'startTime, $config'endTime, $config'active)) = $config;
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_requireOwnerOrAdmin();
+    throw_unless(52453, ($initialRounds > 0));
+    throw_unless(42342, ($sequence > 0));
+    throw_unless(57401, ($config'startTime < $config'endTime));
+    int $validPrizes = ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_verifyPoolPrizes($prizes);
+    throw_unless(26690, $validPrizes);
+    int $poolId = $self'nextPoolId;
+    $self'nextPoolId = $self'nextPoolId + 1;
+    var ($pool'poolId, $pool'creator, $pool'rounds, $pool'startTime, $pool'endTime, $pool'sequence, $pool'active, $pool'prizes) = $Pool$_constructor_poolId_creator_rounds_startTime_endTime_sequence_active_prizes($poolId, __tact_context_get_sender(), null(), $config'startTime, $config'endTime, $sequence, true, $prizes);
+    var ($roundTickets'rounds) = $RoundTicket$_constructor_rounds(null());
+    int $index = 1;
+    repeat ($initialRounds) {
+        int $startTime = ($config'startTime + (($index - 1) * $sequence));
+        int $endRoundTime = ($config'startTime + ($index * $sequence));
+        var ($roundConfig'roundId, $roundConfig'poolId, $roundConfig'ticketPrice, $roundConfig'startTime, $roundConfig'endTime, $roundConfig'active) = $RoundConfig$_constructor_roundId_poolId_ticketPrice_startTime_endTime_active($index, $poolId, $config'ticketPrice, $startTime, (($config'endTime < $endRoundTime) ? $config'endTime : $endRoundTime), true);
+        $roundTickets'rounds~__tact_dict_set_int_cell(257, $index, $UserTicket$_store_cell($UserTicket$_constructor_users(null())));
+        $pool'rounds~__tact_dict_set_int_cell(257, $index, $RoundConfig$_store_cell(($roundConfig'roundId, $roundConfig'poolId, $roundConfig'ticketPrice, $roundConfig'startTime, $roundConfig'endTime, $roundConfig'active)));
+        $index = $index + 1;
+    }
+    $self'pools~__tact_dict_set_int_cell(257, $poolId, $Pool$_store_cell(($pool'poolId, $pool'creator, $pool'rounds, $pool'startTime, $pool'endTime, $pool'sequence, $pool'active, $pool'prizes)));
+    $self'usersTicket~__tact_dict_set_int_cell(257, $poolId, $RoundTicket$_store_cell(($roundTickets'rounds)));
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_reply(__gen_cell_comment_3fe93897158698e4d473b74414d7493716b0fc3a70310934873f0019daaccab4());
+    $global_emit($PoolCreatedEvent$_store_cell($PoolCreatedEvent$_constructor_poolId_ticketPrice_initialRounds_startTime_endTime_active_sequence_rounds_creator_prizes($poolId, $config'ticketPrice, $initialRounds, $config'startTime, $config'endTime, true, $sequence, $pool'rounds, __tact_context_get_sender(), $prizes)));
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), slice) $Lottery$_fun_asciiToChar((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $ascii) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    if (( (($ascii >= 48)) ? (($ascii <= 57)) : (false) )) {
+        return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), __tact_int_to_string($ascii));
+    } elseif (( (($ascii >= 65)) ? (($ascii <= 90)) : (false) )) {
+        return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), __tact_int_to_string($ascii));
+    } else {
+        return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), __gen_slice_string_96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7());
+    }
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), (int, slice)) $Lottery$_fun_generateRandomASCIIString((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $length) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    tuple $result = __tact_string_builder_start_string();
+    int $asciiNumber = 0;
+    repeat ($length) {
+        int $isDigit = ($global_random(0, 2) == 0);
+        int $randomInt = 0;
+        if ($isDigit) {
+            $randomInt = $global_random(48, 58);
+        } else {
+            $randomInt = $global_random(65, 91);
+        }
+        $asciiNumber = (($asciiNumber * 100) + $randomInt);
+        $result~__tact_string_builder_append(($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_asciiToChar($randomInt));
+    }
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), $RandomTicketResponse$_constructor_ASCIINumber_ticket($asciiNumber, __tact_string_builder_end_slice($result)));
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), slice) $Lottery$_fun_createTicket((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, slice $user, int $poolId, int $roundId, int $quantity) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    tuple $newTickets = __tact_string_builder_start_string();
+    repeat ($quantity) {
+        var ($rs'ASCIINumber, $rs'ticket) = ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_generateRandomASCIIString(4);
+        int $ticketNumber = $rs'ASCIINumber;
+        slice $ticket = $rs'ticket;
+        if (__tact_slice_neq(__gen_slice_string_96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7(), __tact_string_builder_end_slice($newTickets))) {
+            $newTickets~__tact_string_builder_append(__gen_slice_string_4ee8888d01627a5b474e9faffd54b20b84dcc566933880a09b1be21640019c02());
+        }
+        $newTickets~__tact_string_builder_append($ticket);
+        var ($ticketData'ticket, $ticketData'ticketNumber, $ticketData'owner) = $Ticket$_constructor_ticket_ticketNumber_owner($ticket, $ticketNumber, $user);
+    }
+    tuple $userTicketPool = $RoundTicket$_load_opt(__tact_dict_get_int_cell($self'usersTicket, 257, $poolId));
+    if ((~ null?($userTicketPool))) {
+        tuple $roundsTicket = $UserTicket$_load_opt(__tact_dict_get_int_cell($RoundTicket$_get_rounds($RoundTicket$_not_null($userTicketPool)), 257, $roundId));
+        if ((~ null?($roundsTicket))) {
+            cell $usersTicket = $UserTicket$_get_users($UserTicket$_not_null($roundsTicket));
+            tuple $existingTickets = $TicketPayoutResponse$_load_opt(__tact_dict_get_slice_cell($usersTicket, 267, $user));
+            if (( (__tact_slice_neq(__gen_slice_string_96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7(), __tact_string_builder_end_slice($newTickets))) ? ((~ null?($existingTickets))) : (false) )) {
+                $newTickets~__tact_string_builder_append(__gen_slice_string_4ee8888d01627a5b474e9faffd54b20b84dcc566933880a09b1be21640019c02());
+            }
+            if ((~ null?($existingTickets))) {
+                var ($ticketPayoutResponse'ticket) = $TicketPayoutResponse$_not_null($existingTickets);
+                $newTickets~__tact_string_builder_append($ticketPayoutResponse'ticket);
+            }
+            var ($ticketPayout'ticket) = $TicketPayoutResponse$_constructor_ticket(__tact_string_builder_end_slice($newTickets));
+            var ($userTicket'users) = $UserTicket$_constructor_users($usersTicket);
+            $userTicket'users~__tact_dict_set_slice_cell(267, $user, $TicketPayoutResponse$_store_cell(($ticketPayout'ticket)));
+            var ($roundTicket'rounds) = $RoundTicket$_constructor_rounds($RoundTicket$_get_rounds($RoundTicket$_not_null($userTicketPool)));
+            $roundTicket'rounds~__tact_dict_set_int_cell(257, $roundId, $UserTicket$_store_cell(($userTicket'users)));
+            $self'usersTicket~__tact_dict_set_int_cell(257, $poolId, $RoundTicket$_store_cell(($roundTicket'rounds)));
+        }
+    }
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), __tact_string_builder_end_slice($newTickets));
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_buyTicket((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, int $quantity) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    tuple $pool = $Pool$_load_opt(__tact_dict_get_int_cell($self'pools, 257, $poolId));
+    if (null?($pool)) {
+        throw_unless(42120, false);
+    }
+    var ($poolInfo'poolId, $poolInfo'creator, $poolInfo'rounds, $poolInfo'startTime, $poolInfo'endTime, $poolInfo'sequence, $poolInfo'active, $poolInfo'prizes) = $Pool$_not_null($pool);
+    throw_unless(13687, $poolInfo'active);
+    tuple $round = $RoundConfig$_load_opt(__tact_dict_get_int_cell($poolInfo'rounds, 257, $roundId));
+    if (null?($round)) {
+        throw_unless(36876, false);
+    }
+    var ($roundInfo'roundId, $roundInfo'poolId, $roundInfo'ticketPrice, $roundInfo'startTime, $roundInfo'endTime, $roundInfo'active) = $RoundConfig$_not_null($round);
+    throw_unless(47697, $roundInfo'active);
+    throw_unless(24801, ( ((now() >= $roundInfo'startTime)) ? ((now() < $roundInfo'endTime)) : (false) ));
+    throw_unless(59272, ($quantity > 0));
+    slice $user = __tact_context_get_sender();
+    int $totalCost = ($roundInfo'ticketPrice * $quantity);
+    throw_unless(58383, ($Context$_get_value(__tact_context_get()) >= $totalCost));
+    slice $tickets = ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_createTicket($user, $poolId, $roundId, $quantity);
+    if (($Context$_get_value(__tact_context_get()) > $totalCost)) {
+        $global_send($SendParameters$_constructor_to_value_mode($user, ($Context$_get_value(__tact_context_get()) - $totalCost), 2));
+    }
+    $global_emit($TicketBoughtEvent$_store_cell($TicketBoughtEvent$_constructor_roundId_poolId_quantity_totalCost_buyer_tickets($roundId, $poolId, $quantity, $totalCost, $user, $tickets)));
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_roundById((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), $RoundConfig$_as_optional($RoundConfig$_not_null($RoundConfig$_load_opt(__tact_dict_get_int_cell($Pool$_get_rounds($Pool$_not_null($Pool$_load_opt(__tact_dict_get_int_cell($self'pools, 257, $poolId)))), 257, $roundId)))));
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_drawWinningNumbers((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, slice $latestTxHash) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_requireOwnerOrAdmin();
+    tuple $resultPool = $Result$_load_opt(__tact_dict_get_int_cell($self'result, 257, $poolId));
+    if ((~ null?($resultPool))) {
+        int $resultRound = __tact_dict_get_int_int($Result$_get_rounds($Result$_not_null($resultPool)), 257, $roundId, 257);
+        if ((~ null?($resultRound))) {
+            throw_unless(20265, false);
+        }
+    } else {
+        $self'result~__tact_dict_set_int_cell(257, $poolId, $Result$_store_cell($Result$_constructor_rounds(null())));
+        $resultPool = $Result$_load_opt(__tact_dict_get_int_cell($self'result, 257, $poolId));
+    }
+    tuple $round = ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_roundById($poolId, $roundId);
+    throw_unless(36876, (~ null?($round)));
+    var ($roundInfo'roundId, $roundInfo'poolId, $roundInfo'ticketPrice, $roundInfo'startTime, $roundInfo'endTime, $roundInfo'active) = $RoundConfig$_not_null($round);
+    throw_unless(50778, (now() >= $roundInfo'endTime));
+    var ($rs'ASCIINumber, $rs'ticket) = ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_generateRandomASCIIString(4);
+    int $ticketNumber = $rs'ASCIINumber;
+    var ($resultData'rounds) = $Result$_constructor_rounds($Result$_get_rounds($Result$_not_null($resultPool)));
+    $resultData'rounds~__tact_dict_set_int_int(257, $roundId, $ticketNumber, 257);
+    $self'result~__tact_dict_set_int_cell(257, $poolId, $Result$_store_cell(($resultData'rounds)));
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_reply(__gen_cell_comment_d7a2e3d435587bd3bb71130beeec92f53b4e8aa34b4016d3cdab8f25049e6cbf());
+    $global_emit($WinningNumbersDrawnEvent$_store_cell($WinningNumbersDrawnEvent$_constructor_poolId_roundId_winningNumber($roundInfo'poolId, $roundInfo'roundId, $ticketNumber)));
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_getMessageHash((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, int $amount, slice $receiver) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    cell $signatureData = end_cell(store_coins(__tact_store_address(store_int(store_int(begin_cell(), $poolId, 32), $roundId, 32), $receiver), $amount));
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), cell_hash($signatureData));
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_claimData((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    tuple $poolData = $ClaimInfo$_load_opt(__tact_dict_get_int_cell($self'claimData, 257, $poolId));
+    if ((~ null?($poolData))) {
+        return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), $UserClaim$_load_opt(__tact_dict_get_int_cell($ClaimInfo$_get_info($ClaimInfo$_not_null($poolData)), 257, $roundId)));
+    }
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), null());
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_isClaim((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, slice $receiver) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    tuple $poolData = ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_claimData($poolId, $roundId);
+    if ((~ null?($poolData))) {
+        return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), (~ null?(__tact_dict_get_slice_int($UserClaim$_get_user($UserClaim$_not_null($poolData)), 267, $receiver, 1))));
+    }
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), false);
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_userTicketByAddress((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId, slice $user) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), $TicketPayoutResponse$_load_opt(__tact_dict_get_slice_cell($UserTicket$_get_users($UserTicket$_not_null($UserTicket$_load_opt(__tact_dict_get_int_cell($RoundTicket$_get_rounds($RoundTicket$_not_null($RoundTicket$_load_opt(__tact_dict_get_int_cell($self'usersTicket, 257, $poolId)))), 257, $roundId)))), 267, $user)));
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), ()) $Lottery$_fun_claimPrize((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, (int, int, int, slice, slice) $msg) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    var (($msg'poolId, $msg'roundId, $msg'amount, $msg'receiver, $msg'signature)) = $msg;
+    int $msgHash = ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_getMessageHash($msg'poolId, $msg'roundId, $msg'amount, $msg'receiver);
+    throw_unless(48401, check_signature($msgHash, $msg'signature, __tact_not_null($self'publicKey)));
+    int $isClaimed = ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_isClaim($msg'poolId, $msg'roundId, $msg'receiver);
+    throw_unless(42504, (~ $isClaimed));
+    tuple $userTicket = ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_userTicketByAddress($msg'poolId, $msg'roundId, $msg'receiver);
+    if (null?($userTicket)) {
+        throw_unless(25441, false);
+    }
+    tuple $claimPool = $ClaimInfo$_load_opt(__tact_dict_get_int_cell($self'claimData, 257, $msg'poolId));
+    if (null?($claimPool)) {
+        var ($claimUser'user) = $UserClaim$_constructor_user(null());
+        $claimUser'user~__tact_dict_set_slice_int(267, $msg'receiver, true, 1);
+        var ($claimInfo'info) = $ClaimInfo$_constructor_info(null());
+        $claimInfo'info~__tact_dict_set_int_cell(257, $msg'roundId, $UserClaim$_store_cell(($claimUser'user)));
+        $self'claimData~__tact_dict_set_int_cell(257, $msg'poolId, $ClaimInfo$_store_cell(($claimInfo'info)));
+    } else {
+        tuple $claimInfo = $UserClaim$_load_opt(__tact_dict_get_int_cell($ClaimInfo$_get_info($ClaimInfo$_not_null($claimPool)), 257, $msg'roundId));
+        var ($claimUser'user) = $UserClaim$_constructor_user(null());
+        if ((~ null?($claimInfo))) {
+            ($claimUser'user) = $UserClaim$_constructor_user($UserClaim$_get_user($UserClaim$_not_null($claimInfo)));
+            $claimUser'user~__tact_dict_set_slice_int(267, $msg'receiver, true, 1);
+        } else {
+            $claimUser'user~__tact_dict_set_slice_int(267, $msg'receiver, true, 1);
+        }
+        var ($currentClaimInfo'info) = $ClaimInfo$_constructor_info($ClaimInfo$_get_info($ClaimInfo$_not_null($claimPool)));
+        $currentClaimInfo'info~__tact_dict_set_int_cell(257, $msg'roundId, $UserClaim$_store_cell(($claimUser'user)));
+        $self'claimData~__tact_dict_set_int_cell(257, $msg'poolId, $ClaimInfo$_store_cell(($currentClaimInfo'info)));
+    }
+    int $claimFee = (($msg'amount * $self'claimFeePercent) / 100000);
+    int $claimAmount = ($msg'amount - $claimFee);
+    throw_unless(45000, ($claimAmount < __tact_my_balance()));
+    $global_send($SendParameters$_constructor_to_bounce_value_mode_body($msg'receiver, true, $claimAmount, 65, __gen_cell_comment_3fe93897158698e4d473b74414d7493716b0fc3a70310934873f0019daaccab4()));
+    $global_emit($ClaimedEvent$_store_cell($ClaimedEvent$_constructor_poolId_roundId_amount_receiver($msg'poolId, $msg'roundId, $claimAmount, $msg'receiver)));
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), cell) $Lottery$_fun_admins((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), $self'admin);
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), cell) $Lottery$_fun_currentPool((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), $self'pools);
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_poolById((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), $Pool$_load_opt(__tact_dict_get_int_cell($self'pools, 257, $poolId)));
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), (cell)) $Lottery$_fun_usersTicket((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), $UserTicket$_not_null($UserTicket$_load_opt(__tact_dict_get_int_cell($RoundTicket$_get_rounds($RoundTicket$_not_null($RoundTicket$_load_opt(__tact_dict_get_int_cell($self'usersTicket, 257, $poolId)))), 257, $roundId))));
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_resultByRound((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId, int $roundId) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    tuple $resultPool = $Result$_load_opt(__tact_dict_get_int_cell($self'result, 257, $poolId));
+    if ((~ null?($resultPool))) {
+        return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), __tact_dict_get_int_int($Result$_get_rounds($Result$_not_null($resultPool)), 257, $roundId, 257));
+    }
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), null());
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), tuple) $Lottery$_fun_resultByPool((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, int $poolId) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), $Result$_load_opt(__tact_dict_get_int_cell($self'result, 257, $poolId)));
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_publicKey((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), $self'publicKey);
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_contractBalance((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), __tact_my_balance());
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_fun_claimFeePercent((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), $self'claimFeePercent);
+}
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), slice) $Lottery$_fun_owner((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self) impure inline_ref {
+    var (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)) = $self;
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), $self'owner);
+}
+
+;;
+;; Receivers of a Contract Lottery
+;;
+
+(((slice, cell, cell, int, cell, cell, cell, int, cell, int)), ()) $Lottery$_internal_binary_CreatePool((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, (slice, int, int, int, int, int, int, cell) $msg) impure inline {
+    var ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent) = $self;
+    var ($msg'jettonWallet, $msg'ticketPrice, $msg'initialRounds, $msg'startTime, $msg'endTime, $msg'sequence, $msg'active, $msg'prizes) = $msg;
+    int $initialRounds = $msg'initialRounds;
+    int $ticketPrice = $msg'ticketPrice;
+    int $startTime = $msg'startTime;
+    int $endTime = $msg'endTime;
+    int $sequence = $msg'sequence;
+    cell $prizes = $msg'prizes;
+    var ($config'roundId, $config'poolId, $config'ticketPrice, $config'startTime, $config'endTime, $config'active) = $RoundConfig$_constructor_roundId_poolId_ticketPrice_startTime_endTime_active(0, 0, $ticketPrice, $startTime, $endTime, true);
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_createPool($initialRounds, $sequence, ($config'roundId, $config'poolId, $config'ticketPrice, $config'startTime, $config'endTime, $config'active), $prizes);
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+(((slice, cell, cell, int, cell, cell, cell, int, cell, int)), ()) $Lottery$_internal_binary_BuyTicket((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, (int, int, int) $msg) impure inline {
+    var ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent) = $self;
+    var ($msg'poolId, $msg'roundId, $msg'quantity) = $msg;
+    int $poolId = $msg'poolId;
+    int $roundId = $msg'roundId;
+    int $quantity = $msg'quantity;
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_buyTicket($poolId, $roundId, $quantity);
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+(((slice, cell, cell, int, cell, cell, cell, int, cell, int)), ()) $Lottery$_internal_binary_DrawWinningNumbers((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, (int, int, slice) $msg) impure inline {
+    var ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent) = $self;
+    var ($msg'poolId, $msg'roundId, $msg'latestTxHash) = $msg;
+    int $poolId = $msg'poolId;
+    int $roundId = $msg'roundId;
+    slice $latestTxHash = $msg'latestTxHash;
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_drawWinningNumbers($poolId, $roundId, $latestTxHash);
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+(((slice, cell, cell, int, cell, cell, cell, int, cell, int)), ()) $Lottery$_internal_binary_SetAdmin((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, (slice, int) $msg) impure inline {
+    var ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent) = $self;
+    var ($msg'admin, $msg'active) = $msg;
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_setAdmin($msg'admin, $msg'active);
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+(((slice, cell, cell, int, cell, cell, cell, int, cell, int)), ()) $Lottery$_internal_binary_Claim((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, (int, int, int, slice, slice) $msg) impure inline {
+    var ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent) = $self;
+    var ($msg'poolId, $msg'roundId, $msg'amount, $msg'receiver, $msg'signature) = $msg;
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_claimPrize($Claim$_tensor_cast(($msg'poolId, $msg'roundId, $msg'amount, $msg'receiver, $msg'signature)));
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+(((slice, cell, cell, int, cell, cell, cell, int, cell, int)), ()) $Lottery$_internal_binary_SetPublicKey((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, (int) $msg) impure inline {
+    var ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent) = $self;
+    var ($msg'publicKey) = $msg;
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_requireOwnerOrAdmin();
+    $self'publicKey = $msg'publicKey;
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+(((slice, cell, cell, int, cell, cell, cell, int, cell, int)), ()) $Lottery$_internal_binary_SetClaimFeePercent((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, (int) $msg) impure inline {
+    var ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent) = $self;
+    var ($msg'claimFeePercent) = $msg;
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_requireOwnerOrAdmin();
+    throw_unless(10050, ( (($msg'claimFeePercent >= 0)) ? (($msg'claimFeePercent <= 100)) : (false) ));
+    $self'claimFeePercent = ($msg'claimFeePercent * 1000);
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+(((slice, cell, cell, int, cell, cell, cell, int, cell, int)), ()) $Lottery$_internal_binary_TransferFund((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, (slice, int) $msg) impure inline {
+    var ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent) = $self;
+    var ($msg'to, $msg'amount) = $msg;
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_requireOwnerOrAdmin();
+    $global_send($SendParameters$_constructor_to_bounce_value($msg'to, true, (($msg'amount > __tact_my_balance()) ? __tact_my_balance() : $msg'amount)));
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+(((slice, cell, cell, int, cell, cell, cell, int, cell, int)), ()) $Lottery$_internal_binary_Deploy((slice, cell, cell, int, cell, cell, cell, int, cell, int) $self, (int) $deploy) impure inline {
+    var ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent) = $self;
+    var ($deploy'queryId) = $deploy;
+    ($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent)~$Lottery$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId)));
+    return (($self'owner, $self'admin, $self'pools, $self'nextPoolId, $self'usersTicket, $self'result, $self'rewardPools, $self'publicKey, $self'claimData, $self'claimFeePercent), ());
+}
+
+;;
+;; Get methods of a Contract Lottery
+;;
+
+_ %admins() method_id(100637) {
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_admins();
+    return res;
+}
+
+_ %isAdmin(slice $address) method_id(122448) {
+    slice $address = __tact_verify_address($address);
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_isAdmin($address);
+    return res;
+}
+
+_ %currentPool() method_id(76907) {
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_currentPool();
+    return res;
+}
+
+_ %poolById(int $poolId) method_id(122632) {
+    int $poolId = $poolId;
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_poolById($poolId);
+    return $Pool$_to_opt_external(res);
+}
+
+_ %usersTicket(int $poolId, int $roundId) method_id(70847) {
+    int $poolId = $poolId;
+    int $roundId = $roundId;
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_usersTicket($poolId, $roundId);
+    return $UserTicket$_to_external(res);
+}
+
+_ %userTicketByAddress(int $poolId, int $roundId, slice $user) method_id(101588) {
+    int $poolId = $poolId;
+    int $roundId = $roundId;
+    slice $user = __tact_verify_address($user);
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_userTicketByAddress($poolId, $roundId, $user);
+    return $TicketPayoutResponse$_to_opt_external(res);
+}
+
+_ %roundById(int $poolId, int $roundId) method_id(120186) {
+    int $poolId = $poolId;
+    int $roundId = $roundId;
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_roundById($poolId, $roundId);
+    return $RoundConfig$_to_opt_external(res);
+}
+
+_ %resultByRound(int $poolId, int $roundId) method_id(74053) {
+    int $poolId = $poolId;
+    int $roundId = $roundId;
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_resultByRound($poolId, $roundId);
+    return res;
+}
+
+_ %resultByPool(int $poolId) method_id(110335) {
+    int $poolId = $poolId;
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_resultByPool($poolId);
+    return $Result$_to_opt_external(res);
+}
+
+_ %publicKey() method_id(86520) {
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_publicKey();
+    return res;
+}
+
+_ %claimData(int $poolId, int $roundId) method_id(122213) {
+    int $poolId = $poolId;
+    int $roundId = $roundId;
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_claimData($poolId, $roundId);
+    return $UserClaim$_to_opt_external(res);
+}
+
+_ %isClaim(int $poolId, int $roundId, slice $receiver) method_id(88594) {
+    int $poolId = $poolId;
+    int $roundId = $roundId;
+    slice $receiver = __tact_verify_address($receiver);
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_isClaim($poolId, $roundId, $receiver);
+    return res;
+}
+
+_ %contractBalance() method_id(110221) {
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_contractBalance();
+    return res;
+}
+
+_ %claimFeePercent() method_id(124973) {
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_claimFeePercent();
+    return res;
+}
+
+_ %owner() method_id(83229) {
+    var self = $Lottery$_contract_load();
+    var res = self~$Lottery$_fun_owner();
+    return res;
+}
+
+_ lazy_deployment_completed() method_id {
+    return get_data().begin_parse().load_int(1);
+}
+
+;;
+;; Routing of a Contract Lottery
+;;
+
+((slice, cell, cell, int, cell, cell, cell, int, cell, int), int) $Lottery$_contract_router_internal((slice, cell, cell, int, cell, cell, cell, int, cell, int) self, int msg_bounced, slice in_msg) impure inline_ref {
+    ;; Handle bounced messages
+    if (msg_bounced) {
+        return (self, true);
+    }
+    
+    ;; Parse incoming message
+    int op = 0;
+    if (slice_bits(in_msg) >= 32) {
+        op = in_msg.preload_uint(32);
+    }
+    
+    
+    ;; Receive CreatePool message
+    if (op == 2095598070) {
+        var msg = in_msg~$CreatePool$_load();
+        self~$Lottery$_internal_binary_CreatePool(msg);
+        return (self, true);
+    }
+    
+    ;; Receive BuyTicket message
+    if (op == 3748203161) {
+        var msg = in_msg~$BuyTicket$_load();
+        self~$Lottery$_internal_binary_BuyTicket(msg);
+        return (self, true);
+    }
+    
+    ;; Receive DrawWinningNumbers message
+    if (op == 3591482628) {
+        var msg = in_msg~$DrawWinningNumbers$_load();
+        self~$Lottery$_internal_binary_DrawWinningNumbers(msg);
+        return (self, true);
+    }
+    
+    ;; Receive SetAdmin message
+    if (op == 134190905) {
+        var msg = in_msg~$SetAdmin$_load();
+        self~$Lottery$_internal_binary_SetAdmin(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Claim message
+    if (op == 1449747896) {
+        var msg = in_msg~$Claim$_load();
+        self~$Lottery$_internal_binary_Claim(msg);
+        return (self, true);
+    }
+    
+    ;; Receive SetPublicKey message
+    if (op == 3279683070) {
+        var msg = in_msg~$SetPublicKey$_load();
+        self~$Lottery$_internal_binary_SetPublicKey(msg);
+        return (self, true);
+    }
+    
+    ;; Receive SetClaimFeePercent message
+    if (op == 233252030) {
+        var msg = in_msg~$SetClaimFeePercent$_load();
+        self~$Lottery$_internal_binary_SetClaimFeePercent(msg);
+        return (self, true);
+    }
+    
+    ;; Receive TransferFund message
+    if (op == 3687331887) {
+        var msg = in_msg~$TransferFund$_load();
+        self~$Lottery$_internal_binary_TransferFund(msg);
+        return (self, true);
+    }
+    
+    ;; Receive Deploy message
+    if (op == 2490013878) {
+        var msg = in_msg~$Deploy$_load();
+        self~$Lottery$_internal_binary_Deploy(msg);
+        return (self, true);
+    }
+    
+    return (self, false);
+}
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    var msg_flags = cs~load_uint(4);
+    var msg_bounced = -(msg_flags & 1);
+    slice msg_sender_addr = __tact_verify_address(cs~load_msg_addr());
+    __tact_context = (msg_bounced, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var self = $Lottery$_contract_load();
+    
+    ;; Handle operation
+    int handled = self~$Lottery$_contract_router_internal(msg_bounced, in_msg);
+    
+    ;; Throw if not handled
+    throw_unless(130, handled);
+    
+    ;; Persist state
+    $Lottery$_contract_store(self);
+}

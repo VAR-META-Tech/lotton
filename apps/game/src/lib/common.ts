@@ -3,6 +3,8 @@ import bigDecimal from 'js-big-decimal';
 import { formatUnits, getAddress, isAddress } from 'viem';
 
 import { REGEX_EMOJI, REGEX_NO_SPECIAL_CHARACTERS } from './regex';
+import { RoundingModes } from 'js-big-decimal/dist/node/roundingModes';
+import { Address } from '@ton/core';
 
 export function capitalizeFirstLetter(str = '') {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -179,4 +181,32 @@ export const checkIsSameDay = (date1: Date, date2: Date): boolean => {
     date1.getMonth() === date2.getMonth() &&
     date1.getDate() === date2.getDate()
   );
+};
+
+export const delay = async (ms: number) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+export const getRoundActiveNumber = (value: number): string => {
+  return value ? `${value < 10 ? `0${value}` : value}` : '00';
+};
+
+export const roundNumber = (
+  number: string | number,
+  round = 6,
+  roundMode: RoundingModes = bigDecimal.RoundingModes.DOWN
+) => {
+  const roundedNumber = bigDecimal.round(number, round, roundMode);
+
+  return parseFloat(roundedNumber.toString());
+};
+
+export const convertTonWalletToBase64 = (address: string) => {
+  try {
+    const addressParse = Address.parse(address);
+
+    return String(addressParse.toString());
+  } catch (error) {
+    return '';
+  }
 };

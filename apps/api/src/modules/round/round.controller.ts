@@ -1,10 +1,14 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { GetUser } from '@/common/decorators/user.decorator';
+import { User } from '@/database/entities';
 import { QueryPaginationDto } from '@/shared/dto/pagination.query';
+import { SwaggerOperationEnum } from '@/shared/enums';
 
 import { AdminJwtGuard } from '../auth/guards/admin_jwt.guard';
-import { RoundQueryDto } from './dto/round.query.dto';
+import { UserJwtGuard } from '../auth/guards/user_jwt.guard';
+import { RoundQueryDto, WinningTicketQueryDto } from './dto/round.query.dto';
 import { RoundService } from './round.service';
 
 @Controller('rounds')
@@ -13,6 +17,7 @@ import { RoundService } from './round.service';
 export class RoundController {
   constructor(private readonly roundService: RoundService) {}
 
+  @ApiOperation({ summary: SwaggerOperationEnum.ADMIN })
   @Get()
   @UseGuards(AdminJwtGuard)
   async findRounds(
@@ -22,9 +27,26 @@ export class RoundController {
     return await this.roundService.findRounds(query, pagination);
   }
 
+  @ApiOperation({ summary: SwaggerOperationEnum.ADMIN })
+  @Get('winningTicket')
+  @UseGuards(AdminJwtGuard)
+  async findWinningTickets(
+    @Query() query: WinningTicketQueryDto,
+    @Query() pagination: QueryPaginationDto,
+  ) {
+    return await this.roundService.findWinningTickets(query, pagination);
+  }
+
+  @ApiOperation({ summary: SwaggerOperationEnum.ADMIN })
   @Get(':id')
   @UseGuards(AdminJwtGuard)
   async findRoundById(@Param('id') id: number) {
     return await this.roundService.findOne(+id);
+  }
+
+  @Get(':id/total-tickets')
+  @UseGuards(UserJwtGuard)
+  async totalTickets(@Param('id') id: number, @GetUser('user') user: User) {
+    return await this.roundService.totalTickets(+id, user);
   }
 }

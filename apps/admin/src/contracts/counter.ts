@@ -23,7 +23,7 @@ export default class Counter implements Contract {
 
   async createPool(provider: ContractProvider, via: Sender, messageBody?: Maybe<Cell | string>) {
     await provider.internal(via, {
-      value: "0.05", // send 0.002 TON for gas
+      value: "0.5", // send 0.002 TON for gas
       body: messageBody
     });
   }

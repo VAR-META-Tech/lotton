@@ -1,41 +1,45 @@
+import { IGetPoolDetailRound } from '@/apis/pools';
 import { Icons } from '@/assets/icons';
+import { getRoundActiveNumber } from '@/lib/common';
 import { cn } from '@/lib/utils';
+import { MIN_ROUND } from '@/modules/LandingPage/utils/const';
 import { FCC } from '@/types';
 import React, { Dispatch, FC, HTMLAttributes, SetStateAction, useCallback } from 'react';
 
 interface Props {
-  minRound: number;
   maxRound: number;
-  currentRound: string;
+  roundActive: IGetPoolDetailRound;
   setCurrentRound: Dispatch<SetStateAction<number>>;
+  setIsLoadingCountDown: Dispatch<SetStateAction<boolean>>;
 }
 
-const RoundAction: FC<Props> = ({ minRound, maxRound, currentRound, setCurrentRound }) => {
-  const roundNumber = Number(currentRound || 0);
+const RoundAction: FC<Props> = ({ maxRound, roundActive, setCurrentRound, setIsLoadingCountDown }) => {
+  const roundNumber = Number(getRoundActiveNumber(roundActive?.roundNumber) || 0);
 
   const handleChangeRound = useCallback(
-    (type: 'plus' | 'minus') => {
-      const isPlus = type === 'plus';
+    (isPlus: boolean) => {
+      setIsLoadingCountDown(true);
+      const isMaxRound = maxRound === roundNumber;
+      const isMinRound = roundNumber === MIN_ROUND;
 
-      if ((isPlus && roundNumber === maxRound) || (!isPlus && roundNumber === minRound)) return;
+      if ((isPlus && isMaxRound) || (!isPlus && isMinRound)) return;
 
       if (isPlus) {
         setCurrentRound((prev) => prev + 1);
-        return;
+      } else {
+        setCurrentRound((prev) => prev - 1);
       }
-
-      setCurrentRound((prev) => prev - 1);
     },
-    [maxRound, minRound, roundNumber, setCurrentRound]
+    [maxRound, roundNumber, setCurrentRound, setIsLoadingCountDown]
   );
 
   return (
-    <div className="space-x-5 absolute top-24 right-5 z-20">
-      <RoundButton isDisabled={roundNumber === minRound} onClick={() => handleChangeRound('minus')}>
+    <div className="space-x-5 absolute top-[7.5rem] right-5 z-20">
+      <RoundButton isDisabled={roundNumber === MIN_ROUND} onClick={() => handleChangeRound(false)}>
         <Icons.arrowLeft color="#fff" />
       </RoundButton>
 
-      <RoundButton isDisabled={roundNumber === maxRound} onClick={() => handleChangeRound('plus')}>
+      <RoundButton isDisabled={roundNumber === maxRound} onClick={() => handleChangeRound(true)}>
         <Icons.arrowRight color="#fff" />
       </RoundButton>
     </div>
@@ -53,7 +57,7 @@ export const RoundButton: FCC<IRoundButtonProps> = ({ children, isDisabled, ...p
     <button
       disabled={isDisabled}
       className={cn('active:opacity-40', {
-        'opacity-30': isDisabled,
+        'opacity-30 active:opacity-30': isDisabled,
       })}
       {...props}
     >

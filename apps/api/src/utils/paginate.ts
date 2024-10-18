@@ -54,3 +54,26 @@ export async function paginateEntities<T>(
     meta,
   };
 }
+
+export function generatePagination<T>(
+  totalItems: number,
+  items: Array<T>,
+  page = 1,
+  take = 50,
+) {
+  const itemCount = items.length;
+  const itemsPerPage = Number(take);
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const currentPage = Number(page) || 1;
+  const meta = {
+    itemCount,
+    totalItems,
+    itemsPerPage,
+    totalPages,
+    currentPage,
+  };
+  return {
+    items,
+    meta,
+  };
+}

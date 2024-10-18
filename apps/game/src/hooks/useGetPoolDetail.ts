@@ -1,11 +1,12 @@
 import { useGetPoolDetailQuery } from '@/apis/pools';
 
-export const useGetPoolDetail = ({ poolId, isActive }: { poolId: number; isActive: boolean }) => {
+export const useGetPoolDetail = ({ poolId, isActive }: { poolId?: number; isActive: boolean }) => {
   const { data, ...rest } = useGetPoolDetailQuery({
     variables: {
       id: String(poolId),
     },
-    enabled: !!poolId && isActive,
+    enabled: poolId !== undefined && isActive,
+    refetchInterval: 10000,
   });
 
   return {

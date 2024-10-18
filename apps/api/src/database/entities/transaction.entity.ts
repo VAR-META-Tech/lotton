@@ -6,6 +6,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+import { TransactionType } from '@/shared/enums';
+
 import { BaseTime } from './base/time.entity';
 import { Token } from './token.entity';
 
@@ -23,14 +25,20 @@ export class Transaction extends BaseTime {
   @Column({ length: 100, nullable: false })
   toAddress: string;
 
-  @Column({ length: 100, nullable: false })
+  @Column({ nullable: false })
   value: string;
+
+  @Column({ nullable: true })
+  quantity: number;
 
   @Column({ length: 20, nullable: false })
   blockTimestamp: string;
 
-  // @Column({ length: 20, nullable: false })
-  // blockNumber: string;
+  @Column({
+    type: 'enum',
+    enum: TransactionType,
+  })
+  type: TransactionType;
 
   @Column({ length: 255, nullable: false })
   transactionHash: string;

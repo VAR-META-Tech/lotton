@@ -1,14 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import type { Transaction } from '@ton/core';
-import { Address } from '@ton/core';
+import type { Message, Transaction } from '@ton/core';
+import { Address, fromNano } from '@ton/core';
 import { TonClient } from '@ton/ton';
+import bigDecimal from 'js-big-decimal';
 import TonWeb from 'tonweb';
 import { Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
-import type { Pool, Token } from '@/database/entities';
+import type { Pool, PoolPrize, Token } from '@/database/entities';
 import {
   LatestBlock,
   PoolRound,
@@ -16,20 +17,26 @@ import {
   Transaction as TransactionDB,
   UserTicket,
 } from '@/database/entities';
+import {
+  EVENT_HEADER,
+  PoolStatusEnum,
+  TransactionType,
+  UserTicketStatus,
+} from '@/shared/enums';
 
 import {
   getCurrentPool,
   loadBuyTicket,
+  loadClaimedEvent,
   loadPoolCreatedEvent,
   loadTicketBoughtEvent,
   loadWinningNumbersDrawnEvent,
 } from './contract_funcs';
+import { calculatorMatch, splitTickets } from './func';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class CrawlWorkerService {
-  tonClient: TonClient;
-  gameContractAddress: Address;
-
   constructor(
     @InjectRepository(LatestBlock)
     private readonly latestBlockRepository: Repository<LatestBlock>,
@@ -40,28 +47,20 @@ export class CrawlWorkerService {
     private readonly poolRoundRepository: Repository<PoolRound>,
     private readonly poolRepository: Repository<Pool>,
     private readonly prizesRepository: Repository<Prizes>,
-  ) {
-    this.tonClient = new TonClient({
-      endpoint: this.configService.get('contract.rpcEndpoint', {
-        infer: true,
-      }),
-      apiKey: this.configService.get('contract.apiKey', {
-        infer: true,
-      }),
-    });
-
-    this.gameContractAddress = Address.parse(
-      this.configService.get('contract.gameContractAddress', {
-        infer: true,
-      }),
-    );
-  }
+    private readonly poolPrizeRepository: Repository<PoolPrize>,
+    private readonly gameContractAddress: Address,
+    private readonly tonClient: TonClient,
+  ) {}
 
   async doCrawlJob() {
     try {
       const currentBlockNumber = (await this.getCurrentBloc()).blockNumber;
       const latestBlockNumber = (await this.getContractState()).lastTransaction
         .lt;
+      Logger.debug(
+        'IN DB: ' + currentBlockNumber + ' ONCHAIN: ' + latestBlockNumber,
+      );
+
       if (+currentBlockNumber >= +latestBlockNumber) return;
 
       const transactions = await this.getTransactions(
@@ -69,7 +68,9 @@ export class CrawlWorkerService {
         currentBlockNumber.toString(),
       );
 
-      for (const tx of transactions) {
+      Logger.debug('Transaction Length: ' + transactions.length);
+
+      for (const tx of transactions.reverse()) {
         const isAbortedTx = tx.description?.['aborted'];
         if (isAbortedTx) continue;
 
@@ -79,15 +80,21 @@ export class CrawlWorkerService {
           const body = originalBody.clone();
           const op = body.loadUint(32);
 
+          Logger.debug('op: ' + op);
+          Logger.debug('lt: ' + tx.lt);
+
           switch (op) {
-            case 2004140043:
+            case EVENT_HEADER.CREATE_POOL_EVENT:
               await this.createPoolEvent(tx);
               break;
-            case 3748203161:
+            case EVENT_HEADER.BUY_TICKETS_EVENT:
               await this.buyTicketsEvent(tx);
               break;
-            case 3591482628:
+            case EVENT_HEADER.DRAW_WINNING_NUMBER:
               await this.drawWinningNumber(tx);
+              break;
+            case EVENT_HEADER.USER_CLAIM_PRIZE:
+              await this.userClaimPrize(tx);
               break;
 
             default:
@@ -98,194 +105,392 @@ export class CrawlWorkerService {
 
       await this.updateBlockLt(latestBlockNumber);
     } catch (error) {
+      console.error('Error at: doCrawlJob');
       console.log(error);
     }
+  }
+
+  async userClaimPrize(tx: Transaction) {
+    const inMsgs = tx.inMessage;
+    const outMsgs = this.getBodyExternalOut(tx.outMessages.values());
+    if (outMsgs.length === 0) return;
+
+    const outMsgsList = this.getBodyExternalOut(tx.outMessages.values());
+    const outMsgsFirst = outMsgsList[0];
+    const originalOutMsgBody = outMsgsFirst?.body.beginParse();
+    const payloadOutMsg = loadClaimedEvent(originalOutMsgBody);
+
+    const txHash = tx.hash().toString('hex');
+    const token = await this.tokenRepository.findOneBy({ symbol: 'TON' });
+
+    const newTransaction: Partial<TransactionDB> = {
+      fromAddress: this.parseAddress(inMsgs.info.src.toString()),
+      toAddress: this.parseAddress(tx.inMessage.info.dest.toString()),
+      value: fromNano(payloadOutMsg?.amount ?? 0),
+      type: TransactionType.CLAIM,
+      blockTimestamp: tx.lt.toString(),
+      transactionHash: txHash,
+      token,
+      id: null,
+    };
+
+    const userClaimAddress = payloadOutMsg.receiver.toRawString();
+
+    await Promise.all([
+      this.saveTxUserClaim(newTransaction),
+      this.setTicketClaim(
+        Number(payloadOutMsg.poolId),
+        Number(payloadOutMsg.roundId),
+        userClaimAddress,
+        dayjs().unix(),
+      ),
+      this.setClaimedPrize(
+        Number(payloadOutMsg.poolId),
+        Number(payloadOutMsg.roundId),
+        Number(payloadOutMsg.amount),
+      ),
+    ]);
+  }
+
+  async setClaimedPrize(
+    poolIdOnChain: number,
+    roundIdOnChain: number,
+    amount: number,
+  ) {
+    const prizes = await this.prizesRepository.findOneBy({
+      poolIdOnChain,
+      roundIdOnChain,
+    });
+    if (!prizes) return;
+
+    prizes.claimedPrizes = (prizes.claimedPrizes ?? 0) + amount;
+    this.prizesRepository.save(prizes);
+  }
+
+  async setTicketClaim(
+    poolIdOnChain: number,
+    roundIdOnChain: number,
+    userWallet: string,
+    claimedAt: number,
+  ) {
+    const roundExist = await this.poolRoundRepository.findOneBy({
+      roundIdOnChain,
+      pool: {
+        poolIdOnChain,
+      },
+    });
+
+    if (!roundExist) return;
+
+    const tickets = await this.userTicketRepository
+      .createQueryBuilder('userTicket')
+      .leftJoin('userTicket.round', 'round')
+      .where('round.id = :roundId', { roundId: roundExist.id })
+      .andWhere('userTicket.userWallet = :userWallet', { userWallet })
+      .andWhere('userTicket.winningMatch > 0')
+      .getMany();
+
+    await this.userTicketRepository.save(
+      tickets.map((ticket) => ({
+        ...ticket,
+        status: UserTicketStatus.CONFIRMED_CLAIM,
+        claimedAt,
+      })),
+    );
+  }
+
+  async saveTxUserClaim(tx: Partial<TransactionDB>) {
+    await this.transactionRepository
+      .createQueryBuilder()
+      .insert()
+      .into(TransactionDB)
+      .values(tx)
+      .orUpdate(
+        [
+          'fromAddress',
+          'toAddress',
+          'value',
+          'blockTimestamp',
+          'quantity',
+          'type',
+        ],
+        ['transactionHash'],
+      )
+      .execute();
   }
 
   async drawWinningNumber(tx: Transaction) {
-    try {
-      const outMsgsList = tx.outMessages
-        .values()
-        .filter((msg) => msg.info.type === 'external-out');
-      const outMsgsFirst = outMsgsList[0];
-      const originalOutMsgBody = outMsgsFirst?.body.beginParse();
-      const payloadOutMsg = loadWinningNumbersDrawnEvent(originalOutMsgBody);
+    const outMsgsList = this.getBodyExternalOut(tx.outMessages.values());
 
-      const tickets = this.splitTickets(
-        payloadOutMsg.winningNumber.toString(),
-        1,
-      );
+    const outMsgsFirst = outMsgsList[0];
+    const originalOutMsgBody = outMsgsFirst?.body.beginParse();
+    const payloadOutMsg = loadWinningNumbersDrawnEvent(originalOutMsgBody);
 
-      // Set draw winning code for round
-      const roundExist = await this.poolRoundRepository.findOneBy({
-        roundIdOnChain: Number(payloadOutMsg.roundId),
-      });
-      roundExist.winningCode = tickets?.[0];
-      await this.poolRoundRepository.save(roundExist);
+    const tickets = splitTickets(payloadOutMsg.winningNumber.toString(), 1);
 
-      // // Set winning code for user ticket
-      const userTicketsExist = await this.userTicketRepository.findBy({
-        round: {
-          id: roundExist.id,
-        },
-      });
-      const userTicketsUpdate = userTicketsExist.map((ticket) => ({
-        ...ticket,
-        winningCode: tickets?.[0],
-        winningMatch: this.calculatorMatch(ticket.code, tickets?.[0] ?? ''),
-      }));
-      await this.userTicketRepository.save(userTicketsUpdate);
-    } catch (error) {
-      Logger.error(error);
+    // Set draw winning code for round
+    const roundExist = await this.poolRoundRepository.findOneBy({
+      roundIdOnChain: Number(payloadOutMsg.roundId),
+      pool: {
+        poolIdOnChain: Number(payloadOutMsg.poolId),
+      },
+    });
+
+    if (!roundExist) return;
+
+    const txHash = tx.hash().toString('hex');
+
+    roundExist.winningBlock = txHash;
+    roundExist.winningCode = tickets?.[0];
+    await this.poolRoundRepository.save(roundExist);
+
+    // Set winning code for user ticket
+    const userTicketsExist = await this.userTicketRepository.findBy({
+      round: {
+        id: roundExist.id,
+      },
+    });
+    const userTicketsUpdate = userTicketsExist.map((ticket) => ({
+      ...ticket,
+      winningCode: tickets?.[0],
+      winningMatch: calculatorMatch(ticket.code, tickets?.[0] ?? ''),
+    }));
+    await this.userTicketRepository.save(userTicketsUpdate);
+
+    // Calculator round prize
+    const roundPrize = await this.prizesRepository.findOneBy({
+      poolIdOnChain: Number(payloadOutMsg.poolId),
+      roundIdOnChain: Number(payloadOutMsg.roundId),
+    });
+
+    if (!roundPrize) return;
+
+    const totalTicketsMatch = await this.getTotalTicketMatch(
+      Number(payloadOutMsg.roundId),
+    );
+
+    if (totalTicketsMatch.length === 0) {
+      roundPrize.winningPrizes = 0;
+      return await this.prizesRepository.save(roundPrize);
     }
+
+    const poolPrizes = await this.poolPrizeRepository.findBy({
+      pool: {
+        poolIdOnChain: Number(payloadOutMsg.poolId),
+      },
+    });
+
+    const totalPrizesDecimal = new bigDecimal(roundPrize.totalPrizes);
+    const totalWinningPrizes = poolPrizes.reduce((acc, prize) => {
+      const getTotalTickets = totalTicketsMatch.find(
+        (match) => match.winningMatch === prize.matchNumber,
+      );
+      if (!getTotalTickets) return acc;
+
+      const allocationDecimal = new bigDecimal(prize.allocation);
+      // const totalTicketsDecimal = new bigDecimal(getTotalTickets.totalTickets);
+      const percentDecimal = new bigDecimal(100);
+
+      return acc.add(
+        totalPrizesDecimal.multiply(allocationDecimal).divide(percentDecimal),
+        // .divide(totalTicketsDecimal),
+      );
+    }, new bigDecimal(0));
+
+    roundPrize.winningPrizes = +totalWinningPrizes.getValue();
+    await this.prizesRepository.save(roundPrize);
+  }
+
+  getTotalTicketMatch(roundId: number) {
+    return this.userTicketRepository
+      .createQueryBuilder('userTicket')
+      .leftJoin('userTicket.round', 'round')
+      .where(
+        'userTicket.winningMatch IS NOT NULL AND userTicket.winningMatch > 0',
+      )
+      .andWhere('round.roundIdOnChain = :roundId', {
+        roundId,
+      })
+      .select([
+        'COUNT(userTicket.id) as totalTickets',
+        'userTicket.winningMatch as winningMatch',
+      ])
+      .groupBy('userTicket.winningMatch')
+      .getRawMany();
   }
 
   async buyTicketsEvent(tx: Transaction) {
-    try {
-      const inMsgs = tx.inMessage;
-      const outMsgs = tx.outMessages
-        .values()
-        .filter((msg) => msg.info.type === 'external-out');
-      if (outMsgs.length === 0) return;
+    const inMsgs = tx.inMessage;
+    const outMsgs = this.getBodyExternalOut(tx.outMessages.values());
 
-      const originalOutMsgBody = outMsgs[0]?.body.beginParse();
-      const originalInMsgBody = inMsgs?.body.beginParse();
-      const payloadOutMsg = loadTicketBoughtEvent(originalOutMsgBody);
-      const payloadInMsg = loadBuyTicket(originalInMsgBody);
+    if (outMsgs.length === 0) return;
 
-      // Create transaction buy ticket
-      const txHash = tx.hash().toString('hex');
-      const token = await this.tokenRepository.findOneBy({ symbol: 'TON' });
+    const originalOutMsgBody = outMsgs[0]?.body.beginParse();
+    const originalInMsgBody = inMsgs?.body.beginParse();
+    const payloadOutMsg = loadTicketBoughtEvent(originalOutMsgBody);
+    const payloadInMsg = loadBuyTicket(originalInMsgBody);
 
-      const newTransaction: Partial<TransactionDB> = {
-        fromAddress: this.parseAddress(inMsgs.info.src.toString()),
-        toAddress: this.parseAddress(tx.inMessage.info.dest.toString()),
-        value: payloadInMsg.quantity.toString(),
-        blockTimestamp: tx.lt.toString(),
-        transactionHash: txHash,
-        token,
+    // Create transaction buy ticket
+    const txHash = tx.hash().toString('hex');
+    const token = await this.tokenRepository.findOneBy({ symbol: 'TON' });
+
+    const newTransaction: Partial<TransactionDB> = {
+      fromAddress: this.parseAddress(inMsgs.info.src.toString()),
+      toAddress: this.parseAddress(tx.inMessage.info.dest.toString()),
+      quantity: Number(payloadInMsg.quantity),
+      value: payloadOutMsg?.totalCost
+        ? fromNano(payloadOutMsg?.totalCost)
+        : '0',
+      type: TransactionType.BUY,
+      blockTimestamp: tx.lt.toString(),
+      transactionHash: txHash,
+      token,
+      id: null,
+    };
+
+    await this.transactionRepository
+      .createQueryBuilder()
+      .insert()
+      .into(TransactionDB)
+      .values(newTransaction)
+      .orUpdate(
+        [
+          'fromAddress',
+          'toAddress',
+          'value',
+          'blockTimestamp',
+          'quantity',
+          'type',
+        ],
+        ['transactionHash'],
+      )
+      .execute();
+
+    const transaction = await this.transactionRepository.findOneBy({
+      transactionHash: txHash,
+    });
+
+    const tickets = splitTickets(
+      payloadOutMsg.tickets,
+      Number(payloadInMsg.quantity),
+    );
+
+    const roundExist = await this.poolRoundRepository.findOneBy({
+      roundIdOnChain: Number(payloadOutMsg.roundId),
+      pool: {
+        poolIdOnChain: Number(payloadOutMsg.poolId),
+      },
+    });
+
+    if (!roundExist) return;
+
+    // Create user tickets
+    await this.userTicketRepository
+      .createQueryBuilder()
+      .insert()
+      .into(UserTicket)
+      .values(
+        tickets.map((t) => ({
+          id: null,
+          userWallet: this.parseAddress(inMsgs.info.src.toString()),
+          round: roundExist,
+          code: t,
+          transaction: transaction,
+          status: UserTicketStatus.BOUGHT,
+        })),
+      )
+      .orUpdate(['roundId'], ['transactionId', 'userWallet', 'code'])
+      .execute();
+
+    // Sum total prizes
+    const poolExist = await this.getPool(Number(payloadOutMsg.poolId));
+    if (!poolExist) return;
+    const totalTickets = await this.getTotalTicketOfRound(
+      roundExist.roundIdOnChain,
+      Number(payloadOutMsg.poolId),
+    );
+    const totalTicketAmount = totalTickets * Number(poolExist.ticketPrice);
+
+    let roundPrize: Partial<Prizes>;
+
+    if (roundExist.roundIdOnChain === 1) {
+      roundPrize = {
         id: null,
-      };
-
-      await this.transactionRepository
-        .createQueryBuilder()
-        .insert()
-        .into(TransactionDB)
-        .values(newTransaction)
-        .orUpdate(
-          ['fromAddress', 'toAddress', 'value', 'blockTimestamp'],
-          ['transactionHash'],
-        )
-        .execute();
-
-      const transaction = await this.transactionRepository.findOneBy({
-        transactionHash: txHash,
-      });
-
-      const tickets = this.splitTickets(
-        payloadOutMsg.tickets,
-        Number(payloadInMsg.quantity),
-      );
-
-      const roundExist = await this.poolRoundRepository.findOneBy({
-        roundIdOnChain: Number(payloadOutMsg.roundId),
-      });
-
-      // Create user tickets
-      await this.userTicketRepository
-        .createQueryBuilder()
-        .insert()
-        .into(UserTicket)
-        .values(
-          tickets.map((t) => ({
-            id: null,
-            userWallet: this.parseAddress(inMsgs.info.src.toString()),
-            round: roundExist,
-            code: t,
-            transaction: transaction,
-          })),
-        )
-        .orUpdate(['roundId'], ['transactionId', 'userWallet', 'code'])
-        .execute();
-
-      // Sum total prizes
-      const totalTickets = await this.getTotalTicketOfRound(
-        roundExist.roundIdOnChain,
-      );
-      const poolExist = await this.getPool(Number(payloadOutMsg.poolId));
-      const totalPrizes = totalTickets * Number(poolExist.ticketPrice);
-
-      // Set prize for round
-      const roundPrize: Partial<Prizes> = {
         poolIdOnChain: Number(payloadOutMsg.poolId),
         roundIdOnChain: Number(payloadOutMsg.roundId),
-        totalPrizes,
-        id: null,
+        totalTicketAmount,
+        totalPrizes: totalTicketAmount,
+        previousPrizes: 0,
       };
-      await this.setPrizesRound(roundPrize);
-    } catch (error) {
-      console.log(error);
+    } else {
+      const getPreviousPrize = await this.prizesRepository
+        .createQueryBuilder('prize')
+        .where('poolIdOnChain = :poolIdOnChain', {
+          poolIdOnChain: Number(payloadOutMsg.poolId),
+        })
+        .andWhere('roundIdOnChain < :roundIdOnChain', {
+          roundIdOnChain: roundExist.roundIdOnChain,
+        })
+        .orderBy('prize.roundIdOnChain', 'DESC')
+        .getOne();
+      const previousPrizes =
+        (getPreviousPrize?.totalPrizes ?? 0) -
+        (getPreviousPrize?.winningPrizes ?? 0);
+
+      roundPrize = {
+        id: null,
+        poolIdOnChain: Number(payloadOutMsg.poolId),
+        roundIdOnChain: Number(payloadOutMsg.roundId),
+        totalTicketAmount,
+        totalPrizes: previousPrizes + totalTicketAmount,
+        previousPrizes: previousPrizes,
+      };
     }
-  }
 
-  splitTickets(ticketsList: string, quantity: number) {
-    const ticketsString = ticketsList
-      .replace(/,/g, '')
-      .substring(0, 4 * 2 * quantity);
-
-    const tickets = [];
-    for (let i = 0; i < ticketsString.length; i += 8) {
-      const ticket = ticketsString.substring(i, i + 8);
-      let ticketConvert = '';
-
-      for (let i = 0; i < ticket.length; i += 2) {
-        const ticketChar = ticket.substring(i, i + 2);
-        ticketConvert += String.fromCharCode(+ticketChar);
-      }
-      tickets.push(ticketConvert);
-    }
-
-    return tickets;
+    await this.setPrizesRound(roundPrize);
   }
 
   async createPoolEvent(tx: Transaction) {
-    try {
-      const outMsgs = tx.outMessages.values()[0];
-      const originalBody = outMsgs?.body.beginParse();
-      const payload = loadPoolCreatedEvent(originalBody);
-      const poolIdOnChain = payload.poolId;
+    const outMsgsList = this.getBodyExternalOut(tx.outMessages.values());
+    const outMsgs = outMsgsList?.[0];
+    const originalBody = outMsgs?.body?.beginParse();
+    const payload = loadPoolCreatedEvent(originalBody);
 
-      const pools = await this.getPools();
-      const getPool = pools.find((p) => p.poolId === poolIdOnChain);
-      if (!getPool) return;
+    const pool = await this.poolRepository.findOneBy({
+      status: PoolStatusEnum.INACTIVE,
+      startTime: Number(payload.startTime),
+      sequency: Number(payload.sequence),
+    });
 
-      const poolOffChain = await this.getPool(poolIdOnChain);
-      if (!poolOffChain) return;
+    if (!pool) return;
+    pool.poolIdOnChain = Number(payload.poolId);
+    pool.totalRounds = payload.rounds.values().length;
+    pool.endTime = Number(payload.endTime);
+    pool.ticketPrice = Number(payload.ticketPrice);
+    pool.status = PoolStatusEnum.ACTIVE;
 
-      const rounds = getPool.rounds.values();
+    await this.poolRepository.save(pool);
+    const rounds = payload.rounds.values();
 
-      await this.poolRoundRepository
-        .createQueryBuilder()
-        .insert()
-        .into(PoolRound)
-        .values(
-          rounds.map((round) => ({
-            id: null,
-            pool: poolOffChain,
-            roundIdOnChain: Number(round.roundId),
-            roundNumber: Number(round.roundId),
-            startTime: Number(round.startTime),
-            endTime: Number(round.endTime),
-          })),
-        )
-        .orUpdate(
-          ['roundNumber', 'startTime', 'endTime', 'poolId'],
-          ['roundIdOnChain'],
-        )
-        .execute();
-    } catch (error) {
-      Logger.error(error);
-    }
+    await this.poolRoundRepository
+      .createQueryBuilder()
+      .insert()
+      .into(PoolRound)
+      .values(
+        rounds.map((round) => ({
+          id: null,
+          pool: pool,
+          roundIdOnChain: Number(round.roundId),
+          roundNumber: Number(round.roundId),
+          startTime: Number(round.startTime),
+          endTime: Number(round.endTime),
+        })),
+      )
+      .orUpdate(
+        ['roundNumber', 'startTime', 'endTime'],
+        ['poolId', 'roundIdOnChain'],
+      )
+      .execute();
   }
 
   async getPools() {
@@ -300,19 +505,6 @@ export class CrawlWorkerService {
       throw error;
     }
   }
-
-  // async getPoolIdOnChange(poolId: number) {
-  //   const builder = new TupleBuilder();
-  //   builder.writeNumber(BigInt(poolId));
-
-  //   const currentPool = await getPoolById(
-  //     this.tonClient.provider(this.gameContractAddress),
-  //     BigInt(poolId),
-  //   );
-
-  //   const result = currentPool.readTupleOpt();
-  //   return result ? loadTuplePool(result) : null;
-  // }
 
   async updateBlockLt(lt: string) {
     try {
@@ -356,10 +548,13 @@ export class CrawlWorkerService {
     });
   }
 
-  getTotalTicketOfRound(roundIdOnChain: number) {
+  getTotalTicketOfRound(roundIdOnChain: number, poolIdOnChain: number) {
     return this.userTicketRepository.countBy({
       round: {
         roundIdOnChain,
+        pool: {
+          poolIdOnChain,
+        },
       },
     });
   }
@@ -376,7 +571,10 @@ export class CrawlWorkerService {
       .insert()
       .into(Prizes)
       .values(roundPrize)
-      .orUpdate(['totalPrizes'], ['poolIdOnChain', 'roundIdOnChain'])
+      .orUpdate(
+        ['totalPrizes', 'totalTicketAmount', 'previousPrizes'],
+        ['poolIdOnChain', 'roundIdOnChain'],
+      )
       .execute();
   }
 
@@ -389,13 +587,7 @@ export class CrawlWorkerService {
       return Address.parse(address).toRawString();
     return address;
   }
-
-  calculatorMatch(userCode: string, winningCode: string) {
-    for (let index = winningCode.length; index >= 0; index--) {
-      if (userCode.slice(0, index) === winningCode.slice(0, index))
-        return index;
-    }
-
-    return 0;
+  getBodyExternalOut(body: Message[]) {
+    return body.filter((msg) => msg.info.type === 'external-out');
   }
 }

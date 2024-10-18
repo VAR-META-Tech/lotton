@@ -1,72 +1,72 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import { Icons } from '@/assets/icons';
 
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
-import YourTickets from './YourTickets';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { FCC } from '@/types';
-import TicketInfo from '../TicketInfo';
-import { HStack } from '@/components/ui/Utilities';
-import { Button } from '@/components/ui/button';
 import { IGetPoolJoinedItem } from '@/apis/pools';
-import { useBuyTicketStore } from '@/stores/BuyTicketStore';
+import { CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import { useCommonCarousel } from '@/hooks/useCommonCarousel';
+import TicketDetailItem from './TicketDetailItem';
+import { useDetailTicketStore } from '@/stores/DetailTicketStore';
 
 type Props = {
   pool: IGetPoolJoinedItem;
-  roundActiveNumber: number;
+  activeRound: number;
+  setActiveRound: Dispatch<SetStateAction<number>>;
 };
 
-export const TicketDetailDrawer: FCC<Props> = ({ children, pool, roundActiveNumber }) => {
-  const setPoolId = useBuyTicketStore.use.setPoolId();
+export const TicketDetailDrawer: FCC<Props> = ({ children, pool, activeRound, setActiveRound }) => {
+  const [skipLoop, setSkipLoop] = React.useState(false);
+  const store = useDetailTicketStore.use.store();
+  const setStore = useDetailTicketStore.use.setStore();
 
-  const roundActiveInfo = useMemo(() => {
-    const round = pool?.rounds?.find((round) => {
-      return round?.roundNumber === roundActiveNumber;
-    });
+  const { carouselRef, selectedIndex, onNextButtonClick } = useCommonCarousel();
 
-    return round;
-  }, [roundActiveNumber, pool?.rounds]);
+  useEffect(() => {
+    setActiveRound(selectedIndex);
+    setSkipLoop(true);
+  }, [selectedIndex, setActiveRound]);
 
-  const isEndRound = useMemo(() => {
-    if (!roundActiveInfo?.endTime) return false;
-
-    const roundEndtime = new Date(roundActiveInfo?.endTime);
-    const now = new Date();
-
-    if (now > roundEndtime) {
-      return true;
+  useEffect(() => {
+    if (!skipLoop) {
+      for (let i = 0; i < activeRound; i++) {
+        onNextButtonClick();
+      }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeRound, onNextButtonClick]);
 
-    return false;
-  }, [roundActiveInfo?.endTime]);
+  const handleClose = () => {
+    setStore({
+      ...store,
+      poolId: undefined,
+    });
+  };
 
   return (
-    <Drawer>
+    <Drawer open={store?.poolId ? store?.poolId === pool?.id : false} onOpenChange={() => setSkipLoop(false)}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent>
         <div className="w-full">
           <DrawerHeader className="flex justify-between container">
             <DrawerTitle className="text-white text-2xl font-semibold">Ticket Details</DrawerTitle>
 
-            <DrawerClose>
+            <button onClick={handleClose}>
               <Icons.x className="text-gray-color" />
-            </DrawerClose>
+            </button>
           </DrawerHeader>
-          <div className="border-t-[1px] max-h-[70vh] overflow-auto border-t-gray-color pt-5 pb-10">
-            <div className="container">
-              <TicketInfo name={pool?.name || ''} roundActiveNumber={roundActiveNumber} />
-
-              <YourTickets winCode={roundActiveInfo?.winningCode || '    '} roundInfo={roundActiveInfo} />
-
-              {!isEndRound && (
-                <HStack pos={'center'}>
-                  <Button className="text-white" onClick={() => setPoolId(pool?.id)}>
-                    Buy More Ticket
-                  </Button>
-                </HStack>
-              )}
-            </div>
+          <div className="border-t-[1px] max-h-[70vh] h-fit overflow-auto border-t-gray-color pt-5 pb-10">
+            <CarouselContent className="-ml-[3rem]" ref={carouselRef}>
+              {pool?.rounds?.map((item, index) => {
+                return (
+                  <CarouselItem key={`${pool?.id || 0}-${index}`} className="pl-[3rem] basis-[100%]">
+                    <TicketDetailItem pool={pool} roundActive={item} />
+                  </CarouselItem>
+                );
+              })}
+            </CarouselContent>
           </div>
         </div>
       </DrawerContent>

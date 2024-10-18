@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import type { ConfigService } from '@nestjs/config';
 import { mnemonicToPrivateKey } from '@ton/crypto';
 import {
@@ -9,20 +10,25 @@ import {
   TupleBuilder,
   WalletContractV4,
 } from '@ton/ton';
-import type { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, type Repository } from 'typeorm';
 
 import type { StellaConfig } from '@/configs';
-import type { Pool, PoolRound } from '@/database/entities';
+import type { Pool, PoolRound, Prizes, UserTicket } from '@/database/entities';
+import { PoolStatusEnum, UserTicketStatus } from '@/shared/enums';
 import { getLogger } from '@/utils/logger';
 
 import {
   getCurrentPool,
+  getResultByRound,
   loadGetterTupleUserTicket,
   storeBuyTicket,
   storeCreatePool,
   storeDrawWinningNumbers,
   storeSetAdmin,
+  storeSetPublicKey,
 } from './contract_funcs';
+import { calculatorMatch, splitTickets } from './func';
+import dayjs from 'dayjs';
 
 const logger = getLogger('CrawlTokenService');
 
@@ -34,6 +40,8 @@ export class RoundPrizesService {
     private poolRepository: Repository<Pool>,
     private poolRoundRepository: Repository<PoolRound>,
     private configService: ConfigService<StellaConfig>,
+    private userTicketRepository: Repository<UserTicket>,
+    private prizesRepository: Repository<Prizes>,
   ) {
     this.tonClient = new TonClient({
       endpoint: this.configService.get('contract.rpcEndpoint', {
@@ -80,14 +88,82 @@ export class RoundPrizesService {
     // this.createPool();
     // this.getListPools();
     // this.buyTickets();
-    // this.setAdmin();
+    // await this.setAdmin();
+    // await this.publicKey();
+
+    this.revertStatusTicketClaim();
+    this.drawRound();
+    this.airdropPool();
+  }
+
+  getPoolsAirdrop() {
+    return this.poolRepository.findBy({
+      status: PoolStatusEnum.ACTIVE,
+      endTime: LessThanOrEqual(dayjs().subtract(5, 'minutes').unix()),
+    });
+  }
+
+  getPrizes(poolIdOnChain: number) {
+    return this.prizesRepository
+      .createQueryBuilder('prize')
+      .where('prize.poolIdOnChain = :poolIdOnChain', { poolIdOnChain })
+      .select([
+        'winningPrizes',
+        'claimedPrizes',
+        'poolIdOnChain',
+        'roundIdOnChain',
+      ])
+      .getRawMany();
+  }
+
+  getTotalPrizesPool(poolIdOnChain: number) {
+    return this.prizesRepository
+      .createQueryBuilder('prize')
+      .where('prize.poolIdOnChain = :poolIdOnChain', { poolIdOnChain })
+      .orderBy('prize.roundIdOnChain', 'DESC')
+      .select(['totalPrizes'])
+      .getRawOne();
+  }
+
+  async airdropPool() {
+    const pools = await this.getPoolsAirdrop();
+    for (const pool of pools) {
+      const [prizes, totalPrizes] = await Promise.all([
+        this.getPrizes(pool.poolIdOnChain),
+        this.getTotalPrizesPool(pool.poolIdOnChain),
+      ]);
+      const remainWinningPrize = prizes.reduce(
+        (acc, prize) =>
+          (acc += (prize.winningPrizes ?? 0) - (prize.claimedPrizes ?? 0)),
+        0,
+      );
+
+      const airdropPrize = totalPrizes?.totalPrizes + remainWinningPrize;
+      console.log(pool.id, airdropPrize);
+    }
+  }
+
+  async drawRound() {
     const pools = await this.getPoolsAvailable();
     for (const pool of pools) {
-      const rounds = await this.getRoundsAvailable(pool.poolIdOnChain);
+      const rounds = await this.getRoundsAvailable(pool.id);
       for (const round of rounds) {
-        await this.drawWinningNumbers(pool.id, round.id);
+        await this.drawWinningNumbers(pool.poolIdOnChain, round.roundIdOnChain);
       }
     }
+  }
+
+  async revertStatusTicketClaim() {
+    const tickets = await this.userTicketRepository
+      .createQueryBuilder('userTicket')
+      .where('status = :status', { status: UserTicketStatus.CONFIRMING_CLAIM })
+      .andWhere('claimedAt < :time', {
+        time: dayjs().subtract(1, 'minute').unix(),
+      })
+      .getMany();
+    await this.userTicketRepository.save(
+      tickets.map((ticket) => ({ ...ticket, status: UserTicketStatus.BOUGHT })),
+    );
   }
 
   async userTickets(poolId: number, roundId: number) {
@@ -155,10 +231,10 @@ export class RoundPrizesService {
                   '0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP',
                 ),
                 ticketPrice: BigInt(1),
-                initialRounds: BigInt(6),
-                startTime: BigInt(1724989513),
+                initialRounds: BigInt(10),
+                startTime: BigInt(new Date().valueOf().toString().slice(0, -3)),
                 endTime: BigInt(1725985385),
-                sequence: BigInt(600),
+                sequence: BigInt(1200),
                 active: true,
               }),
             )
@@ -198,21 +274,9 @@ export class RoundPrizesService {
     console.log('create ok');
   }
 
-  async getListPools() {
-    const pools = (
-      await getCurrentPool(
-        this.tonClient.provider(Address.parse(this.contractAddress)),
-      )
-    ).values();
-    console.log(pools);
-    console.log('get pools ok');
-  }
-
-  async drawWinningNumbers(poolId: number, roundId: number) {
-    const { contract, keyPair } = await this.makeWallet();
-    // Create a transfer
-    // await adminWallet.send(contractProvider, messageDraw);
-    console.log('start');
+  async publicKey() {
+    const { wallet: adminWallet, keyPair } = await this.makeWallet();
+    const contract = this.tonClient.open(adminWallet);
     const seqno = await contract.getSeqno();
     const transfer = await contract.createTransfer({
       seqno,
@@ -220,16 +284,13 @@ export class RoundPrizesService {
       messages: [
         internal({
           value: toNano('0.05'),
-          to: this.configService.get('contract.gameContractAddress', {
-            infer: true,
-          }),
+          to: this.contractAddress,
           body: beginCell()
             .store(
-              storeDrawWinningNumbers({
-                $$type: 'DrawWinningNumbers',
-                poolId: BigInt(poolId),
-                roundId: BigInt(roundId),
-                latestTxHash: '',
+              storeSetPublicKey({
+                $$type: 'SetPublicKey',
+                publicKey:
+                  35697107194817367972172360094398639751774068753154718602415145470517477976469n,
               }),
             )
             .endCell(),
@@ -237,29 +298,135 @@ export class RoundPrizesService {
       ],
     });
     await contract.send(transfer);
+    console.log('publicKey ok');
+  }
 
-    console.log('draw ok');
-    // console.log(transfer);
-    // console.log(await contract.getSeqno());
+  async getListPools() {
+    const pools = (
+      await getCurrentPool(
+        this.tonClient.provider(Address.parse(this.contractAddress)),
+      )
+    ).values();
+    console.log(pools.map((p) => p.rounds.values()));
+    console.log('get pools ok');
+  }
+
+  async getResultByRound(poolId: bigint, roundId: bigint) {
+    const result = await getResultByRound(
+      this.tonClient.provider(Address.parse(this.contractAddress)),
+      poolId,
+      roundId,
+    );
+
+    if (!result) {
+      console.log('get getResultByRound ok', result);
+      return [];
+    }
+    const ticketDraw = splitTickets(Number(result).toString(), 1);
+    console.log('get getResultByRound ok', ticketDraw);
+    return ticketDraw;
+  }
+
+  async drawWinningNumbers(poolId: number, roundId: number) {
+    try {
+      console.log('Draw poolId', poolId, 'roundId', roundId);
+
+      const ticketsDraw = await this.getResultByRound(
+        BigInt(poolId),
+        BigInt(roundId),
+      );
+      if (ticketsDraw.length === 1) {
+        return await this.setWinningDraw(poolId, roundId, ticketsDraw[0]);
+      }
+
+      const { contract, keyPair } = await this.makeWallet();
+      // Create a transfer
+      const seqno = await contract.getSeqno();
+      const transfer = await contract.createTransfer({
+        seqno,
+        secretKey: keyPair.secretKey,
+        messages: [
+          internal({
+            value: toNano('0.05'),
+            to: this.configService.get('contract.gameContractAddress', {
+              infer: true,
+            }),
+            body: beginCell()
+              .store(
+                storeDrawWinningNumbers({
+                  $$type: 'DrawWinningNumbers',
+                  poolId: BigInt(poolId),
+                  roundId: BigInt(roundId),
+                  latestTxHash: '',
+                }),
+              )
+              .endCell(),
+          }),
+        ],
+      });
+      await contract.send(transfer);
+      console.log('draw ok');
+      let newSeqno = seqno;
+      do {
+        await this.wait(1000);
+        newSeqno = await contract.getSeqno();
+        console.log(newSeqno);
+      } while (newSeqno === seqno);
+    } catch (error) {
+      Logger.error(error);
+    }
+  }
+
+  async setWinningDraw(
+    poolIdOnChain: number,
+    roundIdOnChain: number,
+    ticketDraw: string,
+  ) {
+    // Set draw winning code for round
+    const roundExist = await this.poolRoundRepository.findOneBy({
+      roundIdOnChain,
+      pool: {
+        poolIdOnChain,
+      },
+    });
+    roundExist.winningCode = ticketDraw;
+    await this.poolRoundRepository.save(roundExist);
+
+    // Set winning code for user ticket
+    const userTicketsExist = await this.userTicketRepository.findBy({
+      round: {
+        id: roundExist.id,
+      },
+    });
+    const userTicketsUpdate = userTicketsExist.map((ticket) => ({
+      ...ticket,
+      winningCode: ticketDraw,
+      winningMatch: calculatorMatch(ticket.code, ticketDraw ?? ''),
+    }));
+    await this.userTicketRepository.save(userTicketsUpdate);
   }
 
   async getPoolsAvailable() {
-    return (
-      this.poolRepository
-        .createQueryBuilder()
-        .where('startTime < UNIX_TIMESTAMP(NOW())')
-        // .andWhere('endTime > UNIX_TIMESTAMP(NOW())')
-        .getMany()
-    );
+    return this.poolRepository
+      .createQueryBuilder('pool')
+      .leftJoinAndSelect('pool.rounds', 'rounds', 'rounds.winningCode IS NULL')
+      .where('pool.status = :status', { status: PoolStatusEnum.ACTIVE })
+      .select(['pool.*', 'COUNT(rounds.id) as totalRoundsNotDraw'])
+      .groupBy('pool.id')
+      .having('totalRoundsNotDraw > 0')
+      .getRawMany();
   }
 
   async getRoundsAvailable(poolId: number) {
     return this.poolRoundRepository
       .createQueryBuilder()
       .where('poolId = :poolId', { poolId })
-      .andWhere('startTime < UNIX_TIMESTAMP(NOW())')
-      .andWhere('UNIX_TIMESTAMP(NOW()) > endTime')
       .andWhere('winningCode IS NULL')
+      .andWhere('UNIX_TIMESTAMP(NOW()) > endTime')
       .getMany();
+  }
+
+  wait(timeout: number) {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
   }
 }

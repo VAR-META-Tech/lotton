@@ -44,6 +44,7 @@ export interface IGetPoolDetailData {
   endTime: string;
   sequency: number;
   totalRounds: number;
+  status: string;
   ticketPrice: string;
   currency: IGetPoolDetailCurrency;
   rounds: IGetPoolDetailRound[];
@@ -53,10 +54,10 @@ export interface IGetPoolDetailData {
 export interface IGetPoolDetailCurrency {
   createdAt: string;
   updatedAt: string;
-  deletedAt: any;
+  deletedAt: string | null;
   id: number;
   name: string;
-  icon: any;
+  icon: string | null;
   decimals: number;
   symbol: string;
   contractAddress: string;
@@ -74,13 +75,21 @@ export interface IGetPoolDetailRound {
   roundNumber: number;
   startTime: string;
   endTime: string;
-  winningCode: string;
+  winningCode?: string;
+  totalPrizes: string;
+  winners: IGetPoolDetailWinner[];
+  totalTickets: number;
+}
+
+export interface IGetPoolDetailWinner {
+  totalWinning: string;
+  winningMatch: number;
 }
 
 export interface IGetPoolDetailPoolPrize {
   createdAt: string;
   updatedAt: string;
-  deletedAt: any;
+  deletedAt: string | null;
   id: number;
   matchNumber: number;
   allocation: number;
@@ -115,15 +124,16 @@ export interface IGetPoolJoinedItem {
 }
 
 export interface IGetPoolJoinedItemRound {
-  totalTicket: string;
+  totalTicket: number;
   createdAt: string;
   updatedAt: string;
-  deletedAt: any;
+  deletedAt: string | null;
   id: number;
+  roundIdOnChain: number;
   roundNumber: number;
-  startTime: string;
-  endTime: string;
-  winningCode: string | null;
+  startTime: number;
+  endTime: number;
+  winningCode: string;
   ticket: IGetPoolJoinedItemTicket[];
 }
 
@@ -136,6 +146,24 @@ export interface IGetPoolJoinedItemTicket {
   code: string;
   winningCode?: string;
   winningMatch?: number;
+  claimed: boolean;
+  status: string;
+  claimedAt: string | null;
+  transaction: IGetPoolJoinedItemTransaction;
+}
+
+export interface IGetPoolJoinedItemTransaction {
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: any;
+  id: number;
+  fromAddress: string;
+  toAddress: string;
+  value: string;
+  quantity: number;
+  blockTimestamp: string;
+  type: string;
+  transactionHash: string;
 }
 
 export interface IGetPoolCollectPrizeParams {
@@ -181,4 +209,22 @@ export interface IGetClaimSignatureResponse extends TResponse<IGetClaimSignature
 
 export interface IGetClaimSignatureData {
   signature: string;
+  prizesToClaim: string;
+  token: IGetClaimSignatureToken;
+  roundExits: IGetClaimSignatureRoundExits;
+  unitPrizes: string;
+}
+
+export interface IGetClaimSignatureToken {
+  decimals: number;
+}
+
+export interface IGetClaimSignatureRoundExits {
+  poolIdOnChain: number;
+  roundIdOnChain: number;
+  roundEndTime: string;
+}
+
+export interface IConfirmClaimParams {
+  roundId: number;
 }

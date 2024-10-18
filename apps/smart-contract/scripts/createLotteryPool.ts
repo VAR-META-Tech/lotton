@@ -1,31 +1,40 @@
-import { Address, beginCell, toNano } from '@ton/core';
+import { Address, beginCell, Dictionary, toNano } from '@ton/core';
 import { Lottery } from '../wrappers/Lottery';
 import { NetworkProvider, sleep } from '@ton/blueprint';
 import { mnemonicToWalletKey, sign } from '@ton/crypto';
 
-export async function run(provider: NetworkProvider, args: string[]) {
-    const ui = provider.ui();
+async function setPublicKey(lottery: any, provider: any) {
+    await lottery.send(
+        provider.sender(), {
+            value: toNano('0.06'),
+        },
+        {
+            $$type: 'SetPublicKey',
+            publicKey: 35697107194817367972172360094398639751774068753154718602415145470517477976469n
+        }
+    );
+}
 
-    // const address = Address.parse(args.length > 0 ? args[0] : await ui.input('Lottery address'));
-    const address = Address.parse('EQAwO2CucgqsCctKFFqVPAgY48iLO96xjOJxZgcuha5UgSmE');
+async function setAdmin(lottery: any, provider: any) {
+    await lottery.send(
+        provider.sender(), {
+            value: toNano('0.05'),
+        },
+        {
+            $$type: 'SetAdmin',
+            admin: Address.parse('0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP'),
+            active: true
+        }
+    );
+}
 
-    if (!(await provider.isContractDeployed(address))) {
-        ui.write(`Error: Contract at address ${address} is not deployed!`);
-        return;
-    }
-
-    const lottery = provider.open(Lottery.fromAddress(address));
+async function createPool(lottery: any, provider: any) {
     const now = Math.floor(Date.now()/1000);
-
-    // await lottery.send(
-    //     provider.sender(), {
-    //         value: toNano('0.05'),
-    //     },
-    //     {
-    //         $$type: 'SetAdmin',
-    //         admin: Address.parse('0QBmPzFlJnqlNaHV22V6midanLx7ch9yRBiUnv6sH8aMfIcP'),
-    //     }
-    // );
+    let prizes: Dictionary<number, number> = Dictionary.empty(Dictionary.Keys.Uint(8), Dictionary.Values.Uint(8));
+    prizes.set(1, 10);
+    prizes.set(2, 15);
+    prizes.set(3, 20);
+    prizes.set(4, 25);
 
     await lottery.send(
         provider.sender(), {
@@ -33,27 +42,47 @@ export async function run(provider: NetworkProvider, args: string[]) {
         },
         {
             $$type: 'CreatePool',
-            ticketPrice: 1n,
+            ticketPrice: toNano(1),
             initialRounds: 1n,
             startTime: BigInt(now),
-            endTime: BigInt(now) + BigInt(60 * 60 * 24 * 7),
+            endTime: BigInt(now) + BigInt(40),
             active: true,
             sequence: BigInt(3600 * 24),
             jettonWallet: Address.parse('EQDw0Uwf9kK-_AlMOJV7sgmYSX86tAD83q9R8LKc-UMy1DfT'),
+            prizes: prizes
         }
     );
+}
+export async function run(provider: NetworkProvider, args: string[]) {
+    const ui = provider.ui();
+    const address = Address.parse('EQDLxMVfx4t_B-h1N09cmgKztdtSrS8a21ZAVz135VIQK5Nb');
+    const lottery = provider.open(Lottery.fromAddress(address));
 
-    ui.write('Waiting for counter to increase...');
+
+    if (!(await provider.isContractDeployed(address))) {
+        ui.write(`Error: Contract at address ${address} is not deployed!`);
+        return;
+    }
+
+    let poolId = 1n;
+    let roundId = 1n;
+
+    await setAdmin(lottery, provider);
+    await setPublicKey(lottery, provider);
+
+    //await createPool(lottery, provider);
+
     await sleep(20000);
     let pools = await lottery.getCurrentPool();
     let attempt = 1;
-    let poolId = 1n;
+
     console.log('pools', pools);
+    console.log('Prizes: ', pools.get(1n)?.prizes);
     while (poolId) {
         ui.setActionPrompt(`Attempt ${attempt}: `);
         let pool = await lottery.getPoolById(poolId);
         console.log('pool', pool);
-        let round = await lottery.getRoundById(1n, 1n);
+        let round = await lottery.getRoundById(poolId, roundId);
         console.log('round', round);
         if (round?.roundId) {
             await lottery.send(
@@ -62,18 +91,16 @@ export async function run(provider: NetworkProvider, args: string[]) {
                 },
                 {
                     $$type: 'BuyTicket',
-                    poolId: 1n,
-                    roundId: 1n,
+                    poolId: poolId,
+                    roundId: roundId,
                     quantity: 1n
                 }
             );
             console.log('Waiting for user ticket...');
             await sleep(20000);
             console.log('Address: ', provider.sender().address!!);
-            let userTicket = await lottery.getUsersTicket(1n, 1n);
-            let attempt2 = 1;
-            let x = await lottery.getPublicKey();
-            console.log('publicKey', x);
+            let userTicket = await lottery.getUsersTicket(poolId, roundId);
+            await lottery.getPublicKey();
             console.log('userTicket', userTicket);
             let userTicketNumber = await lottery.getUserTicketByAddress(round?.poolId, round?.roundId, provider.sender().address!!);
             console.log('userTicketNumber', userTicketNumber);
@@ -85,8 +112,8 @@ export async function run(provider: NetworkProvider, args: string[]) {
                 },
                 {
                     $$type: 'DrawWinningNumbers',
-                    poolId: 1n,
-                    roundId: 1n,
+                    poolId: poolId,
+                    roundId: roundId,
                     latestTxHash: '0x1234567890',
                 }
             );
@@ -129,8 +156,8 @@ export async function run(provider: NetworkProvider, args: string[]) {
                 },
                 {
                     $$type: 'Claim',
-                    poolId: 1n,
-                    roundId: 1n,
+                    poolId: poolId,
+                    roundId: roundId,
                     amount: airDropAmount,
                     receiver: provider.sender().address!!,
                     signature: signatureCell
@@ -139,9 +166,9 @@ export async function run(provider: NetworkProvider, args: string[]) {
             await sleep(20000);
             console.log('claim', claim);
 
-            let userClaim = await lottery.getClaimData(1n, 1n);
+            let userClaim = await lottery.getClaimData(poolId, roundId);
             console.log('userClaim', userClaim);
-            let isClaimed = await lottery.getIsClaim(1n, 1n, provider.sender().address!!);
+            let isClaimed = await lottery.getIsClaim(poolId, roundId, provider.sender().address!!);
             console.log('isClaimed', isClaimed);
         }
     }

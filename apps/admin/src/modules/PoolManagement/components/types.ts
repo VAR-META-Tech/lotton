@@ -8,14 +8,17 @@ export const poolFilterSchema = z.object({
 });
 
 export type PoolFilterSchema = z.infer<typeof poolFilterSchema>;
+  
+export interface CommonQuery  {
+  page?: number;
+  pageSizes?: number;
+  order?: 'DESC' | 'ASC'
+}
 
-export interface IGetAllPoolParams {
+export interface IGetAllPoolParams extends CommonQuery {
   search?: string;
   status?: string;
   name?: string;
-  page?: number;
-  pageSizes?: number;
-  sort?: string;
 }
 
 const poolNumberValidation = (fieldName: string) =>
@@ -31,6 +34,18 @@ const poolNumberValidation = (fieldName: string) =>
     .refine((data) => Number(data) >= 0, `${fieldName} must be positive integer numbers.`)
     .refine((data) => Number.isInteger(Number(data)), `${fieldName} must not be a decimal.`);
 
+const priceValidation = (fieldName: string) =>
+  z
+    .string({ required_error: `${fieldName} field is required` })
+    .trim()
+    .max(10, { message: `${fieldName} must be less than 10 characters.` })
+    .refine((data) => {
+      if (!data) return false;
+      return true;
+    }, `${fieldName} field is required`)
+    .refine((data) => !Number.isNaN(Number(data)), `${fieldName} must be a number.`)
+    .refine((data) => Number(data) >= 0, `${fieldName} must be greater than 0.`);
+
 export const poolSchema = z.object({
   name: z.string({ required_error: validationMessages.required('Name')}).trim().refine((data) => {
     if (!data) return false;
@@ -42,7 +57,7 @@ export const poolSchema = z.object({
   upcomingRound: z.string().optional(),
   startTime: z.date({ required_error: validationMessages.required('Start time') }),
   endTime: z.date({ required_error: validationMessages.required('End time') }),
-  ticketPrice: poolNumberValidation('Ticket Price'),
+  ticketPrice: priceValidation('Ticket Price'),
   match1: poolNumberValidation('Match 1'),
   match2: poolNumberValidation('Match 2'),
   match3: poolNumberValidation('Match 3'),

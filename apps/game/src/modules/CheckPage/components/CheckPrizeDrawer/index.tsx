@@ -3,21 +3,27 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Icons } from '@/assets/icons';
 
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { FCC } from '@/types';
 import { VStack } from '@/components/ui/Utilities';
 import CollectWinning from './CollectWinning';
-import { useWinPools } from '@/hooks/useWinPools';
 import PrizeItem from './PrizeItem';
+import { useClaimStore } from '@/stores/ClaimStore';
+import { IGetPoolJoinedItem } from '@/apis/pools';
 
-interface IClaimStepProps {
+export interface IClaimStep {
   poolId: number | null;
   roundId: number | null;
 }
 
-export const CheckPrizeDrawer: FCC = ({ children }) => {
-  const { poolList } = useWinPools();
-  const [claimStep, setClaimStep] = useState<IClaimStepProps>({
+interface Props {
+  poolList: IGetPoolJoinedItem[];
+}
+
+export const CheckPrizeDrawer: FCC<Props> = ({ children, poolList }) => {
+  const isOpen = useClaimStore.use.isOpen();
+  const setIsOpen = useClaimStore.use.setIsOpen();
+  const [claimStep, setClaimStep] = useState<IClaimStep>({
     poolId: null,
     roundId: null,
   });
@@ -40,29 +46,24 @@ export const CheckPrizeDrawer: FCC = ({ children }) => {
     return 'Collect Winning';
   }, [claimStep, titleDraw]);
 
-  const handleChangeStep = useCallback(
-    (poolId: number, roundId: number) => {
-      if (!!claimStep?.poolId && !!claimStep?.roundId) return;
-
-      setClaimStep({
-        poolId,
-        roundId,
-      });
-    },
-    [claimStep?.poolId, claimStep?.roundId]
-  );
-
   const renderContent = useCallback(() => {
     if (!claimStep?.poolId && !claimStep?.roundId) {
       return (
-        <VStack spacing={40}>
+        <VStack spacing={80}>
           {poolList?.map((pool) => {
             return pool?.rounds?.map((round, index) => (
               <PrizeItem
                 key={`${pool?.id}-${round?.id}-${index}`}
                 pool={pool}
                 round={round}
-                handleChangeStep={() => handleChangeStep(pool?.id, round?.id)}
+                handleChangeStep={() => {
+                  if (!!claimStep?.poolId && !!claimStep?.roundId) return;
+
+                  setClaimStep({
+                    poolId: pool?.id,
+                    roundId: round?.id,
+                  });
+                }}
               />
             ));
           })}
@@ -71,19 +72,23 @@ export const CheckPrizeDrawer: FCC = ({ children }) => {
     }
 
     return <CollectWinning poolId={claimStep?.poolId || 0} roundId={claimStep?.roundId || 0} />;
-  }, [claimStep?.poolId, claimStep?.roundId, handleChangeStep, poolList]);
+  }, [claimStep?.poolId, claimStep?.roundId, poolList]);
 
   return (
-    <Drawer onOpenChange={() => setClaimStep({ poolId: null, roundId: null })}>
+    <Drawer
+      open={isOpen}
+      onOpenChange={() => setClaimStep({ poolId: null, roundId: null })}
+      onClose={() => setIsOpen(false)}
+    >
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent>
         <div className="w-full">
           <DrawerHeader className="flex justify-between container">
             <DrawerTitle className="text-white text-2xl font-semibold">{renderTitle()}</DrawerTitle>
 
-            <DrawerClose>
+            <button onClick={() => setIsOpen(false)}>
               <Icons.x className="text-gray-color" />
-            </DrawerClose>
+            </button>
           </DrawerHeader>
           <div className="border-t-[1px] max-h-[70vh] overflow-auto border-t-gray-color pt-5 pb-10">
             {renderContent()}

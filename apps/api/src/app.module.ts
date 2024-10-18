@@ -17,6 +17,7 @@ import { ServicesModule } from './modules/services/services.module';
 import { SessionModule } from './modules/session/session.module';
 import { TokenModule } from './modules/token/token.module';
 import { TokenPriceModule } from './modules/token_price/token_price.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
 import { UserModule } from './modules/user/user.module';
 import { OrmModule } from './orm.module';
 
@@ -39,6 +40,7 @@ import { OrmModule } from './orm.module';
     ServicesModule,
     PoolModule,
     RoundModule,
+    TransactionModule,
   ],
   controllers: [HealthController],
   providers: [

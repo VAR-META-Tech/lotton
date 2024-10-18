@@ -1,9 +1,33 @@
 import { createQuery } from 'react-query-kit';
 
-import { getBalanceRequest } from './requests';
-import type { IGetBalanceParams, IGetBalanceResponse } from './types';
+import {
+  getAddressBalanceRequest,
+  getAddressInformationRequest,
+  getExtendedAddressInformationRequest,
+} from './requests';
+import type {
+  IGetAddressBalanceParams,
+  IGetAddressBalanceResponse,
+  IGetAddressInformationParams,
+  IGetAddressInformationResponse,
+  IGetExtendedAddressInformationParams,
+  IGetExtendedAddressInformationResponse,
+} from './types';
 
-export const useGetBalanceQuery = createQuery<IGetBalanceResponse, IGetBalanceParams>({
+export const useGetAddressInformationQuery = createQuery<IGetAddressInformationResponse, IGetAddressInformationParams>({
   queryKey: ['/getAddressInformation'],
-  fetcher: getBalanceRequest,
+  fetcher: getAddressInformationRequest,
+});
+
+export const useGetExtendedAddressInformationQuery = createQuery<
+  IGetExtendedAddressInformationResponse,
+  IGetExtendedAddressInformationParams
+>({
+  queryKey: ['/getExtendedAddressInformation'],
+  fetcher: getExtendedAddressInformationRequest,
+});
+
+export const useGetAddressBalanceQuery = createQuery<IGetAddressBalanceResponse, IGetAddressBalanceParams>({
+  queryKey: ['/getAddressInformation'],
+  fetcher: getAddressBalanceRequest,
 });

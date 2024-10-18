@@ -1,5 +1,5 @@
 import { request } from '../axios';
-import type { IGetPoolDetailResponse, IGetPoolsListResponse, IGetPoolsParams, IGetRoundsListResponse, IGetRoundsParams, IGetTokenListResponse, IPayloadCreatePool, IPoolItem, IResCreatePool } from './types';
+import type { IGetPoolDetailResponse, IGetPoolsListResponse, IGetPoolsParams, IGetRoundDetailResponse, IGetRoundsListResponse, IGetRoundsParams, IGetRoundsWinningTicketParams, IGetRoundsWinningTicketResponse, IGetTokenListResponse, IPayloadCreatePool, IPoolItem, IResCreatePool } from './types';
 
 export const getTokens = async (params?: any): Promise<IGetTokenListResponse> => {
   const { data } = await request({
@@ -70,6 +70,25 @@ export const updatePool = async ({
     url: `/api/pools/${poolId}`,
     method: 'PUT',
     data: payload,
+  });
+
+  return data;
+};
+
+export const getRoundDetail = async (id: string): Promise<IGetRoundDetailResponse> => {
+  const { data } = await request({
+    url: `/api/rounds/${id}`,
+    method: 'GET',
+  });
+
+  return data;
+};
+
+export const getRoundWinningTicket = async (params?: IGetRoundsWinningTicketParams): Promise<IGetRoundsWinningTicketResponse> => {
+  const { data } = await request({
+    url: `/api/rounds/winningTicket`,
+    method: 'GET',
+    params,
   });
 
   return data;

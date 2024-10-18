@@ -6,6 +6,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
+import { UserTicketStatus } from '@/shared/enums';
+
 import { BaseTime } from './base/time.entity';
 import { PoolRound } from './pool_round.entity';
 import { Transaction } from './transaction.entity';
@@ -30,8 +32,15 @@ export class UserTicket extends BaseTime {
   @Column({ nullable: true })
   winningCode: string;
 
-  @Column({ default: false })
-  claimed: boolean;
+  @Column({
+    type: 'enum',
+    enum: UserTicketStatus,
+    default: UserTicketStatus.BOUGHT,
+  })
+  status: UserTicketStatus;
+
+  @Column({ nullable: true })
+  claimedAt: number;
 
   @Column({ nullable: true })
   winningMatch: number;

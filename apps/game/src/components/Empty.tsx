@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils';
 
 interface Props extends VStackProps {
   emptyText?: string;
+  textClassName?: Props['className'];
 }
 
-const Empty = forwardRef<HTMLDivElement, Props>(({ emptyText, className, ...props }, ref) => {
+const Empty = forwardRef<HTMLDivElement, Props>(({ emptyText, className, textClassName, ...props }, ref) => {
   return (
     <VStack
       justify={'center'}
@@ -20,7 +21,7 @@ const Empty = forwardRef<HTMLDivElement, Props>(({ emptyText, className, ...prop
     >
       <GalleryVerticalEnd size={50} />
 
-      <p>{emptyText ?? 'No data'}</p>
+      <p className={textClassName}>{emptyText ?? 'No data'}</p>
     </VStack>
   );
 });

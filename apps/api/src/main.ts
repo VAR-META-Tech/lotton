@@ -34,7 +34,7 @@ async function bootstrap() {
   app.use(
     rateLimit({
       windowMs: 10 * 60 * 1000,
-      limit: 150,
+      limit: 1500,
       standardHeaders: 'draft-7',
       legacyHeaders: false,
       message: {

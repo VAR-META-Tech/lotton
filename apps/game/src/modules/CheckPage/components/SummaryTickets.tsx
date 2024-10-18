@@ -20,7 +20,7 @@ const SummaryTickets: FC<ISummaryTicketsProps> = ({ icon, title, total, titleCla
 
     return (
       <HStack align={'center'}>
-        <div className="w-[1.875rem] aspect-square">{icon}</div>
+        <div className="w-[1.875rem] aspect-square flex justify-center items-center">{icon}</div>
 
         <span className={cn('font-bold', titleClassName)}>{title}</span>
       </HStack>

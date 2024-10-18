@@ -1,0 +1,878 @@
+;;
+;; Type: StateInit
+;; TLB: _ code:^cell data:^cell = StateInit
+;;
+
+((cell, cell)) $StateInit$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (cell vvv'code, cell vvv'data) = __tact_tuple_destroy_2(v);
+    return (vvv'code, vvv'data);
+}
+
+;;
+;; Type: Context
+;; TLB: _ bounced:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_value((int, slice, int, slice) v) inline {
+    var (v'bounced, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+;;
+;; Type: SendParameters
+;; TLB: _ bounce:bool to:address value:int257 mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell = SendParameters
+;;
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_bounce_to_value_mode_body_code_data(int $bounce, slice $to, int $value, int $mode, cell $body, cell $code, cell $data) inline {
+    return ($bounce, $to, $value, $mode, $body, $code, $data);
+}
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline {
+    return (true, $to, $value, $mode, null(), null(), null());
+}
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_bounce_value_mode_body(slice $to, int $bounce, int $value, int $mode, cell $body) inline {
+    return ($bounce, $to, $value, $mode, $body, null(), null());
+}
+
+((int, slice, int, int, cell, cell, cell)) $SendParameters$_constructor_to_bounce_value(slice $to, int $bounce, int $value) inline {
+    return ($bounce, $to, $value, 0, null(), null(), null());
+}
+
+;;
+;; Type: Deploy
+;; Header: 0x946a98b6
+;; TLB: deploy#946a98b6 queryId:uint64 = Deploy
+;;
+
+(slice, ((int))) $Deploy$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 2490013878);
+    var v'queryId = sc_0~load_uint(64);
+    return (sc_0, (v'queryId));
+}
+
+;;
+;; Type: DeployOk
+;; Header: 0xaff90f57
+;; TLB: deploy_ok#aff90f57 queryId:uint64 = DeployOk
+;;
+
+builder $DeployOk$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 2952335191, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $DeployOk$_store_cell((int) v) inline {
+    return $DeployOk$_store(begin_cell(), v).end_cell();
+}
+
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline {
+    return ($queryId);
+}
+
+;;
+;; Type: Pool
+;; TLB: _ poolId:uint32 creator:address rounds:dict<int, ^RoundConfig{roundId:uint32,poolId:uint32,ticketPrice:coins,startTime:uint32,endTime:uint32,active:bool}> startTime:uint32 endTime:uint32 sequence:uint32 active:bool prizes:dict<uint8, uint8> = Pool
+;;
+
+builder $Pool$_store(builder build_0, (int, slice, cell, int, int, int, int, cell) v) inline_ref {
+    var (v'poolId, v'creator, v'rounds, v'startTime, v'endTime, v'sequence, v'active, v'prizes) = v;
+    build_0 = build_0.store_uint(v'poolId, 32);
+    build_0 = __tact_store_address(build_0, v'creator);
+    build_0 = build_0.store_dict(v'rounds);
+    build_0 = build_0.store_uint(v'startTime, 32);
+    build_0 = build_0.store_uint(v'endTime, 32);
+    build_0 = build_0.store_uint(v'sequence, 32);
+    build_0 = build_0.store_int(v'active, 1);
+    build_0 = build_0.store_dict(v'prizes);
+    return build_0;
+}
+
+cell $Pool$_store_cell((int, slice, cell, int, int, int, int, cell) v) inline {
+    return $Pool$_store(begin_cell(), v).end_cell();
+}
+
+(slice, ((int, slice, cell, int, int, int, int, cell))) $Pool$_load(slice sc_0) inline_ref {
+    var v'poolId = sc_0~load_uint(32);
+    var v'creator = sc_0~__tact_load_address();
+    var v'rounds = sc_0~load_dict();
+    var v'startTime = sc_0~load_uint(32);
+    var v'endTime = sc_0~load_uint(32);
+    var v'sequence = sc_0~load_uint(32);
+    var v'active = sc_0~load_int(1);
+    var v'prizes = sc_0~load_dict();
+    return (sc_0, (v'poolId, v'creator, v'rounds, v'startTime, v'endTime, v'sequence, v'active, v'prizes));
+}
+
+tuple $Pool$_as_optional((int, slice, cell, int, int, int, int, cell) v) inline {
+    var (v'poolId, v'creator, v'rounds, v'startTime, v'endTime, v'sequence, v'active, v'prizes) = v;
+    return __tact_tuple_create_8(v'poolId, v'creator, v'rounds, v'startTime, v'endTime, v'sequence, v'active, v'prizes);
+}
+
+tuple $Pool$_load_opt(cell cl) inline {
+    if (null?(cl)) {
+        return null();
+    }
+    var sc = cl.begin_parse();
+    return $Pool$_as_optional(sc~$Pool$_load());
+}
+
+_ $Pool$_get_rounds((int, slice, cell, int, int, int, int, cell) v) inline {
+    var (v'poolId, v'creator, v'rounds, v'startTime, v'endTime, v'sequence, v'active, v'prizes) = v;
+    return v'rounds;
+}
+
+((int, slice, cell, int, int, int, int, cell)) $Pool$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (int vvv'poolId, slice vvv'creator, cell vvv'rounds, int vvv'startTime, int vvv'endTime, int vvv'sequence, int vvv'active, cell vvv'prizes) = __tact_tuple_destroy_8(v);
+    return (vvv'poolId, vvv'creator, vvv'rounds, vvv'startTime, vvv'endTime, vvv'sequence, vvv'active, vvv'prizes);
+}
+
+tuple $Pool$_to_tuple(((int, slice, cell, int, int, int, int, cell)) v) inline {
+    var (v'poolId, v'creator, v'rounds, v'startTime, v'endTime, v'sequence, v'active, v'prizes) = v;
+    return __tact_tuple_create_8(v'poolId, v'creator, v'rounds, v'startTime, v'endTime, v'sequence, v'active, v'prizes);
+}
+
+tuple $Pool$_to_opt_tuple(tuple v) inline {
+    if (null?(v)) { return null(); } 
+    return $Pool$_to_tuple($Pool$_not_null(v)); 
+}
+
+tuple $Pool$_to_opt_external(tuple v) inline {
+    var loaded = $Pool$_to_opt_tuple(v);
+    if (null?(loaded)) {
+        return null();
+    } else {
+        return (loaded);
+    }
+}
+
+((int, slice, cell, int, int, int, int, cell)) $Pool$_constructor_poolId_creator_rounds_startTime_endTime_sequence_active_prizes(int $poolId, slice $creator, cell $rounds, int $startTime, int $endTime, int $sequence, int $active, cell $prizes) inline {
+    return ($poolId, $creator, $rounds, $startTime, $endTime, $sequence, $active, $prizes);
+}
+
+;;
+;; Type: RoundConfig
+;; TLB: _ roundId:uint32 poolId:uint32 ticketPrice:coins startTime:uint32 endTime:uint32 active:bool = RoundConfig
+;;
+
+builder $RoundConfig$_store(builder build_0, (int, int, int, int, int, int) v) inline_ref {
+    var (v'roundId, v'poolId, v'ticketPrice, v'startTime, v'endTime, v'active) = v;
+    build_0 = build_0.store_uint(v'roundId, 32);
+    build_0 = build_0.store_uint(v'poolId, 32);
+    build_0 = build_0.store_coins(v'ticketPrice);
+    build_0 = build_0.store_uint(v'startTime, 32);
+    build_0 = build_0.store_uint(v'endTime, 32);
+    build_0 = build_0.store_int(v'active, 1);
+    return build_0;
+}
+
+cell $RoundConfig$_store_cell((int, int, int, int, int, int) v) inline {
+    return $RoundConfig$_store(begin_cell(), v).end_cell();
+}
+
+(slice, ((int, int, int, int, int, int))) $RoundConfig$_load(slice sc_0) inline_ref {
+    var v'roundId = sc_0~load_uint(32);
+    var v'poolId = sc_0~load_uint(32);
+    var v'ticketPrice = sc_0~load_coins();
+    var v'startTime = sc_0~load_uint(32);
+    var v'endTime = sc_0~load_uint(32);
+    var v'active = sc_0~load_int(1);
+    return (sc_0, (v'roundId, v'poolId, v'ticketPrice, v'startTime, v'endTime, v'active));
+}
+
+tuple $RoundConfig$_as_optional((int, int, int, int, int, int) v) inline {
+    var (v'roundId, v'poolId, v'ticketPrice, v'startTime, v'endTime, v'active) = v;
+    return __tact_tuple_create_6(v'roundId, v'poolId, v'ticketPrice, v'startTime, v'endTime, v'active);
+}
+
+tuple $RoundConfig$_load_opt(cell cl) inline {
+    if (null?(cl)) {
+        return null();
+    }
+    var sc = cl.begin_parse();
+    return $RoundConfig$_as_optional(sc~$RoundConfig$_load());
+}
+
+((int, int, int, int, int, int)) $RoundConfig$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (int vvv'roundId, int vvv'poolId, int vvv'ticketPrice, int vvv'startTime, int vvv'endTime, int vvv'active) = __tact_tuple_destroy_6(v);
+    return (vvv'roundId, vvv'poolId, vvv'ticketPrice, vvv'startTime, vvv'endTime, vvv'active);
+}
+
+tuple $RoundConfig$_to_tuple(((int, int, int, int, int, int)) v) inline {
+    var (v'roundId, v'poolId, v'ticketPrice, v'startTime, v'endTime, v'active) = v;
+    return __tact_tuple_create_6(v'roundId, v'poolId, v'ticketPrice, v'startTime, v'endTime, v'active);
+}
+
+tuple $RoundConfig$_to_opt_tuple(tuple v) inline {
+    if (null?(v)) { return null(); } 
+    return $RoundConfig$_to_tuple($RoundConfig$_not_null(v)); 
+}
+
+tuple $RoundConfig$_to_opt_external(tuple v) inline {
+    var loaded = $RoundConfig$_to_opt_tuple(v);
+    if (null?(loaded)) {
+        return null();
+    } else {
+        return (loaded);
+    }
+}
+
+((int, int, int, int, int, int)) $RoundConfig$_constructor_roundId_poolId_ticketPrice_startTime_endTime_active(int $roundId, int $poolId, int $ticketPrice, int $startTime, int $endTime, int $active) inline {
+    return ($roundId, $poolId, $ticketPrice, $startTime, $endTime, $active);
+}
+
+;;
+;; Type: TicketPayoutResponse
+;; TLB: _ ticket:^string = TicketPayoutResponse
+;;
+
+builder $TicketPayoutResponse$_store(builder build_0, (slice) v) inline {
+    var (v'ticket) = v;
+    build_0 = build_0.store_ref(begin_cell().store_slice(v'ticket).end_cell());
+    return build_0;
+}
+
+cell $TicketPayoutResponse$_store_cell((slice) v) inline {
+    return $TicketPayoutResponse$_store(begin_cell(), v).end_cell();
+}
+
+(slice, ((slice))) $TicketPayoutResponse$_load(slice sc_0) inline {
+    var v'ticket = sc_0~load_ref().begin_parse();
+    return (sc_0, (v'ticket));
+}
+
+tuple $TicketPayoutResponse$_as_optional((slice) v) inline {
+    var (v'ticket) = v;
+    return __tact_tuple_create_1(v'ticket);
+}
+
+tuple $TicketPayoutResponse$_load_opt(cell cl) inline {
+    if (null?(cl)) {
+        return null();
+    }
+    var sc = cl.begin_parse();
+    return $TicketPayoutResponse$_as_optional(sc~$TicketPayoutResponse$_load());
+}
+
+((slice)) $TicketPayoutResponse$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (slice vvv'ticket) = __tact_tuple_destroy_1(v);
+    return (vvv'ticket);
+}
+
+tuple $TicketPayoutResponse$_to_tuple(((slice)) v) inline {
+    var (v'ticket) = v;
+    return __tact_tuple_create_1(v'ticket);
+}
+
+tuple $TicketPayoutResponse$_to_opt_tuple(tuple v) inline {
+    if (null?(v)) { return null(); } 
+    return $TicketPayoutResponse$_to_tuple($TicketPayoutResponse$_not_null(v)); 
+}
+
+tuple $TicketPayoutResponse$_to_opt_external(tuple v) inline {
+    var loaded = $TicketPayoutResponse$_to_opt_tuple(v);
+    if (null?(loaded)) {
+        return null();
+    } else {
+        return (loaded);
+    }
+}
+
+((slice)) $TicketPayoutResponse$_constructor_ticket(slice $ticket) inline {
+    return ($ticket);
+}
+
+;;
+;; Type: RandomTicketResponse
+;; TLB: _ ASCIINumber:int257 ticket:^string = RandomTicketResponse
+;;
+
+((int, slice)) $RandomTicketResponse$_constructor_ASCIINumber_ticket(int $ASCIINumber, slice $ticket) inline {
+    return ($ASCIINumber, $ticket);
+}
+
+;;
+;; Type: Ticket
+;; TLB: _ ticket:^string ticketNumber:int257 owner:address = Ticket
+;;
+
+((slice, int, slice)) $Ticket$_constructor_ticket_ticketNumber_owner(slice $ticket, int $ticketNumber, slice $owner) inline {
+    return ($ticket, $ticketNumber, $owner);
+}
+
+;;
+;; Type: UserTicket
+;; TLB: _ users:dict<address, ^TicketPayoutResponse{ticket:^string}> = UserTicket
+;;
+
+builder $UserTicket$_store(builder build_0, (cell) v) inline {
+    var (v'users) = v;
+    build_0 = build_0.store_dict(v'users);
+    return build_0;
+}
+
+cell $UserTicket$_store_cell((cell) v) inline {
+    return $UserTicket$_store(begin_cell(), v).end_cell();
+}
+
+(slice, ((cell))) $UserTicket$_load(slice sc_0) inline {
+    var v'users = sc_0~load_dict();
+    return (sc_0, (v'users));
+}
+
+tuple $UserTicket$_as_optional((cell) v) inline {
+    var (v'users) = v;
+    return __tact_tuple_create_1(v'users);
+}
+
+tuple $UserTicket$_load_opt(cell cl) inline {
+    if (null?(cl)) {
+        return null();
+    }
+    var sc = cl.begin_parse();
+    return $UserTicket$_as_optional(sc~$UserTicket$_load());
+}
+
+_ $UserTicket$_get_users((cell) v) inline {
+    var (v'users) = v;
+    return v'users;
+}
+
+((cell)) $UserTicket$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (cell vvv'users) = __tact_tuple_destroy_1(v);
+    return (vvv'users);
+}
+
+(cell) $UserTicket$_to_external(((cell)) v) inline {
+    var (v'users) = v; 
+    return (v'users);
+}
+
+((cell)) $UserTicket$_constructor_users(cell $users) inline {
+    return ($users);
+}
+
+;;
+;; Type: RoundTicket
+;; TLB: _ rounds:dict<int, ^UserTicket{users:dict<address, ^TicketPayoutResponse{ticket:^string}>}> = RoundTicket
+;;
+
+builder $RoundTicket$_store(builder build_0, (cell) v) inline {
+    var (v'rounds) = v;
+    build_0 = build_0.store_dict(v'rounds);
+    return build_0;
+}
+
+cell $RoundTicket$_store_cell((cell) v) inline {
+    return $RoundTicket$_store(begin_cell(), v).end_cell();
+}
+
+(slice, ((cell))) $RoundTicket$_load(slice sc_0) inline {
+    var v'rounds = sc_0~load_dict();
+    return (sc_0, (v'rounds));
+}
+
+tuple $RoundTicket$_as_optional((cell) v) inline {
+    var (v'rounds) = v;
+    return __tact_tuple_create_1(v'rounds);
+}
+
+tuple $RoundTicket$_load_opt(cell cl) inline {
+    if (null?(cl)) {
+        return null();
+    }
+    var sc = cl.begin_parse();
+    return $RoundTicket$_as_optional(sc~$RoundTicket$_load());
+}
+
+_ $RoundTicket$_get_rounds((cell) v) inline {
+    var (v'rounds) = v;
+    return v'rounds;
+}
+
+((cell)) $RoundTicket$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (cell vvv'rounds) = __tact_tuple_destroy_1(v);
+    return (vvv'rounds);
+}
+
+((cell)) $RoundTicket$_constructor_rounds(cell $rounds) inline {
+    return ($rounds);
+}
+
+;;
+;; Type: ClaimInfo
+;; TLB: _ info:dict<int, ^UserClaim{user:dict<address, bool>}> = ClaimInfo
+;;
+
+builder $ClaimInfo$_store(builder build_0, (cell) v) inline {
+    var (v'info) = v;
+    build_0 = build_0.store_dict(v'info);
+    return build_0;
+}
+
+cell $ClaimInfo$_store_cell((cell) v) inline {
+    return $ClaimInfo$_store(begin_cell(), v).end_cell();
+}
+
+(slice, ((cell))) $ClaimInfo$_load(slice sc_0) inline {
+    var v'info = sc_0~load_dict();
+    return (sc_0, (v'info));
+}
+
+tuple $ClaimInfo$_as_optional((cell) v) inline {
+    var (v'info) = v;
+    return __tact_tuple_create_1(v'info);
+}
+
+tuple $ClaimInfo$_load_opt(cell cl) inline {
+    if (null?(cl)) {
+        return null();
+    }
+    var sc = cl.begin_parse();
+    return $ClaimInfo$_as_optional(sc~$ClaimInfo$_load());
+}
+
+_ $ClaimInfo$_get_info((cell) v) inline {
+    var (v'info) = v;
+    return v'info;
+}
+
+((cell)) $ClaimInfo$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (cell vvv'info) = __tact_tuple_destroy_1(v);
+    return (vvv'info);
+}
+
+((cell)) $ClaimInfo$_constructor_info(cell $info) inline {
+    return ($info);
+}
+
+;;
+;; Type: UserClaim
+;; TLB: _ user:dict<address, bool> = UserClaim
+;;
+
+builder $UserClaim$_store(builder build_0, (cell) v) inline {
+    var (v'user) = v;
+    build_0 = build_0.store_dict(v'user);
+    return build_0;
+}
+
+cell $UserClaim$_store_cell((cell) v) inline {
+    return $UserClaim$_store(begin_cell(), v).end_cell();
+}
+
+(slice, ((cell))) $UserClaim$_load(slice sc_0) inline {
+    var v'user = sc_0~load_dict();
+    return (sc_0, (v'user));
+}
+
+tuple $UserClaim$_as_optional((cell) v) inline {
+    var (v'user) = v;
+    return __tact_tuple_create_1(v'user);
+}
+
+tuple $UserClaim$_load_opt(cell cl) inline {
+    if (null?(cl)) {
+        return null();
+    }
+    var sc = cl.begin_parse();
+    return $UserClaim$_as_optional(sc~$UserClaim$_load());
+}
+
+_ $UserClaim$_get_user((cell) v) inline {
+    var (v'user) = v;
+    return v'user;
+}
+
+((cell)) $UserClaim$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (cell vvv'user) = __tact_tuple_destroy_1(v);
+    return (vvv'user);
+}
+
+tuple $UserClaim$_to_tuple(((cell)) v) inline {
+    var (v'user) = v;
+    return __tact_tuple_create_1(v'user);
+}
+
+tuple $UserClaim$_to_opt_tuple(tuple v) inline {
+    if (null?(v)) { return null(); } 
+    return $UserClaim$_to_tuple($UserClaim$_not_null(v)); 
+}
+
+tuple $UserClaim$_to_opt_external(tuple v) inline {
+    var loaded = $UserClaim$_to_opt_tuple(v);
+    if (null?(loaded)) {
+        return null();
+    } else {
+        return (loaded);
+    }
+}
+
+((cell)) $UserClaim$_constructor_user(cell $user) inline {
+    return ($user);
+}
+
+;;
+;; Type: Result
+;; TLB: _ rounds:dict<int, int> = Result
+;;
+
+builder $Result$_store(builder build_0, (cell) v) inline {
+    var (v'rounds) = v;
+    build_0 = build_0.store_dict(v'rounds);
+    return build_0;
+}
+
+cell $Result$_store_cell((cell) v) inline {
+    return $Result$_store(begin_cell(), v).end_cell();
+}
+
+(slice, ((cell))) $Result$_load(slice sc_0) inline {
+    var v'rounds = sc_0~load_dict();
+    return (sc_0, (v'rounds));
+}
+
+tuple $Result$_as_optional((cell) v) inline {
+    var (v'rounds) = v;
+    return __tact_tuple_create_1(v'rounds);
+}
+
+tuple $Result$_load_opt(cell cl) inline {
+    if (null?(cl)) {
+        return null();
+    }
+    var sc = cl.begin_parse();
+    return $Result$_as_optional(sc~$Result$_load());
+}
+
+_ $Result$_get_rounds((cell) v) inline {
+    var (v'rounds) = v;
+    return v'rounds;
+}
+
+((cell)) $Result$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (cell vvv'rounds) = __tact_tuple_destroy_1(v);
+    return (vvv'rounds);
+}
+
+tuple $Result$_to_tuple(((cell)) v) inline {
+    var (v'rounds) = v;
+    return __tact_tuple_create_1(v'rounds);
+}
+
+tuple $Result$_to_opt_tuple(tuple v) inline {
+    if (null?(v)) { return null(); } 
+    return $Result$_to_tuple($Result$_not_null(v)); 
+}
+
+tuple $Result$_to_opt_external(tuple v) inline {
+    var loaded = $Result$_to_opt_tuple(v);
+    if (null?(loaded)) {
+        return null();
+    } else {
+        return (loaded);
+    }
+}
+
+((cell)) $Result$_constructor_rounds(cell $rounds) inline {
+    return ($rounds);
+}
+
+;;
+;; Type: CreatePool
+;; Header: 0x7ce849f6
+;; TLB: create_pool#7ce849f6 jettonWallet:address ticketPrice:uint32 initialRounds:uint8 startTime:uint32 endTime:uint32 sequence:uint32 active:bool prizes:dict<uint8, uint8> = CreatePool
+;;
+
+(slice, ((slice, int, int, int, int, int, int, cell))) $CreatePool$_load(slice sc_0) inline_ref {
+    throw_unless(129, sc_0~load_uint(32) == 2095598070);
+    var v'jettonWallet = sc_0~__tact_load_address();
+    var v'ticketPrice = sc_0~load_uint(32);
+    var v'initialRounds = sc_0~load_uint(8);
+    var v'startTime = sc_0~load_uint(32);
+    var v'endTime = sc_0~load_uint(32);
+    var v'sequence = sc_0~load_uint(32);
+    var v'active = sc_0~load_int(1);
+    var v'prizes = sc_0~load_dict();
+    return (sc_0, (v'jettonWallet, v'ticketPrice, v'initialRounds, v'startTime, v'endTime, v'sequence, v'active, v'prizes));
+}
+
+;;
+;; Type: Claim
+;; Header: 0x566965b8
+;; TLB: claim#566965b8 poolId:int257 roundId:int257 amount:coins receiver:address signature:^slice = Claim
+;;
+
+(slice, ((int, int, int, slice, slice))) $Claim$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 1449747896);
+    var v'poolId = sc_0~load_int(257);
+    var v'roundId = sc_0~load_int(257);
+    var v'amount = sc_0~load_coins();
+    var v'receiver = sc_0~__tact_load_address();
+    var v'signature = sc_0~load_ref().begin_parse();
+    return (sc_0, (v'poolId, v'roundId, v'amount, v'receiver, v'signature));
+}
+
+((int, int, int, slice, slice)) $Claim$_tensor_cast((int, int, int, slice, slice) v) asm "NOP";
+
+;;
+;; Type: WinningNumbersDrawnEvent
+;; Header: 0xd3bd2d7f
+;; TLB: winning_numbers_drawn_event#d3bd2d7f poolId:int257 roundId:int257 winningNumber:int257 = WinningNumbersDrawnEvent
+;;
+
+builder $WinningNumbersDrawnEvent$_store(builder build_0, (int, int, int) v) inline {
+    var (v'poolId, v'roundId, v'winningNumber) = v;
+    build_0 = store_uint(build_0, 3552390527, 32);
+    build_0 = build_0.store_int(v'poolId, 257);
+    build_0 = build_0.store_int(v'roundId, 257);
+    build_0 = build_0.store_int(v'winningNumber, 257);
+    return build_0;
+}
+
+cell $WinningNumbersDrawnEvent$_store_cell((int, int, int) v) inline {
+    return $WinningNumbersDrawnEvent$_store(begin_cell(), v).end_cell();
+}
+
+((int, int, int)) $WinningNumbersDrawnEvent$_constructor_poolId_roundId_winningNumber(int $poolId, int $roundId, int $winningNumber) inline {
+    return ($poolId, $roundId, $winningNumber);
+}
+
+;;
+;; Type: BuyTicket
+;; Header: 0xdf690a99
+;; TLB: buy_ticket#df690a99 poolId:int257 roundId:int257 quantity:int257 = BuyTicket
+;;
+
+(slice, ((int, int, int))) $BuyTicket$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3748203161);
+    var v'poolId = sc_0~load_int(257);
+    var v'roundId = sc_0~load_int(257);
+    var v'quantity = sc_0~load_int(257);
+    return (sc_0, (v'poolId, v'roundId, v'quantity));
+}
+
+;;
+;; Type: DrawWinningNumbers
+;; Header: 0xd611ad04
+;; TLB: draw_winning_numbers#d611ad04 poolId:int257 roundId:int257 latestTxHash:^string = DrawWinningNumbers
+;;
+
+(slice, ((int, int, slice))) $DrawWinningNumbers$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3591482628);
+    var v'poolId = sc_0~load_int(257);
+    var v'roundId = sc_0~load_int(257);
+    var v'latestTxHash = sc_0~load_ref().begin_parse();
+    return (sc_0, (v'poolId, v'roundId, v'latestTxHash));
+}
+
+;;
+;; Type: SetAdmin
+;; Header: 0x07ff9739
+;; TLB: set_admin#07ff9739 admin:address active:bool = SetAdmin
+;;
+
+(slice, ((slice, int))) $SetAdmin$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 134190905);
+    var v'admin = sc_0~__tact_load_address();
+    var v'active = sc_0~load_int(1);
+    return (sc_0, (v'admin, v'active));
+}
+
+;;
+;; Type: SetPublicKey
+;; Header: 0xc37bfdfe
+;; TLB: set_public_key#c37bfdfe publicKey:int257 = SetPublicKey
+;;
+
+(slice, ((int))) $SetPublicKey$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3279683070);
+    var v'publicKey = sc_0~load_int(257);
+    return (sc_0, (v'publicKey));
+}
+
+;;
+;; Type: SetClaimFeePercent
+;; Header: 0x0de724be
+;; TLB: set_claim_fee_percent#0de724be claimFeePercent:uint8 = SetClaimFeePercent
+;;
+
+(slice, ((int))) $SetClaimFeePercent$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 233252030);
+    var v'claimFeePercent = sc_0~load_uint(8);
+    return (sc_0, (v'claimFeePercent));
+}
+
+;;
+;; Type: TransferFund
+;; Header: 0xdbc8382f
+;; TLB: transfer_fund#dbc8382f to:address amount:coins = TransferFund
+;;
+
+(slice, ((slice, int))) $TransferFund$_load(slice sc_0) inline {
+    throw_unless(129, sc_0~load_uint(32) == 3687331887);
+    var v'to = sc_0~__tact_load_address();
+    var v'amount = sc_0~load_coins();
+    return (sc_0, (v'to, v'amount));
+}
+
+;;
+;; Type: PoolCreatedEvent
+;; Header: 0x233540bc
+;; TLB: pool_created_event#233540bc poolId:int257 ticketPrice:uint32 initialRounds:uint8 startTime:uint32 endTime:uint32 active:bool sequence:uint32 rounds:dict<int, ^RoundConfig{roundId:uint32,poolId:uint32,ticketPrice:coins,startTime:uint32,endTime:uint32,active:bool}> creator:address prizes:dict<uint8, uint8> = PoolCreatedEvent
+;;
+
+builder $PoolCreatedEvent$_store(builder build_0, (int, int, int, int, int, int, int, cell, slice, cell) v) inline_ref {
+    var (v'poolId, v'ticketPrice, v'initialRounds, v'startTime, v'endTime, v'active, v'sequence, v'rounds, v'creator, v'prizes) = v;
+    build_0 = store_uint(build_0, 590692540, 32);
+    build_0 = build_0.store_int(v'poolId, 257);
+    build_0 = build_0.store_uint(v'ticketPrice, 32);
+    build_0 = build_0.store_uint(v'initialRounds, 8);
+    build_0 = build_0.store_uint(v'startTime, 32);
+    build_0 = build_0.store_uint(v'endTime, 32);
+    build_0 = build_0.store_int(v'active, 1);
+    build_0 = build_0.store_uint(v'sequence, 32);
+    build_0 = build_0.store_dict(v'rounds);
+    build_0 = __tact_store_address(build_0, v'creator);
+    build_0 = build_0.store_dict(v'prizes);
+    return build_0;
+}
+
+cell $PoolCreatedEvent$_store_cell((int, int, int, int, int, int, int, cell, slice, cell) v) inline {
+    return $PoolCreatedEvent$_store(begin_cell(), v).end_cell();
+}
+
+((int, int, int, int, int, int, int, cell, slice, cell)) $PoolCreatedEvent$_constructor_poolId_ticketPrice_initialRounds_startTime_endTime_active_sequence_rounds_creator_prizes(int $poolId, int $ticketPrice, int $initialRounds, int $startTime, int $endTime, int $active, int $sequence, cell $rounds, slice $creator, cell $prizes) inline {
+    return ($poolId, $ticketPrice, $initialRounds, $startTime, $endTime, $active, $sequence, $rounds, $creator, $prizes);
+}
+
+;;
+;; Type: TicketBoughtEvent
+;; Header: 0x89277a4e
+;; TLB: ticket_bought_event#89277a4e poolId:int257 roundId:int257 quantity:int257 buyer:address tickets:^string totalCost:coins = TicketBoughtEvent
+;;
+
+builder $TicketBoughtEvent$_store(builder build_0, (int, int, int, slice, slice, int) v) inline_ref {
+    var (v'poolId, v'roundId, v'quantity, v'buyer, v'tickets, v'totalCost) = v;
+    build_0 = store_uint(build_0, 2301065806, 32);
+    build_0 = build_0.store_int(v'poolId, 257);
+    build_0 = build_0.store_int(v'roundId, 257);
+    build_0 = build_0.store_int(v'quantity, 257);
+    var build_1 = begin_cell();
+    build_1 = __tact_store_address(build_1, v'buyer);
+    build_1 = build_1.store_ref(begin_cell().store_slice(v'tickets).end_cell());
+    build_1 = build_1.store_coins(v'totalCost);
+    build_0 = store_ref(build_0, build_1.end_cell());
+    return build_0;
+}
+
+cell $TicketBoughtEvent$_store_cell((int, int, int, slice, slice, int) v) inline {
+    return $TicketBoughtEvent$_store(begin_cell(), v).end_cell();
+}
+
+((int, int, int, slice, slice, int)) $TicketBoughtEvent$_constructor_roundId_poolId_quantity_totalCost_buyer_tickets(int $roundId, int $poolId, int $quantity, int $totalCost, slice $buyer, slice $tickets) inline {
+    return ($poolId, $roundId, $quantity, $buyer, $tickets, $totalCost);
+}
+
+;;
+;; Type: ClaimedEvent
+;; Header: 0x369f3352
+;; TLB: claimed_event#369f3352 poolId:int257 roundId:int257 amount:coins receiver:address = ClaimedEvent
+;;
+
+builder $ClaimedEvent$_store(builder build_0, (int, int, int, slice) v) inline {
+    var (v'poolId, v'roundId, v'amount, v'receiver) = v;
+    build_0 = store_uint(build_0, 916403026, 32);
+    build_0 = build_0.store_int(v'poolId, 257);
+    build_0 = build_0.store_int(v'roundId, 257);
+    build_0 = build_0.store_coins(v'amount);
+    build_0 = __tact_store_address(build_0, v'receiver);
+    return build_0;
+}
+
+cell $ClaimedEvent$_store_cell((int, int, int, slice) v) inline {
+    return $ClaimedEvent$_store(begin_cell(), v).end_cell();
+}
+
+((int, int, int, slice)) $ClaimedEvent$_constructor_poolId_roundId_amount_receiver(int $poolId, int $roundId, int $amount, slice $receiver) inline {
+    return ($poolId, $roundId, $amount, $receiver);
+}
+
+;;
+;; Type: Lottery
+;;
+
+builder $Lottery$_store(builder build_0, (slice, cell, cell, int, cell, cell, cell, int, cell, int) v) inline {
+    var (v'owner, v'admin, v'pools, v'nextPoolId, v'usersTicket, v'result, v'rewardPools, v'publicKey, v'claimData, v'claimFeePercent) = v;
+    build_0 = __tact_store_address(build_0, v'owner);
+    build_0 = build_0.store_dict(v'admin);
+    var build_1 = begin_cell();
+    build_1 = build_1.store_dict(v'pools);
+    build_1 = build_1.store_int(v'nextPoolId, 257);
+    build_1 = build_1.store_dict(v'usersTicket);
+    build_1 = build_1.store_dict(v'result);
+    var build_2 = begin_cell();
+    build_2 = build_2.store_dict(v'rewardPools);
+    build_2 = ~ null?(v'publicKey) ? build_2.store_int(true, 1).store_int(v'publicKey, 257) : build_2.store_int(false, 1);
+    build_2 = build_2.store_dict(v'claimData);
+    build_2 = build_2.store_int(v'claimFeePercent, 257);
+    build_1 = store_ref(build_1, build_2.end_cell());
+    build_0 = store_ref(build_0, build_1.end_cell());
+    return build_0;
+}
+
+(slice, ((slice, cell, cell, int, cell, cell, cell, int, cell, int))) $Lottery$_load(slice sc_0) inline {
+    var v'owner = sc_0~__tact_load_address();
+    var v'admin = sc_0~load_dict();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'pools = sc_1~load_dict();
+    var v'nextPoolId = sc_1~load_int(257);
+    var v'usersTicket = sc_1~load_dict();
+    var v'result = sc_1~load_dict();
+    slice sc_2 = sc_1~load_ref().begin_parse();
+    var v'rewardPools = sc_2~load_dict();
+    var v'publicKey = sc_2~load_int(1) ? sc_2~load_int(257) : null();
+    var v'claimData = sc_2~load_dict();
+    var v'claimFeePercent = sc_2~load_int(257);
+    return (sc_0, (v'owner, v'admin, v'pools, v'nextPoolId, v'usersTicket, v'result, v'rewardPools, v'publicKey, v'claimData, v'claimFeePercent));
+}
+
+(slice, ((slice, int))) $Lottery$init$_load(slice sc_0) inline {
+    var v'adminWallet = sc_0~__tact_load_address();
+    var v'publicKey = sc_0~load_int(257);
+    return (sc_0, (v'adminWallet, v'publicKey));
+}
+
+(slice, cell, cell, int, cell, cell, cell, int, cell, int) $Lottery$_contract_load() impure inline_ref {
+    slice $sc = get_data().begin_parse();
+    __tact_context_sys = $sc~load_ref();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$Lottery$_load();
+    } else {
+        ;; Allow only workchain deployments
+        throw_unless(137, my_address().preload_uint(11) == 1024);
+        (slice $adminWallet, int $publicKey) = $sc~$Lottery$init$_load();
+        $sc.end_parse();
+        return $Lottery$_contract_init($adminWallet, $publicKey);
+    }
+}
+
+() $Lottery$_contract_store((slice, cell, cell, int, cell, cell, cell, int, cell, int) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_ref(__tact_context_sys);
+    b = b.store_int(true, 1);
+    b = $Lottery$_store(b, v);
+    set_data(b.end_cell());
+}

@@ -6,8 +6,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { Spinner } from '@/components/ui/spinner';
 import { VStack } from '@/components/ui/Utilities';
 
-import ConnectWalletSection from './components/ConnectWalletSection';
-import YourWalletSection from './components/YourWalletSection';
+import dynamic from 'next/dynamic';
+
+const ConnectWalletSection = dynamic(() => import('./components/ConnectWalletSection'));
+const YourWalletSection = dynamic(() => import('./components/YourWalletSection'));
 
 const WalletPage = () => {
   const { isLoggedIn, status } = useAuth();
