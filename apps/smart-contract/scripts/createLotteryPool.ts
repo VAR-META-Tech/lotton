@@ -55,7 +55,7 @@ async function createPool(lottery: any, provider: any) {
 }
 export async function run(provider: NetworkProvider, args: string[]) {
     const ui = provider.ui();
-    const address = Address.parse('EQCtdn4Gd6v3gnm5uGZiirV-90Xd3KdLDXVZuK1q8Po4ehbW');
+    const address = Address.parse('EQDLxMVfx4t_B-h1N09cmgKztdtSrS8a21ZAVz135VIQK5Nb');
     const lottery = provider.open(Lottery.fromAddress(address));
 
 
